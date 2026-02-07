@@ -156,14 +156,14 @@ foreach($monthsData as $m) {
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card text-white bg-info mb-3 shadow-sm">
+                <div class="card text-white bg-primary mb-3 shadow-sm card-manutencao-12meses">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="card-title mb-0">Gasto Manut. (12 meses)</h6>
                                 <p class="card-text h3 mt-2">R$ <?php echo number_format($gastoManutencao12Meses, 2, ',', '.'); ?></p>
                             </div>
-                            <i class="fas fa-chart-line fa-2x opacity-50"></i>
+                            <i class="fas fa-chart-line fa-2x opacity-50" aria-hidden="true"></i>
                         </div>
                     </div>
                 </div>

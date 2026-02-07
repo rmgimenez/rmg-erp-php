@@ -31,3 +31,15 @@ h6 {
 .btn {
   font-weight: 500;
 }
+
+/* Card: manutenção 12 meses - gradiente com bom contraste */
+.card-manutencao-12meses {
+  background: linear-gradient(135deg, #0d6efd 0%, #4f46e5 100%);
+  color: #ffffff;
+}
+.card-manutencao-12meses .card-text {
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
+}
+.card-manutencao-12meses .fa-chart-line {
+  opacity: 0.85;
+}
