@@ -23,6 +23,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $resultado = $contaController->excluir($id);
             $mensagem = $resultado['mensagem'];
             $tipoMensagem = $resultado['sucesso'] ? 'success' : 'danger';
+        } elseif ($_POST['acao'] === 'pagar') {
+            $resultado = $contaController->registrarPagamento($_POST);
+            $mensagem = $resultado['mensagem'];
+            $tipoMensagem = $resultado['sucesso'] ? 'success' : 'danger';
         }
     }
 }
@@ -44,10 +48,8 @@ $usuarioNome = $_SESSION['usuario_nome'] ?? 'Usuário';
 </head>
 <body class="bg-light">
 
-    <!-- Navbar -->
     <?php include __DIR__ . '/includes/menu.php'; ?>
 
-    <!-- Main Content -->
     <div class="container mt-4">
         
         <div class="row mb-3">
@@ -105,6 +107,16 @@ $usuarioNome = $_SESSION['usuario_nome'] ?? 'Usuário';
                                     <?php endif; ?>
                                 </td>
                                 <td class="text-center">
+                                    <?php if ($c->getStatus() !== 'paga'): ?>
+                                    <button class="btn btn-sm btn-success me-1" 
+                                            onclick='pagarConta(<?php echo json_encode([
+                                                "id_conta_pagar" => $c->getIdContaPagar(),
+                                                "valor" => $c->getValor()
+                                            ]); ?>)' title="Registrar Pagamento">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <?php endif; ?>
+
                                     <button class="btn btn-sm btn-warning me-1" 
                                             onclick='editarConta(<?php echo json_encode([
                                                 "id_conta_pagar" => $c->getIdContaPagar(),
@@ -114,7 +126,7 @@ $usuarioNome = $_SESSION['usuario_nome'] ?? 'Usuário';
                                                 "data_vencimento" => $c->getDataVencimento(),
                                                 "status" => $c->getStatus(),
                                                 "observacoes" => $c->getObservacoes()
-                                            ]); ?>)' title="Editar">
+                                            ]); ?>)' title="Editar" <?php echo ($c->getStatus() == 'paga') ? 'disabled' : ''; ?>>
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     <button class="btn btn-sm btn-danger" 
@@ -195,6 +207,38 @@ $usuarioNome = $_SESSION['usuario_nome'] ?? 'Usuário';
         </div>
     </div>
 
+    <!-- Modal Pagamento -->
+    <div class="modal fade" id="modalPagamento" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Registrar Pagamento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="contas_pagar.php">
+                    <div class="modal-body">
+                        <input type="hidden" name="acao" value="pagar">
+                        <input type="hidden" name="id_conta_pagar" id="id_conta_pagar_pagamento">
+                        
+                        <div class="mb-3">
+                            <label for="data_pagamento" class="form-label">Data do Pagamento *</label>
+                            <input type="date" class="form-control" id="data_pagamento" name="data_pagamento" value="<?php echo date('Y-m-d'); ?>" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="valor_pago" class="form-label">Valor Pago (R$) *</label>
+                            <input type="number" step="0.01" class="form-control" id="valor_pago" name="valor_pago" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Confirmar Pagamento</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Exclusão -->
     <div class="modal fade" id="modalExclusao" tabindex="-1">
         <div class="modal-dialog">
@@ -255,6 +299,12 @@ $usuarioNome = $_SESSION['usuario_nome'] ?? 'Usuário';
             $('#status').val(c.status);
             $('#observacoes').val(c.observacoes);
             $('#modalConta').modal('show');
+        }
+
+        function pagarConta(c) {
+            $('#id_conta_pagar_pagamento').val(c.id_conta_pagar);
+            $('#valor_pago').val(c.valor);
+            $('#modalPagamento').modal('show');
         }
 
         function confirmarExclusao(id) {

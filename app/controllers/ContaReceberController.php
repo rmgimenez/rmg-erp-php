@@ -1,12 +1,16 @@
 <?php
 require_once __DIR__ . '/../dao/ContaReceberDAO.php';
+require_once __DIR__ . '/../dao/RecebimentoDAO.php';
 require_once __DIR__ . '/../models/ContaReceber.php';
+require_once __DIR__ . '/../models/Recebimento.php';
 
 class ContaReceberController {
     private $dao;
+    private $recebimentoDAO;
 
     public function __construct() {
         $this->dao = new ContaReceberDAO();
+        $this->recebimentoDAO = new RecebimentoDAO();
     }
 
     public function salvar($dados) {
@@ -35,10 +39,37 @@ class ContaReceberController {
     }
 
     public function excluir($id) {
+        $conta = $this->buscarPorId($id);
+        
+        if ($conta && $conta->getStatus() === 'recebida') {
+             return ['sucesso' => false, 'mensagem' => "Não é possível excluir uma conta já recebida."];
+        }
+
         if ($this->dao->excluir($id)) {
             return ['sucesso' => true, 'mensagem' => "Conta a receber excluída com sucesso!"];
         } else {
             return ['sucesso' => false, 'mensagem' => "Erro ao excluir conta a receber."];
+        }
+    }
+
+    public function registrarRecebimento($dados) {
+        $idConta = $dados['id_conta_receber'] ?? null;
+        $valor = $dados['valor_recebido'] ?? 0;
+        $data = $dados['data_recebimento'] ?? date('Y-m-d');
+
+        if (!$idConta || $valor <= 0) {
+            return ['sucesso' => false, 'mensagem' => "Dados de recebimento inválidos."];
+        }
+
+        $recebimento = new Recebimento();
+        $recebimento->setContaReceberId($idConta);
+        $recebimento->setValorRecebido($valor);
+        $recebimento->setDataRecebimento($data);
+
+        if ($this->recebimentoDAO->salvar($recebimento)) {
+            return ['sucesso' => true, 'mensagem' => "Recebimento registrado com sucesso!"];
+        } else {
+            return ['sucesso' => false, 'mensagem' => "Erro ao registrar recebimento."];
         }
     }
 

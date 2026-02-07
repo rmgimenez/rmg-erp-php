@@ -23,6 +23,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $resultado = $contaController->excluir($id);
             $mensagem = $resultado['mensagem'];
             $tipoMensagem = $resultado['sucesso'] ? 'success' : 'danger';
+        } elseif ($_POST['acao'] === 'receber') {
+            $resultado = $contaController->registrarRecebimento($_POST);
+            $mensagem = $resultado['mensagem'];
+            $tipoMensagem = $resultado['sucesso'] ? 'success' : 'danger';
         }
     }
 }
@@ -44,10 +48,8 @@ $usuarioNome = $_SESSION['usuario_nome'] ?? 'Usuário';
 </head>
 <body class="bg-light">
 
-    <!-- Navbar -->
     <?php include __DIR__ . '/includes/menu.php'; ?>
 
-    <!-- Main Content -->
     <div class="container mt-4">
         
         <div class="row mb-3">
@@ -105,6 +107,16 @@ $usuarioNome = $_SESSION['usuario_nome'] ?? 'Usuário';
                                     <?php endif; ?>
                                 </td>
                                 <td class="text-center">
+                                    <?php if ($c->getStatus() !== 'recebida'): ?>
+                                    <button class="btn btn-sm btn-success me-1" 
+                                            onclick='receberConta(<?php echo json_encode([
+                                                "id_conta_receber" => $c->getIdContaReceber(),
+                                                "valor" => $c->getValor()
+                                            ]); ?>)' title="Registrar Recebimento">
+                                        <i class="fas fa-hand-holding-usd"></i>
+                                    </button>
+                                    <?php endif; ?>
+
                                     <button class="btn btn-sm btn-warning me-1" 
                                             onclick='editarConta(<?php echo json_encode([
                                                 "id_conta_receber" => $c->getIdContaReceber(),
@@ -114,7 +126,7 @@ $usuarioNome = $_SESSION['usuario_nome'] ?? 'Usuário';
                                                 "data_vencimento" => $c->getDataVencimento(),
                                                 "status" => $c->getStatus(),
                                                 "observacoes" => $c->getObservacoes()
-                                            ]); ?>)' title="Editar">
+                                            ]); ?>)' title="Editar" <?php echo ($c->getStatus() == 'recebida') ? 'disabled' : ''; ?>>
                                         <i class="fas fa-edit"></i>
                                     </button>
                                     <button class="btn btn-sm btn-danger" 
@@ -195,6 +207,38 @@ $usuarioNome = $_SESSION['usuario_nome'] ?? 'Usuário';
         </div>
     </div>
 
+    <!-- Modal Recebimento -->
+    <div class="modal fade" id="modalRecebimento" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Registrar Recebimento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="contas_receber.php">
+                    <div class="modal-body">
+                        <input type="hidden" name="acao" value="receber">
+                        <input type="hidden" name="id_conta_receber" id="id_conta_receber_recebimento">
+                        
+                        <div class="mb-3">
+                            <label for="data_recebimento" class="form-label">Data do Recebimento *</label>
+                            <input type="date" class="form-control" id="data_recebimento" name="data_recebimento" value="<?php echo date('Y-m-d'); ?>" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="valor_recebido" class="form-label">Valor Recebido (R$) *</label>
+                            <input type="number" step="0.01" class="form-control" id="valor_recebido" name="valor_recebido" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Confirmar Recebimento</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Exclusão -->
     <div class="modal fade" id="modalExclusao" tabindex="-1">
         <div class="modal-dialog">
@@ -255,6 +299,12 @@ $usuarioNome = $_SESSION['usuario_nome'] ?? 'Usuário';
             $('#status').val(c.status);
             $('#observacoes').val(c.observacoes);
             $('#modalConta').modal('show');
+        }
+
+        function receberConta(c) {
+            $('#id_conta_receber_recebimento').val(c.id_conta_receber);
+            $('#valor_recebido').val(c.valor);
+            $('#modalRecebimento').modal('show');
         }
 
         function confirmarExclusao(id) {
