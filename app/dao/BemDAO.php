@@ -59,7 +59,8 @@ class BemDAO {
 
     public function listar() {
         try {
-            $sql = "SELECT b.*, s.nome as nome_setor 
+            $sql = "SELECT b.*, s.nome as nome_setor,
+                    (SELECT COALESCE(SUM(custo), 0) FROM rmg_manutencao WHERE bem_id = b.id_bem) as total_manutencao
                     FROM rmg_bem b
                     LEFT JOIN rmg_setor s ON b.setor_id = s.id_setor
                     ORDER BY b.descricao";
@@ -78,6 +79,7 @@ class BemDAO {
                 $b->setValorAquisicao($row['valor_aquisicao']);
                 $b->setStatus($row['status']);
                 $b->setObservacoes($row['observacoes']);
+                $b->setTotalManutencao($row['total_manutencao']);
                 $bens[] = $b;
             }
             return $bens;
@@ -88,7 +90,8 @@ class BemDAO {
 
     public function buscarPorId($id) {
         try {
-            $sql = "SELECT b.*, s.nome as nome_setor 
+            $sql = "SELECT b.*, s.nome as nome_setor,
+                    (SELECT COALESCE(SUM(custo), 0) FROM rmg_manutencao WHERE bem_id = b.id_bem) as total_manutencao 
                     FROM rmg_bem b
                     LEFT JOIN rmg_setor s ON b.setor_id = s.id_setor
                     WHERE b.id_bem = :id_bem";
@@ -107,6 +110,7 @@ class BemDAO {
                 $b->setValorAquisicao($row['valor_aquisicao']);
                 $b->setStatus($row['status']);
                 $b->setObservacoes($row['observacoes']);
+                $b->setTotalManutencao($row['total_manutencao']);
                 return $b;
             }
             return null;

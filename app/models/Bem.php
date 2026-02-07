@@ -9,6 +9,7 @@ class Bem {
     private $valor_aquisicao;
     private $status;
     private $observacoes;
+    private $total_manutencao; // Novo campo
 
     public function getIdBem() {
         return $this->id_bem;
@@ -72,5 +73,13 @@ class Bem {
 
     public function setObservacoes($observacoes) {
         $this->observacoes = $observacoes;
+    }
+
+    public function getTotalManutencao() {
+        return $this->total_manutencao;
+    }
+
+    public function setTotalManutencao($total_manutencao) {
+        $this->total_manutencao = $total_manutencao;
     }
 }

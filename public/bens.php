@@ -79,7 +79,8 @@ $tipoUsuario = $_SESSION['usuario_tipo'] ?? 'visitante';
                                 <th>Descrição</th>
                                 <th>Setor</th>
                                 <th>Aquisição</th>
-                                <th>Valor</th>
+                                <th>Valor Aquis.</th>
+                                <th>Total Manut.</th>
                                 <th>Status</th>
                                 <th width="20%" class="text-center">Ações</th>
                             </tr>
@@ -92,6 +93,7 @@ $tipoUsuario = $_SESSION['usuario_tipo'] ?? 'visitante';
                                 <td><?php echo htmlspecialchars($b->getNomeSetor()); ?></td>
                                 <td><?php echo date('d/m/Y', strtotime($b->getDataAquisicao())); ?></td>
                                 <td>R$ <?php echo number_format($b->getValorAquisicao(), 2, ',', '.'); ?></td>
+                                <td>R$ <?php echo number_format($b->getTotalManutencao(), 2, ',', '.'); ?></td>
                                 <td>
                                     <?php if ($b->getStatus() == 'ativo'): ?>
                                         <span class="badge bg-success">Ativo</span>
