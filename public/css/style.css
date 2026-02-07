@@ -43,3 +43,54 @@ h6 {
 .card-manutencao-12meses .fa-chart-line {
   opacity: 0.85;
 }
+
+/* ===== Menu: alertas (badge + destaque + animação suave) ===== */
+.menu-alerta-badge {
+  position: absolute;
+  top: -6px;
+  right: -10px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  font-size: 0.65rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.06);
+  transform: translateZ(0);
+}
+
+.menu-alerta-pulse {
+  animation: rmg-pulse 1.6s infinite cubic-bezier(0.66, 0.01, 0.3, 1);
+  transform-origin: center;
+}
+
+@keyframes rmg-pulse {
+  0% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0 rgba(0, 0, 0, 0));
+  }
+  50% {
+    transform: scale(1.08);
+    filter: drop-shadow(0 6px 18px rgba(220, 53, 69, 0.12));
+  }
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0 rgba(0, 0, 0, 0));
+  }
+}
+
+.menu-alerta-active {
+  background-color: rgba(220, 53, 69, 0.04);
+  border-radius: 6px;
+  box-shadow: inset 3px 0 0 0 rgba(220, 53, 69, 0.12);
+}
+
+/* small visual polish for the brand and top-level items */
+.navbar-brand .fa-boxes {
+  transform: translateY(1px);
+}
+.navbar-nav .nav-link i {
+  width: 1.1em;
+  text-align: center;
+}

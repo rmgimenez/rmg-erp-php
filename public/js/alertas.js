@@ -44,16 +44,28 @@ function carregarAlertas(forcarExibicao = false) {
       $("#tabelaAlertasPagar tbody").html(htmlPagar);
       $("#tabelaAlertasReceber tbody").html(htmlReceber);
 
-      const hasAlertas = data.pagar.length > 0 || data.receber.length > 0;
-      // mostra/oculta ícone no menu (acessibilidade + estado inicial sem JS é tratado pelo servidor)
+      const totalAlertas = data.pagar.length + data.receber.length;
+      const hasAlertas = totalAlertas > 0;
+
+      // atualiza ícone, badge e destaque do menu (acessibilidade + estado inicial sem JS é tratado pelo servidor)
       const $icone = $("#menu-alertas-icone");
-      if (hasAlertas) {
-        $icone.removeClass("d-none");
-        $icone.attr("aria-hidden", "false");
-      } else {
-        $icone.addClass("d-none");
-        $icone.attr("aria-hidden", "true");
-      }
+      const $badge = $("#menu-alertas-badge");
+      const $link = $("#menu-alertas-vencimentos");
+
+      // badge (contagem) — atualiza texto e visibilidade
+      $badge.text(totalAlertas || "");
+      $badge.toggleClass("d-none", totalAlertas === 0);
+      $badge.attr("aria-hidden", totalAlertas === 0 ? "true" : "false");
+
+      // ícone — cor + pulso
+      $icone.toggleClass("menu-alerta-pulse", hasAlertas);
+      $icone.toggleClass("text-danger", hasAlertas);
+      $icone.toggleClass("text-secondary", !hasAlertas);
+      $icone.attr("aria-hidden", hasAlertas ? "false" : "true");
+
+      // link — destaque visual quando houver alertas
+      $link.toggleClass("menu-alerta-active", hasAlertas);
+      $link.attr("aria-pressed", hasAlertas ? "true" : "false");
 
       // Abre o modal se tiver dados OU se for solicitado forçadamente (clique do menu)
       if (forcarExibicao || hasAlertas) {

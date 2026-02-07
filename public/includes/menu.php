@@ -16,10 +16,10 @@ $paginaAtual = basename($_SERVER['PHP_SELF']);
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
-                    <a class="nav-link <?php echo $paginaAtual === 'index.php' ? 'active' : ''; ?>" href="index.php">Dashboard</a>
+                    <a class="nav-link <?php echo $paginaAtual === 'index.php' ? 'active' : ''; ?>" href="index.php"><i class="fas fa-tachometer-alt me-2" aria-hidden="true"></i>Dashboard</a>
                 </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle <?php echo in_array($paginaAtual, ['setores.php', 'clientes.php', 'fornecedores.php', 'usuarios.php']) ? 'active' : ''; ?>" href="#" role="button" data-bs-toggle="dropdown">Cadastros</a>
+                    <a class="nav-link dropdown-toggle <?php echo in_array($paginaAtual, ['setores.php', 'clientes.php', 'fornecedores.php', 'usuarios.php']) ? 'active' : ''; ?>" href="#" role="button" data-bs-toggle="dropdown"><i class="fas fa-folder-open me-2" aria-hidden="true"></i>Cadastros</a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item <?php echo $paginaAtual === 'setores.php' ? 'active' : ''; ?>" href="setores.php">Setores</a></li>
                         <li><a class="dropdown-item <?php echo $paginaAtual === 'bens.php' || $paginaAtual === 'manutencoes.php' ? 'active' : ''; ?>" href="bens.php">Bens/Equipamentos</a></li>
@@ -34,7 +34,7 @@ $paginaAtual = basename($_SERVER['PHP_SELF']);
                     </ul>
                 </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle <?php echo in_array($paginaAtual, ['contas_pagar.php', 'contas_receber.php']) ? 'active' : ''; ?>" href="#" role="button" data-bs-toggle="dropdown">Financeiro</a>
+                    <a class="nav-link dropdown-toggle <?php echo in_array($paginaAtual, ['contas_pagar.php', 'contas_receber.php']) ? 'active' : ''; ?>" href="#" role="button" data-bs-toggle="dropdown"><i class="fas fa-wallet me-2" aria-hidden="true"></i>Financeiro</a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item <?php echo $paginaAtual === 'contas_pagar.php' ? 'active' : ''; ?>" href="contas_pagar.php">Contas a Pagar</a></li>
                         <li><a class="dropdown-item <?php echo $paginaAtual === 'contas_receber.php' ? 'active' : ''; ?>" href="contas_receber.php">Contas a Receber</a></li>
@@ -42,24 +42,27 @@ $paginaAtual = basename($_SERVER['PHP_SELF']);
                     </ul>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#" id="menu-alertas-vencimentos" onclick="carregarAlertas(true); return false;">
-                        <?php
-                        // exibe ícone apenas se houver alertas (fallback server-side quando JS está desabilitado)
-                        require_once __DIR__ . '/../../app/dao/ContaPagarDAO.php';
-                        require_once __DIR__ . '/../../app/dao/ContaReceberDAO.php';
-                        $rmg_pagar_alertas = (new ContaPagarDAO())->buscarVencidasEProximas(10);
-                        $rmg_receber_alertas = (new ContaReceberDAO())->buscarVencidasEProximas(10);
-                        $rmg_has_alertas = (!empty($rmg_pagar_alertas) || !empty($rmg_receber_alertas));
-                        ?>
-                        <i id="menu-alertas-icone" class="fas fa-exclamation-triangle text-warning me-1 <?php echo $rmg_has_alertas ? '' : 'd-none'; ?>" aria-hidden="<?php echo $rmg_has_alertas ? 'false' : 'true'; ?>"></i>
-                        Alertas Vencimentos
-                    </a>
+                    <a class="nav-link <?php echo $paginaAtual === 'relatorios.php' ? 'active' : ''; ?>" href="relatorios.php"><i class="fas fa-chart-bar me-2" aria-hidden="true"></i>Relatórios</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link <?php echo $paginaAtual === 'relatorios.php' ? 'active' : ''; ?>" href="relatorios.php">Relatórios</a>
+                    <?php
+                    // exibe ícone/badge server-side (fallback) e adiciona classe de destaque quando houver alertas
+                    require_once __DIR__ . '/../../app/dao/ContaPagarDAO.php';
+                    require_once __DIR__ . '/../../app/dao/ContaReceberDAO.php';
+                    $rmg_pagar_alertas = (new ContaPagarDAO())->buscarVencidasEProximas(10);
+                    $rmg_receber_alertas = (new ContaReceberDAO())->buscarVencidasEProximas(10);
+                    $rmg_alertas_count = (int)(count($rmg_pagar_alertas) + count($rmg_receber_alertas));
+                    $rmg_has_alertas = $rmg_alertas_count > 0;
+                    ?>
+                    <a class="nav-link <?php echo $rmg_has_alertas ? 'menu-alerta-active' : ''; ?>" href="#" id="menu-alertas-vencimentos" onclick="carregarAlertas(true); return false;" aria-describedby="menu-alertas-badge" aria-pressed="false">
+                        <span class="position-relative d-inline-block">
+                            <i id="menu-alertas-icone" class="fas fa-bell fa-fw me-1 <?php echo $rmg_has_alertas ? 'text-danger menu-alerta-pulse' : 'text-secondary'; ?>" aria-hidden="<?php echo $rmg_has_alertas ? 'false' : 'true'; ?>"></i>
+                            <span id="menu-alertas-badge" class="badge bg-danger rounded-pill menu-alerta-badge <?php echo $rmg_has_alertas ? '' : 'd-none'; ?>" aria-hidden="<?php echo $rmg_has_alertas ? 'false' : 'true'; ?>"><?php echo $rmg_alertas_count ?: ''; ?></span>
+                        </span>
+                        <strong class="ms-1">Alertas Vencimentos</strong>
+                    </a>
                 </li>
             </ul>
-
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle text-white" href="#" id="usuarioDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
