@@ -169,4 +169,30 @@ class ManutencaoDAO {
             return [];
         }
     }
+
+    // Retorna o total gasto em manutenções nos últimos 30 dias (decimal)
+    public function somaCustoUltimos30Dias() {
+        try {
+            $sql = "SELECT COALESCE(SUM(custo), 0) as total FROM rmg_manutencao WHERE data_manutencao >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->execute();
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return (float) ($row['total'] ?? 0);
+        } catch (PDOException $e) {
+            return 0.0;
+        }
+    }
+
+    // Retorna o total gasto em manutenções nos últimos 12 meses (decimal)
+    public function somaCustoUltimos12Meses() {
+        try {
+            $sql = "SELECT COALESCE(SUM(custo), 0) as total FROM rmg_manutencao WHERE data_manutencao >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->execute();
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return (float) ($row['total'] ?? 0);
+        } catch (PDOException $e) {
+            return 0.0;
+        }
+    }
 }

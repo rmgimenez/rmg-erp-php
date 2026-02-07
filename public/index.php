@@ -23,6 +23,10 @@ $totaisReceber = $contaReceberDAO->obterTotais(); // ['pendente' => X, 'recebida
 $statsBens = $bemDAO->contarPorStatus(); // ['ativo' => X, 'baixado' => Y]
 $totalManutencoes = $manutencaoDAO->contarTotal();
 
+// Totais de custo de manutenção para o dashboard
+$gastoManutencao30Dias = $manutencaoDAO->somaCustoUltimos30Dias();
+$gastoManutencao12Meses = $manutencaoDAO->somaCustoUltimos12Meses();
+
 $totalPagarPendente = $totaisPagar['pendente'] ?? 0;
 $totalReceberPendente = $totaisReceber['pendente'] ?? 0;
 $bensAtivos = $statsBens['ativo'] ?? 0;
@@ -143,8 +147,8 @@ foreach($monthsData as $m) {
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="card-title mb-0">Manutenções Reg.</h6>
-                                <p class="card-text h3 mt-2"><?php echo $totalManutencoes; ?></p>
+                                <h6 class="card-title mb-0">Gasto Manut. (30 dias)</h6>
+                                <p class="card-text h3 mt-2">R$ <?php echo number_format($gastoManutencao30Dias, 2, ',', '.'); ?></p>
                             </div>
                             <i class="fas fa-tools fa-2x opacity-50"></i>
                         </div>
@@ -156,10 +160,10 @@ foreach($monthsData as $m) {
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="card-title mb-0">Bens Ativos</h6>
-                                <p class="card-text h3 mt-2"><?php echo $bensAtivos; ?></p>
+                                <h6 class="card-title mb-0">Gasto Manut. (12 meses)</h6>
+                                <p class="card-text h3 mt-2">R$ <?php echo number_format($gastoManutencao12Meses, 2, ',', '.'); ?></p>
                             </div>
-                            <i class="fas fa-boxes fa-2x opacity-50"></i>
+                            <i class="fas fa-chart-line fa-2x opacity-50"></i>
                         </div>
                     </div>
                 </div>
