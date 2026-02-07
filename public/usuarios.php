@@ -35,22 +35,11 @@ $usuarios = $usuarioController->listarUsuarios();
 // Variáveis para o menu
 $usuarioNome = $_SESSION['usuario_nome'] ?? 'Usuário';
 $tipoUsuario = $_SESSION['usuario_tipo'] ?? 'visitante';
-?>
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciar Usuários - RMG ERP</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="css/style.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
-</head>
-<body class="bg-light d-flex flex-column min-vh-100">
 
-    <!-- Navbar -->
-    <?php include __DIR__ . '/includes/menu.php'; ?>
+$pageTitle = 'Gerenciar Usuários - RMG ERP';
+$extraCss = '<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">';
+include __DIR__ . '/includes/header.php';
+?>
 
     <!-- Main Content -->
     <div class="container mt-4">
@@ -226,8 +215,6 @@ $tipoUsuario = $_SESSION['usuario_tipo'] ?? 'visitante';
     </div>
 
     <?php include __DIR__ . '/includes/footer.php'; ?>
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
 

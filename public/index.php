@@ -87,21 +87,9 @@ foreach($monthsData as $m) {
     $chartDataManutencao[] = $m['manutencao'];
 }
 
+$pageTitle = 'Painel Principal - RMG ERP';
+include __DIR__ . '/includes/header.php';
 ?>
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Principal - RMG ERP</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="css/style.css" rel="stylesheet">
-</head>
-<body class="bg-light d-flex flex-column min-vh-100">
-
-    <!-- Navbar -->
-    <?php include __DIR__ . '/includes/menu.php'; ?>
 
     <!-- Main Content -->
     <div class="container mt-4">
@@ -224,9 +212,6 @@ foreach($monthsData as $m) {
 
     <?php include __DIR__ . '/includes/footer.php'; ?>
 
-    <!-- Scripts -->
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 

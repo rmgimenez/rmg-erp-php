@@ -4,27 +4,18 @@ $loginController = new LoginController();
 $loginController->verificarLogado();
 
 $usuarioNome = $_SESSION['usuario_nome'] ?? 'Usuário';
-?>
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calendário Financeiro - RMG ERP</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="css/style.css" rel="stylesheet">
-    <!-- FullCalendar CSS -->
+
+$pageTitle = 'Calendário Financeiro - RMG ERP';
+$extraCss = "
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
     <style>
         .fc-event {
             cursor: pointer;
         }
     </style>
-</head>
-<body class="bg-light d-flex flex-column min-vh-100">
-
-    <?php include __DIR__ . '/includes/menu.php'; ?>
+";
+include __DIR__ . '/includes/header.php';
+?>
 
     <div class="container mt-4">
         
@@ -51,8 +42,6 @@ $usuarioNome = $_SESSION['usuario_nome'] ?? 'Usuário';
     </div>
 
     <?php include __DIR__ . '/includes/footer.php'; ?>
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
