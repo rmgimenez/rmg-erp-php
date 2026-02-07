@@ -31,8 +31,22 @@ class UsuarioController
         $ativo = isset($dados['ativo']) ? 1 : 0;
         $usuario->setAtivo($ativo);
 
-        // Se estiver editando
+        // Impedir alterações no usuário de login 'admin' e evitar atribuir o login 'admin' a outro registro
         if (!empty($dados['id_usuario'])) {
+            // edição: bloquear se o registro alvo for o admin
+            $existente = $this->usuarioDAO->buscarPorId($dados['id_usuario']);
+            if ($existente && $existente->getUsuario() === 'admin') {
+                return ['sucesso' => false, 'mensagem' => 'O usuário "admin" não pode ser alterado.'];
+            }
+
+            // impedir que outro usuário receba o login 'admin' se já existir
+            if (isset($dados['usuario']) && $dados['usuario'] === 'admin') {
+                $adminExist = $this->usuarioDAO->buscarPorLogin('admin');
+                if ($adminExist && $adminExist->getIdUsuario() != $dados['id_usuario']) {
+                    return ['sucesso' => false, 'mensagem' => 'O login "admin" já está em uso.'];
+                }
+            }
+
             $usuario->setIdUsuario($dados['id_usuario']);
 
             // Se digitou senha, atualiza. Se vazio, o DAO ignora a senha na atualização
@@ -47,6 +61,14 @@ class UsuarioController
             // Novo cadastro
             if (empty($dados['senha'])) {
                 return ['sucesso' => false, 'mensagem' => 'A senha é obrigatória para novos usuários.'];
+            }
+
+            // impedir criação de um segundo registro com login 'admin'
+            if (isset($dados['usuario']) && $dados['usuario'] === 'admin') {
+                $adminExist = $this->usuarioDAO->buscarPorLogin('admin');
+                if ($adminExist) {
+                    return ['sucesso' => false, 'mensagem' => 'O login "admin" já está em uso.'];
+                }
             }
 
             // Verificar se usuário já existe (opcional, mas bom)
@@ -67,6 +89,12 @@ class UsuarioController
     {
         if ($_SESSION['usuario_tipo'] !== 'administrador') {
             return ['sucesso' => false, 'mensagem' => 'Acesso negado.'];
+        }
+
+        // Não permitir excluir o usuário 'admin'
+        $usuarioAlvo = $this->usuarioDAO->buscarPorId($id);
+        if ($usuarioAlvo && $usuarioAlvo->getUsuario() === 'admin') {
+            return ['sucesso' => false, 'mensagem' => 'O usuário "admin" não pode ser excluído.'];
         }
 
         // Não permitir excluir o próprio usuário logado
