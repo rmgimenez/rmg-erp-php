@@ -84,6 +84,37 @@ class ManutencaoDAO {
         }
     }
 
+    public function buscarPorPeriodo($inicio, $fim) {
+        try {
+            $sql = "SELECT m.*, b.descricao as descricao_bem
+                    FROM rmg_manutencao m
+                    JOIN rmg_bem b ON m.bem_id = b.id_bem
+                    WHERE m.data_manutencao BETWEEN :inicio AND :fim
+                    ORDER BY m.data_manutencao DESC";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':inicio', $inicio);
+            $stmt->bindValue(':fim', $fim);
+            $stmt->execute();
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            $lista = [];
+            foreach ($result as $row) {
+                $m = new Manutencao();
+                $m->setIdManutencao($row['id_manutencao']);
+                $m->setBemId($row['bem_id']);
+                $m->setDescricaoBem($row['descricao_bem']);
+                $m->setDataManutencao($row['data_manutencao']);
+                $m->setDescricao($row['descricao']);
+                $m->setCusto($row['custo']);
+                $m->setObservacoes($row['observacoes']);
+                $lista[] = $m;
+            }
+            return $lista;
+        } catch (PDOException $e) {
+            return [];
+        }
+    }
+
     public function listarTodas() {
         try {
             $sql = "SELECT m.*, b.descricao as descricao_bem

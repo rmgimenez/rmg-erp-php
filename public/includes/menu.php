@@ -28,6 +28,9 @@ $paginaAtual = basename($_SERVER['PHP_SELF']);
                         <li><a class="dropdown-item" href="#" onclick="carregarAlertas(); return false;"><i class="fas fa-exclamation-triangle text-warning me-1"></i> Alertas Vencimentos</a></li>
                     </ul>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link <?php echo $paginaAtual === 'relatorios.php' ? 'active' : ''; ?>" href="relatorios.php">Relatórios</a>
+                </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle <?php echo in_array($paginaAtual, ['setores.php', 'clientes.php', 'fornecedores.php', 'usuarios.php']) ? 'active' : ''; ?>" href="#" role="button" data-bs-toggle="dropdown">Cadastros</a>
                     <ul class="dropdown-menu">
