@@ -54,6 +54,7 @@ Os principais objetivos do sistema são:
 - CSS3
 - Bootstrap para layout responsivo
 - JavaScript com jQuery
+- Chart.js (via CDN) para gráficos e dashboards
 - DataTables para listagens
 - Select2 para campos de seleção avançada
 - FontAwesome para ícones

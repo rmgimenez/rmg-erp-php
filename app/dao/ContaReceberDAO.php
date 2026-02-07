@@ -113,4 +113,21 @@ class ContaReceberDAO {
             return null;
         }
     }
+
+    public function obterTotais() {
+        try {
+            $sql = "SELECT status, SUM(valor) as total FROM rmg_conta_receber GROUP BY status";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->execute();
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            $stats = ['pendente' => 0, 'recebida' => 0];
+            foreach ($result as $row) {
+                $stats[$row['status']] = $row['total'];
+            }
+            return $stats;
+        } catch (PDOException $e) {
+            return ['pendente' => 0, 'recebida' => 0];
+        }
+    }
 }

@@ -118,4 +118,21 @@ class BemDAO {
             return null;
         }
     }
+
+    public function contarPorStatus() {
+        try {
+            $sql = "SELECT status, COUNT(*) as qtd FROM rmg_bem GROUP BY status";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->execute();
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            $stats = ['ativo' => 0, 'baixado' => 0];
+            foreach ($result as $row) {
+                $stats[$row['status']] = $row['qtd'];
+            }
+            return $stats;
+        } catch (PDOException $e) {
+            return ['ativo' => 0, 'baixado' => 0];
+        }
+    }
 }

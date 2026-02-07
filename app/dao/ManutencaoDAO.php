@@ -111,4 +111,16 @@ class ManutencaoDAO {
             return [];
         }
     }
+
+    public function contarTotal() {
+        try {
+            $sql = "SELECT COUNT(*) as total FROM rmg_manutencao";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->execute();
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $row['total'] ?? 0;
+        } catch (PDOException $e) {
+            return 0;
+        }
+    }
 }

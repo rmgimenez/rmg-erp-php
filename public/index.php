@@ -1,8 +1,27 @@
 <?php
 require_once __DIR__ . '/../app/controllers/LoginController.php';
+require_once __DIR__ . '/../app/dao/ContaPagarDAO.php';
+require_once __DIR__ . '/../app/dao/ContaReceberDAO.php';
+require_once __DIR__ . '/../app/dao/BemDAO.php';
+require_once __DIR__ . '/../app/dao/ManutencaoDAO.php';
 
 $loginController = new LoginController();
 $loginController->verificarLogado();
+
+$contaPagarDAO = new ContaPagarDAO();
+$contaReceberDAO = new ContaReceberDAO();
+$bemDAO = new BemDAO();
+$manutencaoDAO = new ManutencaoDAO();
+
+// Coletar Estatísticas
+$totaisPagar = $contaPagarDAO->obterTotais(); // ['pendente' => X, 'paga' => Y]
+$totaisReceber = $contaReceberDAO->obterTotais(); // ['pendente' => X, 'recebida' => Y]
+$statsBens = $bemDAO->contarPorStatus(); // ['ativo' => X, 'baixado' => Y]
+$totalManutencoes = $manutencaoDAO->contarTotal();
+
+$totalPagarPendente = $totaisPagar['pendente'] ?? 0;
+$totalReceberPendente = $totaisReceber['pendente'] ?? 0;
+$bensAtivos = $statsBens['ativo'] ?? 0;
 
 $usuarioNome = $_SESSION['usuario_nome'] ?? 'Usuário';
 $tipoUsuario = $_SESSION['usuario_tipo'] ?? 'visitante';
@@ -32,29 +51,29 @@ $tipoUsuario = $_SESSION['usuario_tipo'] ?? 'visitante';
             </div>
         </div>
         
-        <!-- Dashboard Widgets Example -->
+        <!-- Dashboard Widgets -->
         <div class="row mt-4">
             <div class="col-md-3">
-                <div class="card text-white bg-primary mb-3">
+                <div class="card text-white bg-danger mb-3">
                     <div class="card-body">
-                        <h5 class="card-title">Contas a Pagar</h5>
-                        <p class="card-text display-6">R$ 0,00</p>
+                        <h5 class="card-title">A Pagar (Pendente)</h5>
+                        <p class="card-text display-6">R$ <?php echo number_format($totalPagarPendente, 2, ',', '.'); ?></p>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="card text-white bg-success mb-3">
                     <div class="card-body">
-                        <h5 class="card-title">Contas a Receber</h5>
-                        <p class="card-text display-6">R$ 0,00</p>
+                        <h5 class="card-title">A Receber (Pendente)</h5>
+                        <p class="card-text display-6">R$ <?php echo number_format($totalReceberPendente, 2, ',', '.'); ?></p>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="card text-white bg-warning mb-3">
                     <div class="card-body">
-                        <h5 class="card-title">Manutenções</h5>
-                        <p class="card-text display-6">0</p>
+                        <h5 class="card-title">Manutenções Reg.</h5>
+                        <p class="card-text display-6"><?php echo $totalManutencoes; ?></p>
                     </div>
                 </div>
             </div>
@@ -62,13 +81,122 @@ $tipoUsuario = $_SESSION['usuario_tipo'] ?? 'visitante';
                 <div class="card text-white bg-info mb-3">
                     <div class="card-body">
                         <h5 class="card-title">Bens Ativos</h5>
-                        <p class="card-text display-6">0</p>
+                        <p class="card-text display-6"><?php echo $bensAtivos; ?></p>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Charts Section -->
+        <div class="row mt-4 mb-5">
+            <div class="col-md-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">Resumo Financeiro</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="financeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">Status dos Bens</h5>
+                    </div>
+                    <div class="card-body">
+                        <div style="max-height: 400px; display: flex; justify-content: center;">
+                            <canvas id="bensChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // Dados vindos do PHP
+        const dadosFinanceiros = {
+            pagarPendente: <?php echo $totalPagarPendente; ?>,
+            pagarPago: <?php echo $totaisPagar['paga'] ?? 0; ?>,
+            receberPendente: <?php echo $totalReceberPendente; ?>,
+            receberRecebido: <?php echo $totaisReceber['recebida'] ?? 0; ?>
+        };
+
+        const dadosBens = {
+            ativos: <?php echo $bensAtivos; ?>,
+            baixados: <?php echo $statsBens['baixado'] ?? 0; ?>
+        };
+
+        // Gráfico Financeiro (Barra)
+        const ctxFinance = document.getElementById('financeChart').getContext('2d');
+        new Chart(ctxFinance, {
+            type: 'bar',
+            data: {
+                labels: ['A Receber (Pend.)', 'Recebido', 'A Pagar (Pend.)', 'Pago'],
+                datasets: [{
+                    label: 'Valores (R$)',
+                    data: [
+                        dadosFinanceiros.receberPendente,
+                        dadosFinanceiros.receberRecebido,
+                        dadosFinanceiros.pagarPendente,
+                        dadosFinanceiros.pagarPago
+                    ],
+                    backgroundColor: [
+                        'rgba(255, 193, 7, 0.7)',  // Warning
+                        'rgba(25, 135, 84, 0.7)',  // Success
+                        'rgba(220, 53, 69, 0.7)',  // Danger
+                        'rgba(13, 202, 240, 0.7)'  // Info
+                    ],
+                    borderColor: [
+                        'rgba(255, 193, 7, 1)',
+                        'rgba(25, 135, 84, 1)',
+                        'rgba(220, 53, 69, 1)',
+                        'rgba(13, 202, 240, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Gráfico Bens (Doughnut)
+        const ctxBens = document.getElementById('bensChart').getContext('2d');
+        new Chart(ctxBens, {
+            type: 'doughnut',
+            data: {
+                labels: ['Ativos', 'Baixados'],
+                datasets: [{
+                    data: [dadosBens.ativos, dadosBens.baixados],
+                    backgroundColor: [
+                        'rgba(13, 202, 240, 0.7)', // Info
+                        'rgba(108, 117, 125, 0.7)' // Secondary
+                    ],
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    }
+                }
+            }
+        });
+    </script>
 </body>
 </html>

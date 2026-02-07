@@ -114,4 +114,21 @@ class ContaPagarDAO {
             return null;
         }
     }
+
+    public function obterTotais() {
+        try {
+            $sql = "SELECT status, SUM(valor) as total FROM rmg_conta_pagar GROUP BY status";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->execute();
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            $stats = ['pendente' => 0, 'paga' => 0];
+            foreach ($result as $row) {
+                $stats[$row['status']] = $row['total'];
+            }
+            return $stats;
+        } catch (PDOException $e) {
+            return ['pendente' => 0, 'paga' => 0];
+        }
+    }
 }
