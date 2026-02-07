@@ -6,6 +6,7 @@ $pageTitle = isset($pageTitle) ? $pageTitle : 'RMG ERP';
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,7 +16,8 @@ $pageTitle = isset($pageTitle) ? $pageTitle : 'RMG ERP';
     <link href="css/style.css" rel="stylesheet">
     <?php if (isset($extraCss)) echo $extraCss; ?>
 </head>
-<body class="bg-light d-flex flex-column min-vh-100">
+
+<body class="bg-light d-flex flex-column min-vh-100" style="padding-top: 56px;">
 
     <!-- Navbar -->
     <?php include __DIR__ . '/menu.php'; ?>
