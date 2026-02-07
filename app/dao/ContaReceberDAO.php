@@ -114,6 +114,40 @@ class ContaReceberDAO {
         }
     }
 
+    public function buscarVencidasEProximas($dias = 10) {
+        try {
+            // Seleciona Pendentes que estão Vencidas (qualquer data passada) OU Vencem nos próximos X dias
+            $sql = "SELECT c.*, cli.nome as nome_cliente 
+                    FROM rmg_conta_receber c
+                    LEFT JOIN rmg_cliente cli ON c.cliente_id = cli.id_cliente
+                    WHERE c.status != 'recebida' 
+                    AND c.data_vencimento <= DATE_ADD(CURDATE(), INTERVAL :dias DAY)
+                    ORDER BY c.data_vencimento ASC";
+            
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':dias', $dias, PDO::PARAM_INT);
+            $stmt->execute();
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            $contas = [];
+            foreach ($result as $row) {
+                $c = new ContaReceber();
+                $c->setIdContaReceber($row['id_conta_receber']);
+                $c->setClienteId($row['cliente_id']);
+                $c->setNomeCliente($row['nome_cliente']);
+                $c->setDescricao($row['descricao']);
+                $c->setValor($row['valor']);
+                $c->setDataVencimento($row['data_vencimento']);
+                $c->setStatus($row['status']);
+                $c->setObservacoes($row['observacoes']);
+                $contas[] = $c;
+            }
+            return $contas;
+        } catch (PDOException $e) {
+            return [];
+        }
+    }
+
     public function buscarPorPeriodo($inicio, $fim) {
         try {
             $sql = "SELECT c.*, cli.nome as nome_cliente 

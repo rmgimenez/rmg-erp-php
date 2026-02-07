@@ -30,6 +30,7 @@ class LoginController {
             $_SESSION['usuario_nome'] = $userObj->getNome();
             $_SESSION['usuario_login'] = $userObj->getUsuario();
             $_SESSION['usuario_tipo'] = $userObj->getTipoUsuario();
+            $_SESSION['mostrar_alertas'] = true; // Flag para exibir o modal de alertas
             
             return ['sucesso' => true];
         } else {
