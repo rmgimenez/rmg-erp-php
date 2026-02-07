@@ -19,10 +19,10 @@ $paginaAtual = basename($_SERVER['PHP_SELF']);
                     <a class="nav-link <?php echo $paginaAtual === 'index.php' ? 'active' : ''; ?>" href="index.php">Dashboard</a>
                 </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Financeiro</a>
+                    <a class="nav-link dropdown-toggle <?php echo in_array($paginaAtual, ['contas_pagar.php', 'contas_receber.php']) ? 'active' : ''; ?>" href="#" role="button" data-bs-toggle="dropdown">Financeiro</a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">Contas a Pagar</a></li>
-                        <li><a class="dropdown-item" href="#">Contas a Receber</a></li>
+                        <li><a class="dropdown-item <?php echo $paginaAtual === 'contas_pagar.php' ? 'active' : ''; ?>" href="contas_pagar.php">Contas a Pagar</a></li>
+                        <li><a class="dropdown-item <?php echo $paginaAtual === 'contas_receber.php' ? 'active' : ''; ?>" href="contas_receber.php">Contas a Receber</a></li>
                     </ul>
                 </li>
                 <li class="nav-item dropdown">
