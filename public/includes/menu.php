@@ -34,7 +34,7 @@ $paginaAtual = basename($_SERVER['PHP_SELF']);
                         <li><a class="dropdown-item" href="#">Fornecedores</a></li>
                         <?php if ($tipoUsuario === 'administrador'): ?>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#">Usuários</a></li>
+                        <li><a class="dropdown-item <?php echo $paginaAtual === 'usuarios.php' ? 'active' : ''; ?>" href="usuarios.php">Usuários</a></li>
                         <?php endif; ?>
                     </ul>
                 </li>
