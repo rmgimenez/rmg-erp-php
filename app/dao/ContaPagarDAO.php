@@ -2,14 +2,17 @@
 require_once __DIR__ . '/../models/ContaPagar.php';
 require_once __DIR__ . '/Conexao.php';
 
-class ContaPagarDAO {
+class ContaPagarDAO
+{
     private $conexao;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->conexao = Conexao::getInstance();
     }
 
-    public function salvar(ContaPagar $conta) {
+    public function salvar(ContaPagar $conta)
+    {
         try {
             $sql = "INSERT INTO rmg_conta_pagar (fornecedor_id, descricao, valor, data_vencimento, status, observacoes) 
                     VALUES (:fornecedor_id, :descricao, :valor, :data_vencimento, :status, :observacoes)";
@@ -27,7 +30,8 @@ class ContaPagarDAO {
         }
     }
 
-    public function atualizar(ContaPagar $conta) {
+    public function atualizar(ContaPagar $conta)
+    {
         try {
             $sql = "UPDATE rmg_conta_pagar SET fornecedor_id = :fornecedor_id, descricao = :descricao, 
                     valor = :valor, data_vencimento = :data_vencimento, status = :status, observacoes = :observacoes 
@@ -46,7 +50,8 @@ class ContaPagarDAO {
         }
     }
 
-    public function excluir($id) {
+    public function excluir($id)
+    {
         try {
             $sql = "DELETE FROM rmg_conta_pagar WHERE id_conta_pagar = :id_conta_pagar";
             $stmt = $this->conexao->prepare($sql);
@@ -57,7 +62,8 @@ class ContaPagarDAO {
         }
     }
 
-    public function listar() {
+    public function listar()
+    {
         try {
             $sql = "SELECT c.*, f.nome as nome_fornecedor 
                     FROM rmg_conta_pagar c
@@ -66,7 +72,7 @@ class ContaPagarDAO {
             $stmt = $this->conexao->prepare($sql);
             $stmt->execute();
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
+
             $contas = [];
             foreach ($result as $row) {
                 $c = new ContaPagar();
@@ -86,7 +92,8 @@ class ContaPagarDAO {
         }
     }
 
-    public function buscarPorId($id) {
+    public function buscarPorId($id)
+    {
         try {
             $sql = "SELECT c.*, f.nome as nome_fornecedor 
                     FROM rmg_conta_pagar c
@@ -95,7 +102,7 @@ class ContaPagarDAO {
             $stmt = $this->conexao->prepare($sql);
             $stmt->bindValue(':id_conta_pagar', $id);
             $stmt->execute();
-            
+
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             if ($row) {
                 $c = new ContaPagar();
@@ -115,7 +122,8 @@ class ContaPagarDAO {
         }
     }
 
-    public function buscarVencidasEProximas($dias = 10) {
+    public function buscarVencidasEProximas($dias = 10)
+    {
         try {
             // Seleciona Pendentes que estão Vencidas (qualquer data passada) OU Vencem nos próximos X dias
             $sql = "SELECT c.*, f.nome as nome_fornecedor 
@@ -123,13 +131,13 @@ class ContaPagarDAO {
                     LEFT JOIN rmg_fornecedor f ON c.fornecedor_id = f.id_fornecedor
                     WHERE c.status != 'paga' 
                     AND c.data_vencimento <= DATE_ADD(CURDATE(), INTERVAL :dias DAY)
-                    ORDER BY c.data_vencimento ASC";
-            
+                    ORDER BY (c.data_vencimento < CURDATE()) DESC, c.data_vencimento ASC";
+
             $stmt = $this->conexao->prepare($sql);
             $stmt->bindValue(':dias', $dias, PDO::PARAM_INT);
             $stmt->execute();
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
+
             $contas = [];
             foreach ($result as $row) {
                 $c = new ContaPagar();
@@ -149,7 +157,8 @@ class ContaPagarDAO {
         }
     }
 
-    public function buscarPorPeriodo($inicio, $fim) {
+    public function buscarPorPeriodo($inicio, $fim)
+    {
         try {
             $sql = "SELECT c.*, f.nome as nome_fornecedor 
                     FROM rmg_conta_pagar c
@@ -161,7 +170,7 @@ class ContaPagarDAO {
             $stmt->bindValue(':fim', $fim);
             $stmt->execute();
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
+
             $contas = [];
             foreach ($result as $row) {
                 $c = new ContaPagar();
@@ -181,13 +190,14 @@ class ContaPagarDAO {
         }
     }
 
-    public function obterTotais() {
+    public function obterTotais()
+    {
         try {
             $sql = "SELECT status, SUM(valor) as total FROM rmg_conta_pagar GROUP BY status";
             $stmt = $this->conexao->prepare($sql);
             $stmt->execute();
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
+
             $stats = ['pendente' => 0, 'paga' => 0];
             foreach ($result as $row) {
                 $stats[$row['status']] = $row['total'];

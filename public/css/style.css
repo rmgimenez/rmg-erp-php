@@ -59,6 +59,37 @@ h6 {
   transform: translateZ(0);
 }
 
+/* Destaque claro para contas VENCIDAS dentro do modal */
+.alerta-vencida {
+  background-color: rgba(220, 53, 69, 0.06) !important;
+  border-left: 4px solid #dc3545 !important;
+  font-weight: 600;
+}
+.alerta-vencida td {
+  color: #7a0b0b !important;
+}
+
+/* Evidência visual adicional na aba quando houver vencidas */
+.tab-vencida {
+  box-shadow: 0 8px 24px rgba(220, 53, 69, 0.08);
+  animation: rmg-flash 1.2s ease-in-out 2;
+}
+@keyframes rmg-flash {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.modal-alerta-summary {
+  font-weight: 600;
+}
+
 /* modificadores para os dois tipos de contador */
 .menu-alerta-badge-pagar {
   right: -6px;
