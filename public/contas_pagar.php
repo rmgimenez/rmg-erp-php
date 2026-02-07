@@ -70,6 +70,25 @@ $usuarioNome = $_SESSION['usuario_nome'] ?? 'Usuário';
         </div>
         <?php endif; ?>
 
+        <!-- Filtros Rapidos -->
+        <div class="card shadow-sm mb-3">
+            <div class="card-body py-2">
+                <div class="row align-items-center">
+                    <div class="col-md-12">
+                        <span class="me-3 fw-bold text-secondary"><i class="fas fa-filter"></i> Filtros:</span>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="chkOcultarPagas">
+                            <label class="form-check-label" for="chkOcultarPagas">Ocultar Pagas</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="chkApenasVencidas">
+                            <label class="form-check-label text-danger" for="chkApenasVencidas">Apenas Vencidas</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="card shadow-sm">
             <div class="card-body">
                 <div class="table-responsive">
@@ -268,12 +287,40 @@ $usuarioNome = $_SESSION['usuario_nome'] ?? 'Usuário';
     <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
 
     <script>
+        // Custom filtering function which will search data in column 5 (Status)
+        $.fn.dataTable.ext.search.push(
+            function(settings, data, dataIndex) {
+                var status = data[5]; // Status column is index 5
+                
+                // Get checkbox states
+                var ocultarPagas = $('#chkOcultarPagas').is(':checked');
+                var apenasVencidas = $('#chkApenasVencidas').is(':checked');
+
+                // Logic for "Ocultar Pagas" (Contains 'Paga')
+                if (ocultarPagas && status.includes('Paga')) {
+                    return false;
+                }
+
+                // Logic for "Apenas Vencidas" (Contains 'Vencida')
+                if (apenasVencidas && !status.includes('Vencida')) {
+                    return false;
+                }
+
+                return true;
+            }
+        );
+
         $(document).ready(function() {
-            $('#tabelaContas').DataTable({
+            var table = $('#tabelaContas').DataTable({
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/pt-BR.json'
                 },
                 order: [[3, 'asc']] // Order by Vencimento
+            });
+
+            // Event listeners for checkboxes to redraw table
+            $('#chkOcultarPagas, #chkApenasVencidas').change(function() {
+                table.draw();
             });
         });
 
