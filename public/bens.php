@@ -102,6 +102,9 @@ $tipoUsuario = $_SESSION['usuario_tipo'] ?? 'visitante';
                                     <?php endif; ?>
                                 </td>
                                 <td class="text-center">
+                                    <a href="relatorios/detalhes_bem.php?id=<?php echo $b->getIdBem(); ?>" class="btn btn-sm btn-secondary me-1" title="Relatório Detalhado">
+                                        <i class="fas fa-file-alt"></i>
+                                    </a>
                                     <a href="manutencoes.php?bem_id=<?php echo $b->getIdBem(); ?>" class="btn btn-sm btn-info text-white me-1" title="Manutenções">
                                         <i class="fas fa-tools"></i>
                                     </a>
