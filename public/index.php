@@ -19,44 +19,7 @@ $tipoUsuario = $_SESSION['usuario_tipo'] ?? 'visitante';
 <body class="bg-light">
 
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#"><i class="fas fa-boxes me-2"></i> RMG ERP</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="index.php">Dashboard</a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Financeiro</a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">Contas a Pagar</a></li>
-                            <li><a class="dropdown-item" href="#">Contas a Receber</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Cadastros</a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">Bens/Equipamentos</a></li>
-                            <li><a class="dropdown-item" href="#">Clientes</a></li>
-                            <li><a class="dropdown-item" href="#">Fornecedores</a></li>
-                            <?php if ($tipoUsuario === 'administrador'): ?>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#">Usuários</a></li>
-                            <?php endif; ?>
-                        </ul>
-                    </li>
-                </ul>
-                <div class="d-flex text-white align-items-center">
-                    <span class="me-3"><i class="fas fa-user-circle me-1"></i> <?php echo htmlspecialchars($usuarioNome); ?></span>
-                    <a href="logout.php" class="btn btn-outline-light btn-sm">Sair</a>
-                </div>
-            </div>
-        </div>
-    </nav>
+    <?php include __DIR__ . '/includes/menu.php'; ?>
 
     <!-- Main Content -->
     <div class="container mt-4">
