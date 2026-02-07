@@ -2,9 +2,9 @@
 <div class="modal fade" id="modalAlertas" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header bg-warning">
-                <h5 class="modal-title text-dark"><i class="fas fa-exclamation-triangle me-2"></i> Alertas Financeiros <span id="modal-total-vencidas" class="badge bg-danger ms-2 d-none" aria-live="polite"></span></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-header" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-bottom: none;">
+                <h5 class="modal-title text-white"><i class="fas fa-bell me-2"></i> Alertas Financeiros <span id="modal-total-vencidas" class="badge bg-danger ms-2 d-none" style="background: rgba(239,68,68,0.9) !important; color: #fff !important;" aria-live="polite"></span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <p id="modal-alertas-intervalo" class="text-muted small mb-2">Mostrando contas vencidas ou com vencimento nos próximos <strong><span id="modal-alertas-dias">10</span> dias</strong>.</p>

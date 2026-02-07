@@ -9,7 +9,7 @@
             }
         }
         $footer = defined('FOOTER_TEXT') ? FOOTER_TEXT : 'Desenvolvido por Ricardo Moura Gimenez para Cantina Santanna';
-        echo '<p class="mb-0">' . htmlspecialchars($footer, ENT_QUOTES, 'UTF-8') . '</p>';
+        echo '<p class="mb-0"><i class="fas fa-code me-1" style="opacity:0.5;font-size:0.7rem;"></i> ' . htmlspecialchars($footer, ENT_QUOTES, 'UTF-8') . '</p>';
         ?>
     </div>
 </footer>

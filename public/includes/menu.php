@@ -8,15 +8,15 @@ $tipoUsuario = $_SESSION['usuario_tipo'] ?? 'visitante';
 $paginaAtual = basename($_SERVER['PHP_SELF']);
 ?>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="index.php"><i class="fas fa-boxes me-2"></i> RMG ERP</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+    <div class="container-fluid px-3">
+        <a class="navbar-brand" href="index.php"><i class="fas fa-cube me-2"></i>RMG ERP</a>
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
-                    <a class="nav-link <?php echo $paginaAtual === 'index.php' ? 'active' : ''; ?>" href="index.php"><i class="fas fa-tachometer-alt me-2" aria-hidden="true"></i>Dashboard</a>
+                    <a class="nav-link <?php echo $paginaAtual === 'index.php' ? 'active' : ''; ?>" href="index.php"><i class="fas fa-th-large me-2" aria-hidden="true"></i>Dashboard</a>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle <?php echo in_array($paginaAtual, ['setores.php', 'clientes.php', 'fornecedores.php', 'usuarios.php']) ? 'active' : ''; ?>" href="#" role="button" data-bs-toggle="dropdown"><i class="fas fa-folder-open me-2" aria-hidden="true"></i>Cadastros</a>
@@ -69,8 +69,11 @@ $paginaAtual = basename($_SERVER['PHP_SELF']);
             </ul>
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle text-white" href="#" id="usuarioDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-user-circle me-1"></i> <?php echo htmlspecialchars($usuarioNome); ?>
+                    <a class="nav-link dropdown-toggle text-white d-flex align-items-center" href="#" id="usuarioDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="d-inline-flex align-items-center justify-content-center rounded-circle me-2" style="width:28px;height:28px;background:rgba(79,70,229,0.4);font-size:0.75rem;font-weight:600;">
+                            <?php echo strtoupper(substr($usuarioNome, 0, 1)); ?>
+                        </span>
+                        <span class="d-none d-md-inline"><?php echo htmlspecialchars($usuarioNome); ?></span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="usuarioDropdown">
                         <li><a class="dropdown-item" href="alterar_senha.php"><i class="fas fa-key me-2"></i>Alterar Senha</a></li>

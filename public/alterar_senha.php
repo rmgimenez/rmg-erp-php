@@ -34,12 +34,16 @@ include __DIR__ . '/includes/header.php';
 
 <div class="container mt-4">
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow border-0">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0"><i class="fas fa-key me-2"></i>Alterar Senha</h4>
-                </div>
+        <div class="col-md-5">
+            <div class="card shadow-sm">
                 <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <span class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" style="width:56px;height:56px;background:var(--rmg-primary-bg);color:var(--rmg-primary);">
+                            <i class="fas fa-key fa-lg"></i>
+                        </span>
+                        <h5 class="fw-semibold mb-1">Alterar Senha</h5>
+                        <p class="text-muted small mb-0">Preencha os campos abaixo para definir uma nova senha</p>
+                    </div>
                     <?php if ($erro): ?>
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
                             <?php echo htmlspecialchars($erro); ?>

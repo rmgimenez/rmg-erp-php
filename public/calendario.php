@@ -17,73 +17,80 @@ $extraCss = "
 include __DIR__ . '/includes/header.php';
 ?>
 
-    <div class="container mt-4">
-        
-        <div class="row mb-3">
-            <div class="col-md-12">
-                <h2><i class="fas fa-calendar-alt me-2"></i> Calendário Financeiro</h2>
-                <p class="text-muted">Visualize os vencimentos de contas a pagar e receber.</p>
-            </div>
-        </div>
+<div class="container mt-4">
 
-        <div class="card shadow-sm mb-4">
-            <div class="card-body">
-                <div class="row mb-3">
-                    <div class="col-md-12 text-center">
-                        <span class="badge bg-danger me-2">● A Pagar (Pendente)</span>
-                        <span class="badge bg-primary me-2">● A Receber (Pendente)</span>
-                        <span class="badge bg-success">● Concluído (Pago/Recebido)</span>
-                    </div>
-                </div>
-                <div id='calendar'></div>
-            </div>
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <h2><i class="fas fa-calendar-alt me-2"></i> Calendário Financeiro</h2>
+            <p class="text-muted">Visualize os vencimentos de contas a pagar e receber.</p>
         </div>
-
     </div>
 
-    <?php include __DIR__ . '/includes/footer.php'; ?>
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="d-flex flex-wrap justify-content-center gap-3 mb-3">
+                <span class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill" style="background:var(--rmg-danger-bg);color:#991b1b;font-size:0.8rem;font-weight:500;">
+                    <span style="width:8px;height:8px;background:var(--rmg-danger);border-radius:50%;display:inline-block;"></span> A Pagar (Pendente)
+                </span>
+                <span class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill" style="background:var(--rmg-primary-bg);color:#3730a3;font-size:0.8rem;font-weight:500;">
+                    <span style="width:8px;height:8px;background:var(--rmg-primary);border-radius:50%;display:inline-block;"></span> A Receber (Pendente)
+                </span>
+                <span class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill" style="background:var(--rmg-success-bg);color:#065f46;font-size:0.8rem;font-weight:500;">
+                    <span style="width:8px;height:8px;background:var(--rmg-success);border-radius:50%;display:inline-block;"></span> Concluído (Pago/Recebido)
+                </span>
+            </div>
+            <div id='calendar'></div>
+        </div>
+    </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var calendarEl = document.getElementById('calendar');
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                locale: 'pt-br',
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,listMonth'
-                },
-                buttonText: {
-                    today: 'Hoje',
-                    month: 'Mês',
-                    list: 'Lista'
-                },
-                events: 'ajax/calendario_eventos.php',
-                eventClick: function(info) {
-                    // Optional: Open a modal with details? 
-                    // For now, let the URL filtering work or prevent default if needed
-                    // if (info.event.url) {
-                    //    window.open(info.event.url);
-                    //    info.jsEvent.preventDefault();
-                    // }
-                },
-                eventContent: function(arg) {
-                    let italicEl = document.createElement('div');
-                    
-                    if (arg.event.extendedProps.status === 'paga' || arg.event.extendedProps.status === 'recebida') {
-                         italicEl.innerHTML = arg.event.title; 
-                         // Optional: Add icons or strikethrough logic here if title doesn't cover it
-                    } else {
-                        italicEl.innerHTML = arg.event.title;
-                    }
-                    
-                    let arrayOfDomNodes = [ italicEl ]
-                    return { domNodes: arrayOfDomNodes }
+</div>
+
+<?php include __DIR__ . '/includes/footer.php'; ?>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: 'pt-br',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,listMonth'
+            },
+            buttonText: {
+                today: 'Hoje',
+                month: 'Mês',
+                list: 'Lista'
+            },
+            events: 'ajax/calendario_eventos.php',
+            eventClick: function(info) {
+                // Optional: Open a modal with details? 
+                // For now, let the URL filtering work or prevent default if needed
+                // if (info.event.url) {
+                //    window.open(info.event.url);
+                //    info.jsEvent.preventDefault();
+                // }
+            },
+            eventContent: function(arg) {
+                let italicEl = document.createElement('div');
+
+                if (arg.event.extendedProps.status === 'paga' || arg.event.extendedProps.status === 'recebida') {
+                    italicEl.innerHTML = arg.event.title;
+                    // Optional: Add icons or strikethrough logic here if title doesn't cover it
+                } else {
+                    italicEl.innerHTML = arg.event.title;
                 }
-            });
-            calendar.render();
+
+                let arrayOfDomNodes = [italicEl]
+                return {
+                    domNodes: arrayOfDomNodes
+                }
+            }
         });
-    </script>
+        calendar.render();
+    });
+</script>
 </body>
+
 </html>

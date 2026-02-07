@@ -39,102 +39,105 @@ $extraCss = '<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/
 include __DIR__ . '/includes/header.php';
 ?>
 
-    <!-- Main Content -->
-    <div class="container mt-4">
-        
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <h2><i class="fas fa-boxes me-2"></i> Bens e Equipamentos</h2>
-            </div>
-            <div class="col-md-6 text-end">
-                <button type="button" class="btn btn-primary" onclick="abrirModal()">
-                    <i class="fas fa-plus me-1"></i> Novo Bem
-                </button>
-            </div>
-        </div>
+<!-- Main Content -->
+<div class="container mt-4">
 
-        <?php if ($mensagem): ?>
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <h2><i class="fas fa-boxes me-2"></i> Bens e Equipamentos</h2>
+        </div>
+        <div class="col-md-6 text-end">
+            <button type="button" class="btn btn-primary" onclick="abrirModal()">
+                <i class="fas fa-plus me-1"></i> Novo Bem
+            </button>
+        </div>
+    </div>
+
+    <?php if ($mensagem): ?>
         <div class="alert alert-<?php echo $tipoMensagem; ?> alert-dismissible fade show" role="alert">
             <?php echo $mensagem; ?>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-        <?php endif; ?>
+    <?php endif; ?>
 
-        <div class="row mb-4">
-            <div class="col-md-2">
-                <div class="card text-center bg-primary text-white">
-                    <div class="card-body">
-                        <h5 class="card-title">Bens Ativos</h5>
-                        <p class="card-text fs-4"><?php echo $metricas['totalAtivos']; ?></p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-2">
-                <div class="card text-center bg-secondary text-white">
-                    <div class="card-body">
-                        <h5 class="card-title">Bens Baixados</h5>
-                        <p class="card-text fs-4"><?php echo $metricas['totalBaixados']; ?></p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-2">
-                <div class="card text-center bg-info text-white">
-                    <div class="card-body">
-                        <h5 class="card-title">Idade Média</h5>
-                        <p class="card-text fs-4"><?php echo $metricas['idadeMediaAnos']; ?> anos</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card text-center bg-warning text-dark">
-                    <div class="card-body">
-                        <h5 class="card-title">Gasto Manut. (30d)</h5>
-                        <p class="card-text fs-4">R$ <?php echo number_format($metricas['totalGasto30Dias'], 2, ',', '.'); ?></p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-2">
-                <div class="card text-center bg-danger text-white">
-                    <div class="card-body">
-                        <h5 class="card-title">Manut. (30d)</h5>
-                        <p class="card-text fs-4"><?php echo $metricas['totalManutencoes30Dias']; ?></p>
-                    </div>
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md">
+            <div class="card text-center text-white bg-primary">
+                <div class="card-body py-3">
+                    <h6 class="card-title mb-1">Bens Ativos</h6>
+                    <p class="card-text fs-4 mb-0"><?php echo $metricas['totalAtivos']; ?></p>
                 </div>
             </div>
         </div>
-
-        <div class="mb-3">
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="filtroAtivo">
-                <label class="form-check-label" for="filtroAtivo">
-                    Mostrar apenas bens ativos
-                </label>
+        <div class="col-6 col-md">
+            <div class="card text-center text-white bg-secondary">
+                <div class="card-body py-3">
+                    <h6 class="card-title mb-1">Bens Baixados</h6>
+                    <p class="card-text fs-4 mb-0"><?php echo $metricas['totalBaixados']; ?></p>
+                </div>
             </div>
         </div>
+        <div class="col-6 col-md">
+            <div class="card text-center text-white bg-info">
+                <div class="card-body py-3">
+                    <h6 class="card-title mb-1">Idade Média</h6>
+                    <p class="card-text fs-4 mb-0"><?php echo $metricas['idadeMediaAnos']; ?> anos</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card text-center text-white bg-warning">
+                <div class="card-body py-3">
+                    <h6 class="card-title mb-1">Gasto Manut. (30d)</h6>
+                    <p class="card-text fs-4 mb-0">R$ <?php echo number_format($metricas['totalGasto30Dias'], 2, ',', '.'); ?></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md">
+            <div class="card text-center text-white bg-danger">
+                <div class="card-body py-3">
+                    <h6 class="card-title mb-1">Manut. (30d)</h6>
+                    <p class="card-text fs-4 mb-0"><?php echo $metricas['totalManutencoes30Dias']; ?></p>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table id="tabelaBens" class="table table-striped table-hover">
-                        <thead class="table-dark">
-                            <tr>
-                                <th width="5%">ID</th>
-                                <th>Descrição</th>
-                                <th>Setor</th>
-                                <th>Aquisição</th>
-                                <th>Valor Aquis.</th>
-                                <th>Total Manut.</th>
-                                <th>Status</th>
-                                <th width="20%" class="text-center">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($bens as $b): ?>
+    <div class="mb-3">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="filtroAtivo">
+            <label class="form-check-label" for="filtroAtivo">
+                Mostrar apenas bens ativos
+            </label>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="tabelaBens" class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th width="5%">ID</th>
+                            <th>Descrição</th>
+                            <th>Setor</th>
+                            <th>Aquisição</th>
+                            <th>Valor Aquis.</th>
+                            <th>Total Manut.</th>
+                            <th>Status</th>
+                            <th width="20%" class="text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($bens as $b): ?>
                             <tr>
                                 <td><?php echo $b->getIdBem(); ?></td>
                                 <td><?php echo htmlspecialchars($b->getDescricao()); ?></td>
                                 <td><?php echo htmlspecialchars($b->getNomeSetor()); ?></td>
-                                <td><?php echo date('d/m/Y', strtotime($b->getDataAquisicao())); ?><br><small class="text-muted"><?php $dataAquisicao = new DateTime($b->getDataAquisicao()); $hoje = new DateTime(); $diff = $hoje->diff($dataAquisicao); echo $diff->y . ' anos e ' . $diff->m . ' meses'; ?></small></td>
+                                <td><?php echo date('d/m/Y', strtotime($b->getDataAquisicao())); ?><br><small class="text-muted"><?php $dataAquisicao = new DateTime($b->getDataAquisicao());
+                                                                                                                                    $hoje = new DateTime();
+                                                                                                                                    $diff = $hoje->diff($dataAquisicao);
+                                                                                                                                    echo $diff->y . ' anos e ' . $diff->m . ' meses'; ?></small></td>
                                 <td>R$ <?php echo number_format($b->getValorAquisicao(), 2, ',', '.'); ?></td>
                                 <td>R$ <?php echo number_format($b->getTotalManutencao(), 2, ',', '.'); ?></td>
                                 <td>
@@ -151,173 +154,174 @@ include __DIR__ . '/includes/header.php';
                                     <a href="manutencoes.php?bem_id=<?php echo $b->getIdBem(); ?>" class="btn btn-sm btn-info text-white me-1" title="Manutenções">
                                         <i class="fas fa-tools"></i>
                                     </a>
-                                    <button class="btn btn-sm btn-warning me-1" 
-                                            onclick='editarBem(<?php echo json_encode([
-                                                "id_bem" => $b->getIdBem(),
-                                                "descricao" => $b->getDescricao(),
-                                                "setor_id" => $b->getSetorId(),
-                                                "data_aquisicao" => $b->getDataAquisicao(),
-                                                "valor_aquisicao" => $b->getValorAquisicao(),
-                                                "status" => $b->getStatus(),
-                                                "observacoes" => $b->getObservacoes()
-                                            ]); ?>)' title="Editar">
+                                    <button class="btn btn-sm btn-warning me-1"
+                                        onclick='editarBem(<?php echo json_encode([
+                                                                "id_bem" => $b->getIdBem(),
+                                                                "descricao" => $b->getDescricao(),
+                                                                "setor_id" => $b->getSetorId(),
+                                                                "data_aquisicao" => $b->getDataAquisicao(),
+                                                                "valor_aquisicao" => $b->getValorAquisicao(),
+                                                                "status" => $b->getStatus(),
+                                                                "observacoes" => $b->getObservacoes()
+                                                            ]); ?>)' title="Editar">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-danger" 
-                                            onclick="confirmarExclusao(<?php echo $b->getIdBem(); ?>)" title="Excluir">
+                                    <button class="btn btn-sm btn-danger"
+                                        onclick="confirmarExclusao(<?php echo $b->getIdBem(); ?>)" title="Excluir">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </td>
                             </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Modal Cadastro/Edição -->
-    <div class="modal fade" id="modalBem" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitulo">Novo Bem</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <form method="POST" action="bens.php">
-                    <div class="modal-body">
-                        <input type="hidden" name="acao" value="salvar">
-                        <input type="hidden" name="id_bem" id="id_bem">
-                        
-                        <div class="mb-3">
-                            <label for="descricao" class="form-label">Descrição *</label>
-                            <input type="text" class="form-control" id="descricao" name="descricao" required>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="setor_id" class="form-label">Setor *</label>
-                                <select class="form-select" id="setor_id" name="setor_id" required>
-                                    <option value="">Selecione...</option>
-                                    <?php foreach ($setores as $s): ?>
+<!-- Modal Cadastro/Edição -->
+<div class="modal fade" id="modalBem" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitulo">Novo Bem</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="bens.php">
+                <div class="modal-body">
+                    <input type="hidden" name="acao" value="salvar">
+                    <input type="hidden" name="id_bem" id="id_bem">
+
+                    <div class="mb-3">
+                        <label for="descricao" class="form-label">Descrição *</label>
+                        <input type="text" class="form-control" id="descricao" name="descricao" required>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="setor_id" class="form-label">Setor *</label>
+                            <select class="form-select" id="setor_id" name="setor_id" required>
+                                <option value="">Selecione...</option>
+                                <?php foreach ($setores as $s): ?>
                                     <option value="<?php echo $s->getIdSetor(); ?>">
                                         <?php echo htmlspecialchars($s->getNome()); ?>
                                     </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="status" class="form-label">Status *</label>
-                                <select class="form-select" id="status" name="status" required>
-                                    <option value="ativo">Ativo</option>
-                                    <option value="baixado">Baixado (Inativo)</option>
-                                </select>
-                            </div>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="data_aquisicao" class="form-label">Data de Aquisição *</label>
-                                <input type="date" class="form-control" id="data_aquisicao" name="data_aquisicao" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="valor_aquisicao" class="form-label">Valor de Aquisição (R$) *</label>
-                                <input type="number" step="0.01" class="form-control" id="valor_aquisicao" name="valor_aquisicao" required>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="observacoes" class="form-label">Observações</label>
-                            <textarea class="form-control" id="observacoes" name="observacoes" rows="3"></textarea>
+                        <div class="col-md-6 mb-3">
+                            <label for="status" class="form-label">Status *</label>
+                            <select class="form-select" id="status" name="status" required>
+                                <option value="ativo">Ativo</option>
+                                <option value="baixado">Baixado (Inativo)</option>
+                            </select>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Salvar</button>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="data_aquisicao" class="form-label">Data de Aquisição *</label>
+                            <input type="date" class="form-control" id="data_aquisicao" name="data_aquisicao" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="valor_aquisicao" class="form-label">Valor de Aquisição (R$) *</label>
+                            <input type="number" step="0.01" class="form-control" id="valor_aquisicao" name="valor_aquisicao" required>
+                        </div>
                     </div>
+
+                    <div class="mb-3">
+                        <label for="observacoes" class="form-label">Observações</label>
+                        <textarea class="form-control" id="observacoes" name="observacoes" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Exclusão -->
+<div class="modal fade" id="modalExclusao" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Exclusão</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja excluir este bem?</p>
+            </div>
+            <div class="modal-footer">
+                <form method="POST" action="bens.php">
+                    <input type="hidden" name="acao" value="excluir">
+                    <input type="hidden" name="id_bem" id="id_bem_exclusao">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger">Excluir</button>
                 </form>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Modal Exclusão -->
-    <div class="modal fade" id="modalExclusao" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Confirmar Exclusão</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Tem certeza que deseja excluir este bem?</p>
-                </div>
-                <div class="modal-footer">
-                    <form method="POST" action="bens.php">
-                        <input type="hidden" name="acao" value="excluir">
-                        <input type="hidden" name="id_bem" id="id_bem_exclusao">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-danger">Excluir</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+<?php include __DIR__ . '/includes/footer.php'; ?>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
 
-    <?php include __DIR__ . '/includes/footer.php'; ?>
-    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
-
-    <script>
-        $(document).ready(function() {
-            $.fn.dataTable.ext.search.push(
-                function(settings, data, dataIndex) {
-                    if ($('#filtroAtivo').is(':checked')) {
-                        return data[6].indexOf('Ativo') !== -1;
-                    }
-                    return true;
+<script>
+    $(document).ready(function() {
+        $.fn.dataTable.ext.search.push(
+            function(settings, data, dataIndex) {
+                if ($('#filtroAtivo').is(':checked')) {
+                    return data[6].indexOf('Ativo') !== -1;
                 }
-            );
+                return true;
+            }
+        );
 
-            var table = $('#tabelaBens').DataTable({
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/pt-BR.json'
-                }
-            });
-
-            $('#filtroAtivo').change(function() {
-                table.draw();
-            });
+        var table = $('#tabelaBens').DataTable({
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/pt-BR.json'
+            }
         });
 
-        function abrirModal() {
-            $('#modalTitulo').text('Novo Bem');
-            $('#id_bem').val('');
-            $('#descricao').val('');
-            $('#setor_id').val('');
-            $('#data_aquisicao').val('');
-            $('#valor_aquisicao').val('');
-            $('#status').val('ativo');
-            $('#observacoes').val('');
-            $('#modalBem').modal('show');
-        }
+        $('#filtroAtivo').change(function() {
+            table.draw();
+        });
+    });
 
-        function editarBem(b) {
-            $('#modalTitulo').text('Editar Bem');
-            $('#id_bem').val(b.id_bem);
-            $('#descricao').val(b.descricao);
-            $('#setor_id').val(b.setor_id);
-            $('#data_aquisicao').val(b.data_aquisicao);
-            $('#valor_aquisicao').val(b.valor_aquisicao);
-            $('#status').val(b.status);
-            $('#observacoes').val(b.observacoes);
-            $('#modalBem').modal('show');
-        }
+    function abrirModal() {
+        $('#modalTitulo').text('Novo Bem');
+        $('#id_bem').val('');
+        $('#descricao').val('');
+        $('#setor_id').val('');
+        $('#data_aquisicao').val('');
+        $('#valor_aquisicao').val('');
+        $('#status').val('ativo');
+        $('#observacoes').val('');
+        $('#modalBem').modal('show');
+    }
 
-        function confirmarExclusao(id) {
-            $('#id_bem_exclusao').val(id);
-            $('#modalExclusao').modal('show');
-        }
-    </script>
+    function editarBem(b) {
+        $('#modalTitulo').text('Editar Bem');
+        $('#id_bem').val(b.id_bem);
+        $('#descricao').val(b.descricao);
+        $('#setor_id').val(b.setor_id);
+        $('#data_aquisicao').val(b.data_aquisicao);
+        $('#valor_aquisicao').val(b.valor_aquisicao);
+        $('#status').val(b.status);
+        $('#observacoes').val(b.observacoes);
+        $('#modalBem').modal('show');
+    }
+
+    function confirmarExclusao(id) {
+        $('#id_bem_exclusao').val(id);
+        $('#modalExclusao').modal('show');
+    }
+</script>
 </body>
+
 </html>
