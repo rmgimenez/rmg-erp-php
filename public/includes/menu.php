@@ -58,12 +58,22 @@ $paginaAtual = basename($_SERVER['PHP_SELF']);
                 <li class="nav-item">
                     <a class="nav-link <?php echo $paginaAtual === 'relatorios.php' ? 'active' : ''; ?>" href="relatorios.php">Relatórios</a>
                 </li>
-
             </ul>
-            <div class="d-flex text-white align-items-center">
-                <span class="me-3"><i class="fas fa-user-circle me-1"></i> <?php echo htmlspecialchars($usuarioNome); ?></span>
-                <a href="logout.php" class="btn btn-outline-light btn-sm">Sair</a>
-            </div>
+
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-white" href="#" id="usuarioDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user-circle me-1"></i> <?php echo htmlspecialchars($usuarioNome); ?>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="usuarioDropdown">
+                        <li><a class="dropdown-item" href="alterar_senha.php"><i class="fas fa-key me-2"></i>Alterar Senha</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item" href="logout.php"><i class="fas fa-sign-out-alt me-2"></i>Sair</a></li>
+                    </ul>
+                </li>
+            </ul>
         </div>
     </div>
 </nav>
