@@ -115,68 +115,6 @@ $tipoUsuario = $_SESSION['usuario_tipo'] ?? 'visitante';
 
     </div>
 
-    <!-- Modal Alertas -->
-    <div class="modal fade" id="modalAlertas" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header bg-warning">
-                    <h5 class="modal-title text-dark"><i class="fas fa-exclamation-triangle me-2"></i> Alertas Financeiros</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <ul class="nav nav-tabs" id="myTab" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active text-danger" id="pagar-tab" data-bs-toggle="tab" data-bs-target="#pagar" type="button" role="tab">A Pagar (Vencidos/Próximos)</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link text-primary" id="receber-tab" data-bs-toggle="tab" data-bs-target="#receber" type="button" role="tab">A Receber (Vencidos/Próximos)</button>
-                        </li>
-                    </ul>
-                    <div class="tab-content mt-3" id="myTabContent">
-                        <div class="tab-pane fade show active" id="pagar" role="tabpanel">
-                            <div class="table-responsive">
-                                <table class="table table-sm table-striped" id="tabelaAlertasPagar">
-                                    <thead>
-                                        <tr>
-                                            <th>Descrição</th>
-                                            <th>Fornecedor</th>
-                                            <th>Vencimento</th>
-                                            <th>Valor</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <!-- Preenchido via JS -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div class="tab-pane fade" id="receber" role="tabpanel">
-                            <div class="table-responsive">
-                                <table class="table table-sm table-striped" id="tabelaAlertasReceber">
-                                    <thead>
-                                        <tr>
-                                            <th>Descrição</th>
-                                            <th>Cliente</th>
-                                            <th>Vencimento</th>
-                                            <th>Valor</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <!-- Preenchido via JS -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                    <a href="calendario.php" class="btn btn-primary">Ver Calendário Completo</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <?php include __DIR__ . '/includes/footer.php'; ?>
 
     <!-- Scripts -->
@@ -193,53 +131,6 @@ $tipoUsuario = $_SESSION['usuario_tipo'] ?? 'visitante';
                 <?php unset($_SESSION['mostrar_alertas']); ?>
             });
         <?php endif; ?>
-
-        function carregarAlertas() {
-            $.ajax({
-                url: 'ajax/alertas_financeiros.php',
-                method: 'GET',
-                dataType: 'json',
-                success: function(data) {
-                    let htmlPagar = '';
-                    let htmlReceber = '';
-                    
-                    if (data.pagar.length > 0) {
-                        data.pagar.forEach(c => {
-                            let dataVenc = new Date(c.vencimento + 'T00:00:00').toLocaleDateString('pt-BR');
-                            htmlPagar += `<tr>
-                                <td>${c.descricao}</td>
-                                <td>${c.entidade}</td>
-                                <td>${dataVenc}</td>
-                                <td>R$ ${parseFloat(c.valor).toFixed(2).replace('.', ',')}</td>
-                            </tr>`;
-                        });
-                    } else {
-                        htmlPagar = '<tr><td colspan="4" class="text-center text-muted">Nenhuma conta vencida ou vencendo em breve.</td></tr>';
-                    }
-
-                    if (data.receber.length > 0) {
-                        data.receber.forEach(c => {
-                            let dataVenc = new Date(c.vencimento + 'T00:00:00').toLocaleDateString('pt-BR');
-                            htmlReceber += `<tr>
-                                <td>${c.descricao}</td>
-                                <td>${c.entidade}</td>
-                                <td>${dataVenc}</td>
-                                <td>R$ ${parseFloat(c.valor).toFixed(2).replace('.', ',')}</td>
-                            </tr>`;
-                        });
-                    } else {
-                        htmlReceber = '<tr><td colspan="4" class="text-center text-muted">Nenhuma conta vencida ou vencendo em breve.</td></tr>';
-                    }
-
-                    $('#tabelaAlertasPagar tbody').html(htmlPagar);
-                    $('#tabelaAlertasReceber tbody').html(htmlReceber);
-                    
-                    if(data.pagar.length > 0 || data.receber.length > 0) {
-                        $('#modalAlertas').modal('show');
-                    }
-                }
-            });
-        }
 
         // Dados vindos do PHP
         const dadosFinanceiros = {

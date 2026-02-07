@@ -25,7 +25,7 @@ $paginaAtual = basename($_SERVER['PHP_SELF']);
                         <li><a class="dropdown-item <?php echo $paginaAtual === 'contas_receber.php' ? 'active' : ''; ?>" href="contas_receber.php">Contas a Receber</a></li>
                         <li><a class="dropdown-item <?php echo $paginaAtual === 'calendario.php' ? 'active' : ''; ?>" href="calendario.php">Calendário</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#" onclick="carregarAlertas(); return false;"><i class="fas fa-exclamation-triangle text-warning me-1"></i> Alertas Vencimentos</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="carregarAlertas(true); return false;"><i class="fas fa-exclamation-triangle text-warning me-1"></i> Alertas Vencimentos</a></li>
                     </ul>
                 </li>
                 <li class="nav-item">
