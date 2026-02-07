@@ -72,16 +72,21 @@ Os principais objetivos do sistema são:
 
 **Obrigatório:**
 
+- usar o prefixo `rmg_` em todas as tabelas do banco de dados
 - Todo o script de criação do banco deve estar no arquivo:  
   `banco-dados.sql`
 - Todo o script de exclusão (DROP de tabelas, views, etc.) deve estar no arquivo:  
   `banco-dados-drop.sql`
+- sempre que criar uma nova tabela, view ou outro objeto no banco de dados, o script correspondente deve ser adicionado ao arquivo `banco-dados.sql` e o script de exclusão correspondente deve ser adicionado ao arquivo `banco-dados-drop.sql`.
 
 ### Autenticação
 
 - Autenticação baseada em sessão PHP
 - Senhas armazenadas com hash seguro
 - Controle de acesso baseado em tipo de usuário
+- Usuário administrador será usado pela informática para gerenciar o sistema. Terá acesso completo a todas as funcionalidades.
+- Usuário gerente terá acesso a todas as funcionalidades, exceto gerenciamento de usuários.
+- Usuário operador terá acesso restrito a funcionalidades de visualização e registro de pagamentos/recebimentos.
 
 ### Integrações Externas
 
