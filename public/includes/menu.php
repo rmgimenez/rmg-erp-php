@@ -23,6 +23,7 @@ $paginaAtual = basename($_SERVER['PHP_SELF']);
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item <?php echo $paginaAtual === 'contas_pagar.php' ? 'active' : ''; ?>" href="contas_pagar.php">Contas a Pagar</a></li>
                         <li><a class="dropdown-item <?php echo $paginaAtual === 'contas_receber.php' ? 'active' : ''; ?>" href="contas_receber.php">Contas a Receber</a></li>
+                        <li><a class="dropdown-item <?php echo $paginaAtual === 'calendario.php' ? 'active' : ''; ?>" href="calendario.php">Calendário</a></li>
                     </ul>
                 </li>
                 <li class="nav-item dropdown">

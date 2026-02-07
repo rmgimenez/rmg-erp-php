@@ -114,6 +114,38 @@ class ContaReceberDAO {
         }
     }
 
+    public function buscarPorPeriodo($inicio, $fim) {
+        try {
+            $sql = "SELECT c.*, cli.nome as nome_cliente 
+                    FROM rmg_conta_receber c
+                    LEFT JOIN rmg_cliente cli ON c.cliente_id = cli.id_cliente
+                    WHERE c.data_vencimento BETWEEN :inicio AND :fim
+                    ORDER BY c.data_vencimento ASC";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':inicio', $inicio);
+            $stmt->bindValue(':fim', $fim);
+            $stmt->execute();
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            $contas = [];
+            foreach ($result as $row) {
+                $c = new ContaReceber();
+                $c->setIdContaReceber($row['id_conta_receber']);
+                $c->setClienteId($row['cliente_id']);
+                $c->setNomeCliente($row['nome_cliente']);
+                $c->setDescricao($row['descricao']);
+                $c->setValor($row['valor']);
+                $c->setDataVencimento($row['data_vencimento']);
+                $c->setStatus($row['status']);
+                $c->setObservacoes($row['observacoes']);
+                $contas[] = $c;
+            }
+            return $contas;
+        } catch (PDOException $e) {
+            return [];
+        }
+    }
+
     public function obterTotais() {
         try {
             $sql = "SELECT status, SUM(valor) as total FROM rmg_conta_receber GROUP BY status";

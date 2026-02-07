@@ -115,6 +115,38 @@ class ContaPagarDAO {
         }
     }
 
+    public function buscarPorPeriodo($inicio, $fim) {
+        try {
+            $sql = "SELECT c.*, f.nome as nome_fornecedor 
+                    FROM rmg_conta_pagar c
+                    LEFT JOIN rmg_fornecedor f ON c.fornecedor_id = f.id_fornecedor
+                    WHERE c.data_vencimento BETWEEN :inicio AND :fim
+                    ORDER BY c.data_vencimento ASC";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':inicio', $inicio);
+            $stmt->bindValue(':fim', $fim);
+            $stmt->execute();
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            $contas = [];
+            foreach ($result as $row) {
+                $c = new ContaPagar();
+                $c->setIdContaPagar($row['id_conta_pagar']);
+                $c->setFornecedorId($row['fornecedor_id']);
+                $c->setNomeFornecedor($row['nome_fornecedor']);
+                $c->setDescricao($row['descricao']);
+                $c->setValor($row['valor']);
+                $c->setDataVencimento($row['data_vencimento']);
+                $c->setStatus($row['status']);
+                $c->setObservacoes($row['observacoes']);
+                $contas[] = $c;
+            }
+            return $contas;
+        } catch (PDOException $e) {
+            return [];
+        }
+    }
+
     public function obterTotais() {
         try {
             $sql = "SELECT status, SUM(valor) as total FROM rmg_conta_pagar GROUP BY status";
