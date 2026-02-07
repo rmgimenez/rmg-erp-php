@@ -107,4 +107,4 @@ CREATE TABLE rmg_recebimento (
 -- Inserção de usuário administrador padrão (Senha: admin123)
 -- Hash gerado para 'admin123'
 INSERT INTO rmg_usuario (nome, usuario, senha, tipo_usuario, ativo) VALUES 
-('Administrador', 'admin', '$2y$10$vI8aWBnW3fID.ZQ4/zo1G.q1lRps.9cGLcZEiGDMVr5yUP1KUOYTa', 'administrador', 1);
+('Administrador', 'admin', '$2y$10$w9lHUKAQRvDqCUkm959kvO2hmitAWFkdcV0mfCkpHMvzBOG5kSQ9S', 'administrador', 1);
