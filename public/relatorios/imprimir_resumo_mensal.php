@@ -51,6 +51,12 @@ $totSaldo = $totReceb - $totPago;
         <p>Gerado em: <?php echo date('d/m/Y H:i:s'); ?> por <?php echo htmlspecialchars($_SESSION['usuario_nome']); ?></p>
     </div>
 
+    <!-- Gráfico (Chart.js) -->
+    <div style="max-width:920px; margin: 0 auto 18px;">
+        <canvas id="resumoMensalChart" height="280" style="width:100%; max-height:380px; display:block;"></canvas>
+        <p class="small text-muted" style="text-align:center; margin-top:6px;">Gráfico: Receitas (azul), Despesas (vermelho) e Saldo (verde) — últimos 12 meses.</p>
+    </div>
+
     <table>
         <thead>
             <tr>
@@ -90,6 +96,93 @@ $totSaldo = $totReceb - $totPago;
     <div class="footer">
         <p>RMG ERP - Controle Financeiro e Patrimonial | Página 1 de 1</p>
     </div>
+
+    <!-- Chart.js (CDN) + inicialização do gráfico -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        (function(){
+            const raw = <?php echo json_encode(array_values($rows), JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT); ?>;
+            if (!raw || !raw.length) return;
+
+            const labels = raw.map(r => {
+                // r.mes esperado no formato YYYY-MM
+                const m = (r.mes || '').toString();
+                const parts = m.split('-');
+                return parts.length === 2 ? (parts[1] + '/' + parts[0]) : m;
+            });
+
+            const receb = raw.map(r => Number(r.total_recebido || 0));
+            const pago = raw.map(r => Number(r.total_pago || 0));
+            const saldo = raw.map(r => Number(r.saldo || 0));
+
+            const ctx = document.getElementById('resumoMensalChart').getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Recebido',
+                            data: receb,
+                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Pago',
+                            data: pago,
+                            backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            yAxisID: 'y'
+                        },
+                        {
+                            type: 'line',
+                            label: 'Saldo',
+                            data: saldo,
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 2,
+                            tension: 0.25,
+                            pointRadius: 3,
+                            yAxisID: 'y'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    stacked: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { callback: value => value.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}) }
+                        }
+                    }
+                }
+            });
+
+            // Garantir que o canvas imprima com boa resolução
+            function fixPrint() {
+                const canvas = document.getElementById('resumoMensalChart');
+                if (!canvas) return;
+                // for printing, increase size slightly
+                canvas.style.maxHeight = '420px';
+            }
+            window.matchMedia('print').addEventListener('change', e => { if (e.matches) fixPrint(); });
+        })();
+    </script>
+
+    <style>
+        /* garantir que o canvas apareça corretamente ao imprimir */
+        @media print {
+            canvas { page-break-inside: avoid; max-width:100% !important; height: auto !important; }
+        }
+    </style>
 
 </body>
 </html>
