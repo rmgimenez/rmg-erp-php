@@ -67,4 +67,42 @@ class BemController {
         }
         return ['sucesso' => false, 'mensagem' => 'Erro ao excluir bem.'];
     }
+
+    public function obterMetricas() {
+        $stats = $this->bemDAO->contarPorStatus();
+        $totalAtivos = $stats['ativo'];
+        $totalBaixados = $stats['baixado'];
+        $totalBens = $totalAtivos + $totalBaixados;
+
+        // Idade média
+        $bens = $this->bemDAO->listar();
+        $idades = [];
+        foreach ($bens as $bem) {
+            $dataAquisicao = new DateTime($bem->getDataAquisicao());
+            $hoje = new DateTime();
+            $idadeDias = $hoje->diff($dataAquisicao)->days;
+            $idades[] = $idadeDias;
+        }
+        $idadeMediaDias = count($idades) > 0 ? array_sum($idades) / count($idades) : 0;
+        $idadeMediaAnos = round($idadeMediaDias / 365.25, 1);
+
+        // Total gasto em manutenção últimos 30 dias
+        $inicio = date('Y-m-d', strtotime('-30 days'));
+        $fim = date('Y-m-d');
+        $manutencoes = $this->manutencaoDAO->buscarPorPeriodo($inicio, $fim);
+        $totalGasto30Dias = 0;
+        $totalManutencoes30Dias = count($manutencoes);
+        foreach ($manutencoes as $m) {
+            $totalGasto30Dias += $m->getCusto();
+        }
+
+        return [
+            'totalAtivos' => $totalAtivos,
+            'totalBaixados' => $totalBaixados,
+            'totalBens' => $totalBens,
+            'idadeMediaAnos' => $idadeMediaAnos,
+            'totalGasto30Dias' => $totalGasto30Dias,
+            'totalManutencoes30Dias' => $totalManutencoes30Dias
+        ];
+    }
 }

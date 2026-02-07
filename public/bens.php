@@ -28,6 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $bens = $bemController->listarBens();
+$metricas = $bemController->obterMetricas();
 $setores = $setorController->listarSetores();
 
 $usuarioNome = $_SESSION['usuario_nome'] ?? 'Usuário';
@@ -69,6 +70,49 @@ $tipoUsuario = $_SESSION['usuario_tipo'] ?? 'visitante';
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         <?php endif; ?>
+
+        <div class="row mb-4">
+            <div class="col-md-2">
+                <div class="card text-center bg-primary text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Bens Ativos</h5>
+                        <p class="card-text fs-4"><?php echo $metricas['totalAtivos']; ?></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card text-center bg-secondary text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Bens Baixados</h5>
+                        <p class="card-text fs-4"><?php echo $metricas['totalBaixados']; ?></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card text-center bg-info text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Idade Média</h5>
+                        <p class="card-text fs-4"><?php echo $metricas['idadeMediaAnos']; ?> anos</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center bg-warning text-dark">
+                    <div class="card-body">
+                        <h5 class="card-title">Gasto Manut. (30d)</h5>
+                        <p class="card-text fs-4">R$ <?php echo number_format($metricas['totalGasto30Dias'], 2, ',', '.'); ?></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card text-center bg-danger text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Manut. (30d)</h5>
+                        <p class="card-text fs-4"><?php echo $metricas['totalManutencoes30Dias']; ?></p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div class="mb-3">
             <div class="form-check">
