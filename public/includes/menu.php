@@ -46,18 +46,22 @@ $paginaAtual = basename($_SERVER['PHP_SELF']);
                 </li>
                 <li class="nav-item">
                     <?php
-                    // exibe ícone/badge server-side (fallback) e adiciona classe de destaque quando houver alertas
+                    // exibe ícone/badges server-side (fallback) com contagem separada para pagar/receber
                     require_once __DIR__ . '/../../app/dao/ContaPagarDAO.php';
                     require_once __DIR__ . '/../../app/dao/ContaReceberDAO.php';
                     $rmg_pagar_alertas = (new ContaPagarDAO())->buscarVencidasEProximas(10);
                     $rmg_receber_alertas = (new ContaReceberDAO())->buscarVencidasEProximas(10);
-                    $rmg_alertas_count = (int)(count($rmg_pagar_alertas) + count($rmg_receber_alertas));
-                    $rmg_has_alertas = $rmg_alertas_count > 0;
+                    $rmg_count_pagar = count($rmg_pagar_alertas);
+                    $rmg_count_receber = count($rmg_receber_alertas);
+                    $rmg_has_alertas = ($rmg_count_pagar + $rmg_count_receber) > 0;
                     ?>
-                    <a class="nav-link <?php echo $rmg_has_alertas ? 'menu-alerta-active' : ''; ?>" href="#" id="menu-alertas-vencimentos" onclick="carregarAlertas(true); return false;" aria-describedby="menu-alertas-badge" aria-pressed="false">
+                    <a class="nav-link <?php echo $rmg_has_alertas ? 'menu-alerta-active' : ''; ?>" href="#" id="menu-alertas-vencimentos" onclick="carregarAlertas(true); return false;" aria-describedby="menu-alertas-badge-pagar menu-alertas-badge-receber" aria-pressed="false">
                         <span class="position-relative d-inline-block">
                             <i id="menu-alertas-icone" class="fas fa-bell fa-fw me-1 <?php echo $rmg_has_alertas ? 'text-danger menu-alerta-pulse' : 'text-secondary'; ?>" aria-hidden="<?php echo $rmg_has_alertas ? 'false' : 'true'; ?>"></i>
-                            <span id="menu-alertas-badge" class="badge bg-danger rounded-pill menu-alerta-badge <?php echo $rmg_has_alertas ? '' : 'd-none'; ?>" aria-hidden="<?php echo $rmg_has_alertas ? 'false' : 'true'; ?>"><?php echo $rmg_alertas_count ?: ''; ?></span>
+
+                            <span id="menu-alertas-badge-pagar" class="badge bg-danger rounded-pill menu-alerta-badge menu-alerta-badge-pagar <?php echo $rmg_count_pagar ? '' : 'd-none'; ?>" title="Contas a pagar" aria-hidden="<?php echo $rmg_count_pagar ? 'false' : 'true'; ?>"><?php echo $rmg_count_pagar ?: ''; ?></span>
+
+                            <span id="menu-alertas-badge-receber" class="badge bg-primary rounded-pill menu-alerta-badge menu-alerta-badge-receber <?php echo $rmg_count_receber ? '' : 'd-none'; ?>" title="Contas a receber" aria-hidden="<?php echo $rmg_count_receber ? 'false' : 'true'; ?>"><?php echo $rmg_count_receber ?: ''; ?></span>
                         </span>
                         <strong class="ms-1">Alertas Vencimentos</strong>
                     </a>

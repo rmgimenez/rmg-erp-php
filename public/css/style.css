@@ -56,8 +56,19 @@ h6 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.06);
   transform: translateZ(0);
+}
+
+/* modificadores para os dois tipos de contador */
+.menu-alerta-badge-pagar {
+  right: -6px;
+  top: -8px;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.06);
+}
+.menu-alerta-badge-receber {
+  right: -34px;
+  top: -8px;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.06);
 }
 
 .menu-alerta-pulse {
@@ -93,4 +104,15 @@ h6 {
 .navbar-nav .nav-link i {
   width: 1.1em;
   text-align: center;
+}
+
+@media (max-width: 575px) {
+  .menu-alerta-badge-pagar {
+    right: -6px;
+    top: -12px;
+  }
+  .menu-alerta-badge-receber {
+    right: -6px;
+    top: 10px;
+  }
 }

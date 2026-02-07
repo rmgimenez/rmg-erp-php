@@ -14,6 +14,8 @@ $contasReceber = $receberDAO->buscarVencidasEProximas($dias);
 header('Content-Type: application/json');
 echo json_encode([
     'dias' => $dias,
+    'count_pagar' => count($contasPagar),
+    'count_receber' => count($contasReceber),
     'pagar' => array_map(function ($c) {
         return [
             'descricao' => $c->getDescricao(),

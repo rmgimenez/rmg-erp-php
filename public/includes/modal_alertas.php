@@ -10,10 +10,10 @@
                 <p id="modal-alertas-intervalo" class="text-muted small mb-2">Mostrando contas vencidas ou com vencimento nos próximos <strong><span id="modal-alertas-dias">10</span> dias</strong>.</p>
                 <ul class="nav nav-tabs" id="myTab" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active text-danger" id="pagar-tab" data-bs-toggle="tab" data-bs-target="#pagar" type="button" role="tab">A Pagar (Vencidos/Próximos)</button>
+                        <button class="nav-link active text-danger" id="pagar-tab" data-bs-toggle="tab" data-bs-target="#pagar" type="button" role="tab">A Pagar (Vencidos/Próximos) <span id="modal-count-pagar" class="badge bg-danger ms-2 d-none">0</span></button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link text-primary" id="receber-tab" data-bs-toggle="tab" data-bs-target="#receber" type="button" role="tab">A Receber (Vencidos/Próximos)</button>
+                        <button class="nav-link text-primary" id="receber-tab" data-bs-toggle="tab" data-bs-target="#receber" type="button" role="tab">A Receber (Vencidos/Próximos) <span id="modal-count-receber" class="badge bg-primary ms-2 d-none">0</span></button>
                     </li>
                 </ul>
                 <div class="tab-content mt-3" id="myTabContent">
