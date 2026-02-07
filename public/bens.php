@@ -70,6 +70,15 @@ $tipoUsuario = $_SESSION['usuario_tipo'] ?? 'visitante';
         </div>
         <?php endif; ?>
 
+        <div class="mb-3">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="filtroAtivo">
+                <label class="form-check-label" for="filtroAtivo">
+                    Mostrar apenas bens ativos
+                </label>
+            </div>
+        </div>
+
         <div class="card shadow-sm">
             <div class="card-body">
                 <div class="table-responsive">
@@ -92,7 +101,7 @@ $tipoUsuario = $_SESSION['usuario_tipo'] ?? 'visitante';
                                 <td><?php echo $b->getIdBem(); ?></td>
                                 <td><?php echo htmlspecialchars($b->getDescricao()); ?></td>
                                 <td><?php echo htmlspecialchars($b->getNomeSetor()); ?></td>
-                                <td><?php echo date('d/m/Y', strtotime($b->getDataAquisicao())); ?></td>
+                                <td><?php echo date('d/m/Y', strtotime($b->getDataAquisicao())); ?><br><small class="text-muted"><?php $dataAquisicao = new DateTime($b->getDataAquisicao()); $hoje = new DateTime(); $diff = $hoje->diff($dataAquisicao); echo $diff->y . ' anos e ' . $diff->m . ' meses'; ?></small></td>
                                 <td>R$ <?php echo number_format($b->getValorAquisicao(), 2, ',', '.'); ?></td>
                                 <td>R$ <?php echo number_format($b->getTotalManutencao(), 2, ',', '.'); ?></td>
                                 <td>
@@ -230,10 +239,23 @@ $tipoUsuario = $_SESSION['usuario_tipo'] ?? 'visitante';
 
     <script>
         $(document).ready(function() {
-            $('#tabelaBens').DataTable({
+            $.fn.dataTable.ext.search.push(
+                function(settings, data, dataIndex) {
+                    if ($('#filtroAtivo').is(':checked')) {
+                        return data[6].indexOf('Ativo') !== -1;
+                    }
+                    return true;
+                }
+            );
+
+            var table = $('#tabelaBens').DataTable({
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/pt-BR.json'
                 }
+            });
+
+            $('#filtroAtivo').change(function() {
+                table.draw();
             });
         });
 

@@ -1,12 +1,15 @@
 <?php
 require_once __DIR__ . '/../dao/BemDAO.php';
+require_once __DIR__ . '/../dao/ManutencaoDAO.php';
 require_once __DIR__ . '/../models/Bem.php';
 
 class BemController {
     private $bemDAO;
+    private $manutencaoDAO;
 
     public function __construct() {
         $this->bemDAO = new BemDAO();
+        $this->manutencaoDAO = new ManutencaoDAO();
     }
 
     public function listarBens() {
@@ -55,9 +58,13 @@ class BemController {
     }
 
     public function excluir($id) {
+        $manutencoes = $this->manutencaoDAO->listarPorBem($id);
+        if (count($manutencoes) > 0) {
+            return ['sucesso' => false, 'mensagem' => 'Não é possível excluir o bem, pois existem manutenções cadastradas para ele.'];
+        }
         if ($this->bemDAO->excluir($id)) {
             return ['sucesso' => true, 'mensagem' => 'Bem excluído com sucesso!'];
         }
-        return ['sucesso' => false, 'mensagem' => 'Erro ao excluir bem. Verifique se existem manutenções vinculadas.'];
+        return ['sucesso' => false, 'mensagem' => 'Erro ao excluir bem.'];
     }
 }
