@@ -77,7 +77,7 @@ $usuarioNome = $_SESSION['usuario_nome'] ?? 'Usuário';
                     <div class="col-md-12">
                         <span class="me-3 fw-bold text-secondary"><i class="fas fa-filter"></i> Filtros:</span>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" id="chkOcultarPagas">
+                            <input class="form-check-input" type="checkbox" id="chkOcultarPagas" checked>
                             <label class="form-check-label" for="chkOcultarPagas">Ocultar Pagas</label>
                         </div>
                         <div class="form-check form-check-inline">
