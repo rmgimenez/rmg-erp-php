@@ -128,6 +128,43 @@ $tipoUsuario = $_SESSION['usuario_tipo'] ?? 'visitante';
                 </div>
             </div>
 
+            <!-- Relatório: Gastos por Fornecedor -->
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="fas fa-truck-moving me-2"></i>Gastos por Fornecedor</h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="relatorios/imprimir_gastos_fornecedor.php" method="GET" target="_blank">
+                            <div class="mb-3">
+                                <label class="form-label">Período (pagamentos)</label>
+                                <div class="input-group">
+                                    <input type="date" name="inicio" class="form-control" required value="<?php echo date('Y-m-01'); ?>">
+                                    <span class="input-group-text">até</span>
+                                    <input type="date" name="fim" class="form-control" required value="<?php echo date('Y-m-t'); ?>">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-outline-secondary w-100"><i class="fas fa-print me-2"></i>Gerar Relatório</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Relatório: Resumo Mensal (12 meses) -->
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Resumo Mensal (Receitas x Despesas)</h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="relatorios/imprimir_resumo_mensal.php" method="GET" target="_blank">
+                            <p class="small text-muted">Gera o resumo dos últimos 12 meses (recebimentos vs pagamentos).</p>
+                            <button type="submit" class="btn btn-outline-primary w-100"><i class="fas fa-print me-2"></i>Gerar Relatório</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 

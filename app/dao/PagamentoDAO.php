@@ -51,4 +51,28 @@ class PagamentoDAO {
             return [];
         }
     }
+
+    /**
+     * Retorna total pago por fornecedor dentro de um período
+     * Resultado: array de arrays com keys: id_fornecedor, fornecedor, qtd_pagamentos, total_pago
+     */
+    public function obterTotalPagoPorFornecedorPeriodo($inicio, $fim) {
+        try {
+            $sql = "SELECT f.id_fornecedor, f.nome as fornecedor, COUNT(p.id_pagamento) as qtd_pagamentos, SUM(p.valor_pago) as total_pago
+                    FROM rmg_pagamento p
+                    JOIN rmg_conta_pagar cp ON cp.id_conta_pagar = p.conta_pagar_id
+                    LEFT JOIN rmg_fornecedor f ON f.id_fornecedor = cp.fornecedor_id
+                    WHERE p.data_pagamento BETWEEN :inicio AND :fim
+                    GROUP BY f.id_fornecedor, f.nome
+                    ORDER BY total_pago DESC";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':inicio', $inicio);
+            $stmt->bindValue(':fim', $fim);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            return [];
+        }
+    }
 }
+
