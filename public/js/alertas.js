@@ -44,8 +44,19 @@ function carregarAlertas(forcarExibicao = false) {
       $("#tabelaAlertasPagar tbody").html(htmlPagar);
       $("#tabelaAlertasReceber tbody").html(htmlReceber);
 
+      const hasAlertas = data.pagar.length > 0 || data.receber.length > 0;
+      // mostra/oculta ícone no menu (acessibilidade + estado inicial sem JS é tratado pelo servidor)
+      const $icone = $("#menu-alertas-icone");
+      if (hasAlertas) {
+        $icone.removeClass("d-none");
+        $icone.attr("aria-hidden", "false");
+      } else {
+        $icone.addClass("d-none");
+        $icone.attr("aria-hidden", "true");
+      }
+
       // Abre o modal se tiver dados OU se for solicitado forçadamente (clique do menu)
-      if (forcarExibicao || data.pagar.length > 0 || data.receber.length > 0) {
+      if (forcarExibicao || hasAlertas) {
         $("#modalAlertas").modal("show");
       }
     },
