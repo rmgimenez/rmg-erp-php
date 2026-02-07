@@ -7,6 +7,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
+                <p id="modal-alertas-intervalo" class="text-muted small mb-2">Mostrando contas vencidas ou com vencimento nos próximos <strong><span id="modal-alertas-dias">10</span> dias</strong>.</p>
                 <ul class="nav nav-tabs" id="myTab" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active text-danger" id="pagar-tab" data-bs-toggle="tab" data-bs-target="#pagar" type="button" role="tab">A Pagar (Vencidos/Próximos)</button>

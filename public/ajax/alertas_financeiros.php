@@ -5,13 +5,16 @@ require_once __DIR__ . '/../../app/dao/ContaReceberDAO.php';
 $pagarDAO = new ContaPagarDAO();
 $receberDAO = new ContaReceberDAO();
 
-// Busca contas vencidas e a vencer nos próximos 10 dias
-$contasPagar = $pagarDAO->buscarVencidasEProximas(10);
-$contasReceber = $receberDAO->buscarVencidasEProximas(10);
+// janela (dias) usada para buscar vencimentos — manter em variável para consistência
+$dias = 10;
+// Busca contas vencidas e a vencer nos próximos $dias dias
+$contasPagar = $pagarDAO->buscarVencidasEProximas($dias);
+$contasReceber = $receberDAO->buscarVencidasEProximas($dias);
 
 header('Content-Type: application/json');
 echo json_encode([
-    'pagar' => array_map(function($c) {
+    'dias' => $dias,
+    'pagar' => array_map(function ($c) {
         return [
             'descricao' => $c->getDescricao(),
             'entidade' => $c->getNomeFornecedor(),
@@ -19,7 +22,7 @@ echo json_encode([
             'vencimento' => $c->getDataVencimento()
         ];
     }, $contasPagar),
-    'receber' => array_map(function($c) {
+    'receber' => array_map(function ($c) {
         return [
             'descricao' => $c->getDescricao(),
             'entidade' => $c->getNomeCliente(),

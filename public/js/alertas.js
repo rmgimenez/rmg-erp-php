@@ -46,6 +46,14 @@ function carregarAlertas(forcarExibicao = false) {
 
       const totalAlertas = data.pagar.length + data.receber.length;
       const hasAlertas = totalAlertas > 0;
+      const dias = typeof data.dias === "number" ? data.dias : 10;
+
+      // atualiza texto do modal que mostra a janela (acessibilidade / fallback)
+      try {
+        document.getElementById("modal-alertas-dias").textContent = dias;
+      } catch (e) {
+        /* elemento pode não estar presente em views muito antigas — silencioso */
+      }
 
       // atualiza ícone, badge e destaque do menu (acessibilidade + estado inicial sem JS é tratado pelo servidor)
       const $icone = $("#menu-alertas-icone");
