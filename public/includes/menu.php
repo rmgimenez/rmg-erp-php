@@ -26,12 +26,12 @@ $paginaAtual = basename($_SERVER['PHP_SELF']);
                     </ul>
                 </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle <?php echo $paginaAtual === 'setores.php' ? 'active' : ''; ?>" href="#" role="button" data-bs-toggle="dropdown">Cadastros</a>
+                    <a class="nav-link dropdown-toggle <?php echo in_array($paginaAtual, ['setores.php', 'clientes.php', 'fornecedores.php', 'usuarios.php']) ? 'active' : ''; ?>" href="#" role="button" data-bs-toggle="dropdown">Cadastros</a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item <?php echo $paginaAtual === 'setores.php' ? 'active' : ''; ?>" href="setores.php">Setores</a></li>
                         <li><a class="dropdown-item" href="#">Bens/Equipamentos</a></li>
-                        <li><a class="dropdown-item" href="#">Clientes</a></li>
-                        <li><a class="dropdown-item" href="#">Fornecedores</a></li>
+                        <li><a class="dropdown-item <?php echo $paginaAtual === 'clientes.php' ? 'active' : ''; ?>" href="clientes.php">Clientes</a></li>
+                        <li><a class="dropdown-item <?php echo $paginaAtual === 'fornecedores.php' ? 'active' : ''; ?>" href="fornecedores.php">Fornecedores</a></li>
                         <?php if ($tipoUsuario === 'administrador'): ?>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item <?php echo $paginaAtual === 'usuarios.php' ? 'active' : ''; ?>" href="usuarios.php">Usuários</a></li>
