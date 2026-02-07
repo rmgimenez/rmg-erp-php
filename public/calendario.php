@@ -21,7 +21,7 @@ $usuarioNome = $_SESSION['usuario_nome'] ?? 'Usuário';
         }
     </style>
 </head>
-<body class="bg-light">
+<body class="bg-light d-flex flex-column min-vh-100">
 
     <?php include __DIR__ . '/includes/menu.php'; ?>
 
@@ -49,6 +49,7 @@ $usuarioNome = $_SESSION['usuario_nome'] ?? 'Usuário';
 
     </div>
 
+    <?php include __DIR__ . '/includes/footer.php'; ?>
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 

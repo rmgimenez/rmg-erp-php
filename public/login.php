@@ -69,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </form>
         </div>
         <div class="card-footer text-center py-3 bg-white border-top-0">
-            <small class="text-muted">RMG Soluções &copy; <?php echo date('Y'); ?></small>
+            <small class="text-muted">Desenvolvido por Ricardo Moura Gimenez</small>
         </div>
     </div>
 
