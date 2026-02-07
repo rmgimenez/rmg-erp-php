@@ -154,4 +154,19 @@ class ManutencaoDAO {
             return 0;
         }
     }
+
+    public function obterCustoPorMesUltimos12Meses() {
+        try {
+            $sql = "SELECT DATE_FORMAT(data_manutencao, '%Y-%m') as mes, SUM(custo) as total 
+                    FROM rmg_manutencao 
+                    WHERE data_manutencao >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
+                    GROUP BY DATE_FORMAT(data_manutencao, '%Y-%m') 
+                    ORDER BY mes ASC";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            return [];
+        }
+    }
 }

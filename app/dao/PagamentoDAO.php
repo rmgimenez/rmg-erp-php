@@ -36,4 +36,19 @@ class PagamentoDAO {
             return false;
         }
     }
+
+    public function obterTotalPagoPorMesUltimos12Meses() {
+        try {
+            $sql = "SELECT DATE_FORMAT(data_pagamento, '%Y-%m') as mes, SUM(valor_pago) as total 
+                    FROM rmg_pagamento 
+                    WHERE data_pagamento >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
+                    GROUP BY DATE_FORMAT(data_pagamento, '%Y-%m') 
+                    ORDER BY mes ASC";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            return [];
+        }
+    }
 }

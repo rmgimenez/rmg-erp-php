@@ -2,6 +2,8 @@
 require_once __DIR__ . '/../app/controllers/LoginController.php';
 require_once __DIR__ . '/../app/dao/ContaPagarDAO.php';
 require_once __DIR__ . '/../app/dao/ContaReceberDAO.php';
+require_once __DIR__ . '/../app/dao/PagamentoDAO.php';
+require_once __DIR__ . '/../app/dao/RecebimentoDAO.php';
 require_once __DIR__ . '/../app/dao/BemDAO.php';
 require_once __DIR__ . '/../app/dao/ManutencaoDAO.php';
 
@@ -10,10 +12,12 @@ $loginController->verificarLogado();
 
 $contaPagarDAO = new ContaPagarDAO();
 $contaReceberDAO = new ContaReceberDAO();
+$pagamentoDAO = new PagamentoDAO();
+$recebimentoDAO = new RecebimentoDAO();
 $bemDAO = new BemDAO();
 $manutencaoDAO = new ManutencaoDAO();
 
-// Coletar Estatísticas
+// Coletar Estatísticas Gerais
 $totaisPagar = $contaPagarDAO->obterTotais(); // ['pendente' => X, 'paga' => Y]
 $totaisReceber = $contaReceberDAO->obterTotais(); // ['pendente' => X, 'recebida' => Y]
 $statsBens = $bemDAO->contarPorStatus(); // ['ativo' => X, 'baixado' => Y]
@@ -25,6 +29,60 @@ $bensAtivos = $statsBens['ativo'] ?? 0;
 
 $usuarioNome = $_SESSION['usuario_nome'] ?? 'Usuário';
 $tipoUsuario = $_SESSION['usuario_tipo'] ?? 'visitante';
+
+// --- Preparação dos dados para Gráficos de Evolução (Últimos 12 meses) ---
+
+// 1. Inicializar estrutura dos últimos 12 meses
+$monthsData = [];
+for ($i = 11; $i >= 0; $i--) {
+    $date = new DateTime();
+    $date->modify("-$i months");
+    $key = $date->format('Y-m');
+    $label = $date->format('m/Y');
+    
+    $monthsData[$key] = [
+        'label' => $label,
+        'pago' => 0,
+        'recebido' => 0,
+        'manutencao' => 0
+    ];
+}
+
+// 2. Buscar dados do banco
+$rawPago = $pagamentoDAO->obterTotalPagoPorMesUltimos12Meses();
+$rawRecebido = $recebimentoDAO->obterTotalRecebidoPorMesUltimos12Meses();
+$rawManutencao = $manutencaoDAO->obterCustoPorMesUltimos12Meses();
+
+// 3. Preencher os dados
+foreach($rawPago as $row) {
+    if(isset($monthsData[$row['mes']])) {
+        $monthsData[$row['mes']]['pago'] = (float)$row['total'];
+    }
+}
+foreach($rawRecebido as $row) {
+    if(isset($monthsData[$row['mes']])) {
+        $monthsData[$row['mes']]['recebido'] = (float)$row['total'];
+    }
+}
+foreach($rawManutencao as $row) {
+    if(isset($monthsData[$row['mes']])) {
+        $monthsData[$row['mes']]['manutencao'] = (float)$row['total'];
+    }
+}
+
+// 4. Separar em arrays para JS
+$chartLabels = [];
+$chartDataPago = [];
+$chartDataRecebido = [];
+$chartDataManutencao = [];
+
+foreach($monthsData as $m) {
+    $chartLabels[] = $m['label'];
+    $chartDataPago[] = $m['pago'];
+    $chartDataRecebido[] = $m['recebido'];
+    $chartDataManutencao[] = $m['manutencao'];
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -54,60 +112,104 @@ $tipoUsuario = $_SESSION['usuario_tipo'] ?? 'visitante';
         <!-- Dashboard Widgets -->
         <div class="row mt-4">
             <div class="col-md-3">
-                <div class="card text-white bg-danger mb-3">
+                <div class="card text-white bg-danger mb-3 shadow-sm">
                     <div class="card-body">
-                        <h5 class="card-title">A Pagar (Pendente)</h5>
-                        <p class="card-text display-6">R$ <?php echo number_format($totalPagarPendente, 2, ',', '.'); ?></p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-0">A Pagar (Pendente)</h6>
+                                <p class="card-text h3 mt-2">R$ <?php echo number_format($totalPagarPendente, 2, ',', '.'); ?></p>
+                            </div>
+                            <i class="fas fa-file-invoice-dollar fa-2x opacity-50"></i>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card text-white bg-success mb-3">
+                <div class="card text-white bg-success mb-3 shadow-sm">
                     <div class="card-body">
-                        <h5 class="card-title">A Receber (Pendente)</h5>
-                        <p class="card-text display-6">R$ <?php echo number_format($totalReceberPendente, 2, ',', '.'); ?></p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-0">A Receber (Pendente)</h6>
+                                <p class="card-text h3 mt-2">R$ <?php echo number_format($totalReceberPendente, 2, ',', '.'); ?></p>
+                            </div>
+                            <i class="fas fa-hand-holding-usd fa-2x opacity-50"></i>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card text-white bg-warning mb-3">
+                <div class="card text-white bg-warning mb-3 shadow-sm">
                     <div class="card-body">
-                        <h5 class="card-title">Manutenções Reg.</h5>
-                        <p class="card-text display-6"><?php echo $totalManutencoes; ?></p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-0">Manutenções Reg.</h6>
+                                <p class="card-text h3 mt-2"><?php echo $totalManutencoes; ?></p>
+                            </div>
+                            <i class="fas fa-tools fa-2x opacity-50"></i>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card text-white bg-info mb-3">
+                <div class="card text-white bg-info mb-3 shadow-sm">
                     <div class="card-body">
-                        <h5 class="card-title">Bens Ativos</h5>
-                        <p class="card-text display-6"><?php echo $bensAtivos; ?></p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-0">Bens Ativos</h6>
+                                <p class="card-text h3 mt-2"><?php echo $bensAtivos; ?></p>
+                            </div>
+                            <i class="fas fa-boxes fa-2x opacity-50"></i>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Charts Section -->
+        <!-- Charts Row 1: Resumo Financeiro Geral e Status dos Bens -->
+        <div class="row mt-4">
+            <div class="col-md-8">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Evolução Financeira (Últimos 12 Meses)</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="evolucaoFinanceiraChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Status dos Bens</h5>
+                    </div>
+                    <div class="card-body">
+                        <div style="height: 250px; display: flex; justify-content: center;">
+                            <canvas id="bensChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 2: Evolução de Manutenção e Resumo Atual -->
         <div class="row mt-4 mb-5">
             <div class="col-md-6">
                 <div class="card shadow-sm h-100">
                     <div class="card-header bg-white">
-                        <h5 class="mb-0">Resumo Financeiro</h5>
+                        <h5 class="mb-0"><i class="fas fa-wrench me-2"></i>Custos de Manutenção (Últimos 12 Meses)</h5>
                     </div>
                     <div class="card-body">
-                        <canvas id="financeChart"></canvas>
+                        <canvas id="evolucaoManutencaoChart"></canvas>
                     </div>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="card shadow-sm h-100">
                     <div class="card-header bg-white">
-                        <h5 class="mb-0">Status dos Bens</h5>
+                        <h5 class="mb-0"><i class="fas fa-balance-scale me-2"></i>Situação Atual (Pendente vs Realizado)</h5>
                     </div>
                     <div class="card-body">
-                        <div style="max-height: 400px; display: flex; justify-content: center;">
-                            <canvas id="bensChart"></canvas>
-                        </div>
+                        <canvas id="financeChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -132,7 +234,7 @@ $tipoUsuario = $_SESSION['usuario_tipo'] ?? 'visitante';
             });
         <?php endif; ?>
 
-        // Dados vindos do PHP
+        // Dados vindos do PHP - Totais Gerais
         const dadosFinanceiros = {
             pagarPendente: <?php echo $totalPagarPendente; ?>,
             pagarPago: <?php echo $totaisPagar['paga'] ?? 0; ?>,
@@ -145,14 +247,83 @@ $tipoUsuario = $_SESSION['usuario_tipo'] ?? 'visitante';
             baixados: <?php echo $statsBens['baixado'] ?? 0; ?>
         };
 
-        // Gráfico Financeiro (Barra)
+        // Dados Evolutivos
+        const evolucaoLabels = <?php echo json_encode($chartLabels); ?>;
+        const evolucaoPago = <?php echo json_encode($chartDataPago); ?>;
+        const evolucaoRecebido = <?php echo json_encode($chartDataRecebido); ?>;
+        const evolucaoManutencao = <?php echo json_encode($chartDataManutencao); ?>;
+
+        // 1. Gráfico Evolução Financeira (Line Chart)
+        const ctxEvolucao = document.getElementById('evolucaoFinanceiraChart').getContext('2d');
+        new Chart(ctxEvolucao, {
+            type: 'line',
+            data: {
+                labels: evolucaoLabels,
+                datasets: [
+                    {
+                        label: 'Recebido (R$)',
+                        data: evolucaoRecebido,
+                        borderColor: '#198754', // Success green
+                        backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    },
+                    {
+                        label: 'Pago (R$)',
+                        data: evolucaoPago,
+                        borderColor: '#dc3545', // Danger red
+                        backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // 2. Gráfico Evolução Manutenção (Bar Chart)
+        const ctxManutencao = document.getElementById('evolucaoManutencaoChart').getContext('2d');
+        new Chart(ctxManutencao, {
+            type: 'bar',
+            data: {
+                labels: evolucaoLabels,
+                datasets: [{
+                    label: 'Custo Manutenção (R$)',
+                    data: evolucaoManutencao,
+                    backgroundColor: 'rgba(255, 193, 7, 0.7)', // Warning yellow
+                    borderColor: 'rgb(255, 193, 7)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // 3. Gráfico SITUAÇÃO ATUAL (Barra - o original)
         const ctxFinance = document.getElementById('financeChart').getContext('2d');
         new Chart(ctxFinance, {
             type: 'bar',
             data: {
-                labels: ['A Receber (Pend.)', 'Recebido', 'A Pagar (Pend.)', 'Pago'],
+                labels: ['A Receber (Pend.)', 'Recebido (Total)', 'A Pagar (Pend.)', 'Pago (Total)'],
                 datasets: [{
-                    label: 'Valores (R$)',
+                    label: 'Valores ACUMULADOS (R$)',
                     data: [
                         dadosFinanceiros.receberPendente,
                         dadosFinanceiros.receberRecebido,
@@ -160,10 +331,10 @@ $tipoUsuario = $_SESSION['usuario_tipo'] ?? 'visitante';
                         dadosFinanceiros.pagarPago
                     ],
                     backgroundColor: [
-                        'rgba(255, 193, 7, 0.7)',  // Warning
-                        'rgba(25, 135, 84, 0.7)',  // Success
-                        'rgba(220, 53, 69, 0.7)',  // Danger
-                        'rgba(13, 202, 240, 0.7)'  // Info
+                        'rgba(255, 193, 7, 0.7)',
+                        'rgba(25, 135, 84, 0.7)',
+                        'rgba(220, 53, 69, 0.7)',
+                        'rgba(13, 202, 240, 0.7)'
                     ],
                     borderColor: [
                         'rgba(255, 193, 7, 1)',
@@ -184,7 +355,7 @@ $tipoUsuario = $_SESSION['usuario_tipo'] ?? 'visitante';
             }
         });
 
-        // Gráfico Bens (Doughnut)
+        // 4. Gráfico Bens (Doughnut)
         const ctxBens = document.getElementById('bensChart').getContext('2d');
         new Chart(ctxBens, {
             type: 'doughnut',
@@ -201,6 +372,7 @@ $tipoUsuario = $_SESSION['usuario_tipo'] ?? 'visitante';
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: {
                         position: 'bottom',
