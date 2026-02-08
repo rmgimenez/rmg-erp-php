@@ -132,6 +132,11 @@ include __DIR__ . '/includes/header.php';
                                     <?php endif; ?>
                                 </td>
                                 <td class="text-center">
+                                    <button class="btn btn-sm btn-info me-1"
+                                        onclick="verDetalhes(<?php echo $c->getIdContaPagar(); ?>)" title="Ver Detalhes">
+                                        <i class="fas fa-eye text-white"></i>
+                                    </button>
+
                                     <?php if ($c->getStatus() !== 'paga'): ?>
                                         <button class="btn btn-sm btn-success me-1"
                                             onclick='pagarConta(<?php echo json_encode([
@@ -287,11 +292,82 @@ include __DIR__ . '/includes/header.php';
     </div>
 </div>
 
+<!-- Modal Detalhes -->
+<div class="modal fade" id="modalDetalhes" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detalhes da Conta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Descrição:</strong> <span id="det_descricao"></span></p>
+                <p><strong>Fornecedor:</strong> <span id="det_fornecedor"></span></p>
+                <p><strong>Vencimento:</strong> <span id="det_vencimento"></span></p>
+                <p><strong>Valor Original:</strong> R$ <span id="det_valor"></span></p>
+                <p><strong>Status:</strong> <span id="det_status"></span></p>
+
+                <div id="area_pagamento" style="display:none; border-top: 1px solid #eee; padding-top: 10px; margin-top: 10px;">
+                    <h6 class="text-success"><i class="fas fa-check-circle"></i> Dados do Pagamento</h6>
+                    <p><strong>Data Pagamento:</strong> <span id="det_data_pagamento"></span></p>
+                    <p><strong>Valor Pago:</strong> R$ <span id="det_valor_pago"></span></p>
+                </div>
+
+                <div class="mt-3">
+                    <strong>Observações:</strong>
+                    <div id="det_observacoes" class="p-2 bg-light border rounded mt-1" style="min-height: 50px;"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <?php include __DIR__ . '/includes/footer.php'; ?>
 <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
+    function verDetalhes(id) {
+        $.ajax({
+            url: 'ajax/detalhes_conta_pagar.php',
+            type: 'GET',
+            data: {
+                id: id
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.erro) {
+                    alert(response.erro);
+                    return;
+                }
+
+                $('#det_descricao').text(response.descricao);
+                $('#det_fornecedor').text(response.fornecedor);
+                $('#det_vencimento').text(response.vencimento);
+                $('#det_valor').text(response.valor);
+                $('#det_status').text(response.status);
+                $('#det_observacoes').html(response.observacoes);
+
+                if (response.pagamento) {
+                    $('#area_pagamento').show();
+                    $('#det_data_pagamento').text(response.pagamento.data_pagamento);
+                    $('#det_valor_pago').text(response.pagamento.valor_pago);
+                } else {
+                    $('#area_pagamento').hide();
+                }
+
+                var modal = new bootstrap.Modal(document.getElementById('modalDetalhes'));
+                modal.show();
+            },
+            error: function() {
+                alert('Erro ao buscar detalhes da conta.');
+            }
+        });
+    }
+
     // Custom filtering function which will search data in column 5 (Status)
     $.fn.dataTable.ext.search.push(
         function(settings, data, dataIndex) {

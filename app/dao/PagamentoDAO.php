@@ -2,14 +2,17 @@
 require_once __DIR__ . '/../models/Pagamento.php';
 require_once __DIR__ . '/Conexao.php';
 
-class PagamentoDAO {
+class PagamentoDAO
+{
     private $conexao;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->conexao = Conexao::getInstance();
     }
 
-    public function salvar(Pagamento $p) {
+    public function salvar(Pagamento $p)
+    {
         try {
             $this->conexao->beginTransaction();
 
@@ -37,7 +40,31 @@ class PagamentoDAO {
         }
     }
 
-    public function obterTotalPagoPorMesUltimos12Meses() {
+    public function buscarPorContaPagarId($contaPagarId)
+    {
+        try {
+            $sql = "SELECT * FROM rmg_pagamento WHERE conta_pagar_id = :id";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':id', $contaPagarId);
+            $stmt->execute();
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($row) {
+                $p = new Pagamento();
+                $p->setIdPagamento($row['id_pagamento']);
+                $p->setContaPagarId($row['conta_pagar_id']);
+                $p->setDataPagamento($row['data_pagamento']);
+                $p->setValorPago($row['valor_pago']);
+                return $p;
+            }
+            return null;
+        } catch (PDOException $e) {
+            return null;
+        }
+    }
+
+    public function obterTotalPagoPorMesUltimos12Meses()
+    {
         try {
             $sql = "SELECT DATE_FORMAT(data_pagamento, '%Y-%m') as mes, SUM(valor_pago) as total 
                     FROM rmg_pagamento 
@@ -56,7 +83,8 @@ class PagamentoDAO {
      * Retorna total pago por fornecedor dentro de um período
      * Resultado: array de arrays com keys: id_fornecedor, fornecedor, qtd_pagamentos, total_pago
      */
-    public function obterTotalPagoPorFornecedorPeriodo($inicio, $fim) {
+    public function obterTotalPagoPorFornecedorPeriodo($inicio, $fim)
+    {
         try {
             $sql = "SELECT f.id_fornecedor, f.nome as fornecedor, COUNT(p.id_pagamento) as qtd_pagamentos, SUM(p.valor_pago) as total_pago
                     FROM rmg_pagamento p
@@ -75,4 +103,3 @@ class PagamentoDAO {
         }
     }
 }
-
