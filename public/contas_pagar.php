@@ -92,7 +92,8 @@ include __DIR__ . '/includes/header.php';
                             <th>Vencimento</th>
                             <th>Valor</th>
                             <th>Status</th>
-                            <th width="15%" class="text-center">Ações</th>
+                            <th class="text-center">Ações</th>
+                            <th width="6%" class="text-center text-danger">Excluir</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -159,6 +160,8 @@ include __DIR__ . '/includes/header.php';
                                                                 ]); ?>)' title="Editar" <?php echo ($c->getStatus() == 'paga') ? 'disabled' : ''; ?>>
                                         <i class="fas fa-edit"></i>
                                     </button>
+                                </td>
+                                <td class="text-center">
                                     <button class="btn btn-sm btn-danger"
                                         onclick="confirmarExclusao(<?php echo $c->getIdContaPagar(); ?>)" title="Excluir">
                                         <i class="fas fa-trash"></i>
