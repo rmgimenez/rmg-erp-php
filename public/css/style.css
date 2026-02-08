@@ -390,6 +390,31 @@ a:hover {
   color: #fff !important;
 }
 
+/* Linha vencida (destaque na listagem) */
+.linha-vencida {
+  background-color: rgba(239, 68, 68, 0.03) !important; /* leve tom vermelho */
+  border-left: 4px solid var(--rmg-danger);
+  font-weight: 600;
+}
+.linha-vencida td {
+  color: #7f1d1d; /* contraste sutil para texto */
+}
+.linha-vencida .badge.bg-danger {
+  box-shadow: 0 0 0 6px rgba(239, 68, 68, 0.04);
+}
+/* interação sutil (respeita preferência de redução de movimento) */
+@media (prefers-reduced-motion: no-preference) {
+  .linha-vencida {
+    transition:
+      background-color 0.25s,
+      transform 0.12s;
+  }
+  .linha-vencida:hover {
+    transform: translateY(-1px);
+    background-color: rgba(239, 68, 68, 0.05) !important;
+  }
+}
+
 /* ============================================
    Forms
    ============================================ */
