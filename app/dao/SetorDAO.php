@@ -3,14 +3,17 @@
 require_once __DIR__ . '/../models/Setor.php';
 require_once __DIR__ . '/Conexao.php';
 
-class SetorDAO {
+class SetorDAO
+{
     private $conexao;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->conexao = Conexao::getInstance();
     }
 
-    public function salvar(Setor $setor) {
+    public function salvar(Setor $setor)
+    {
         try {
             $sql = "INSERT INTO rmg_setor (nome, descricao) VALUES (:nome, :descricao)";
             $stmt = $this->conexao->prepare($sql);
@@ -22,7 +25,8 @@ class SetorDAO {
         }
     }
 
-    public function atualizar(Setor $setor) {
+    public function atualizar(Setor $setor)
+    {
         try {
             $sql = "UPDATE rmg_setor SET nome = :nome, descricao = :descricao WHERE id_setor = :id_setor";
             $stmt = $this->conexao->prepare($sql);
@@ -35,7 +39,8 @@ class SetorDAO {
         }
     }
 
-    public function excluir($id) {
+    public function excluir($id)
+    {
         try {
             $sql = "DELETE FROM rmg_setor WHERE id_setor = :id_setor";
             $stmt = $this->conexao->prepare($sql);
@@ -46,13 +51,14 @@ class SetorDAO {
         }
     }
 
-    public function listar() {
+    public function listar()
+    {
         try {
             $sql = "SELECT * FROM rmg_setor ORDER BY nome";
             $stmt = $this->conexao->prepare($sql);
             $stmt->execute();
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
+
             $setores = [];
             foreach ($result as $row) {
                 $setor = new Setor();
@@ -67,13 +73,14 @@ class SetorDAO {
         }
     }
 
-    public function buscarPorId($id) {
+    public function buscarPorId($id)
+    {
         try {
             $sql = "SELECT * FROM rmg_setor WHERE id_setor = :id_setor";
             $stmt = $this->conexao->prepare($sql);
             $stmt->bindValue(':id_setor', $id);
             $stmt->execute();
-            
+
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             if ($row) {
                 $setor = new Setor();
@@ -85,6 +92,20 @@ class SetorDAO {
             return null;
         } catch (PDOException $e) {
             return null;
+        }
+    }
+
+    public function temVinculos($id)
+    {
+        try {
+            $sql = "SELECT COUNT(*) as total FROM rmg_bem WHERE setor_id = :setor_id";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':setor_id', $id);
+            $stmt->execute();
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $row['total'] > 0;
+        } catch (PDOException $e) {
+            return false;
         }
     }
 }

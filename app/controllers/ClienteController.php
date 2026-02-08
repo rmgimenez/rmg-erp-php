@@ -2,18 +2,22 @@
 require_once __DIR__ . '/../dao/ClienteDAO.php';
 require_once __DIR__ . '/../models/Cliente.php';
 
-class ClienteController {
+class ClienteController
+{
     private $clienteDAO;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->clienteDAO = new ClienteDAO();
     }
 
-    public function listarClientes() {
+    public function listarClientes()
+    {
         return $this->clienteDAO->listar();
     }
 
-    public function salvar($dados) {
+    public function salvar($dados)
+    {
         $cliente = new Cliente();
         $cliente->setNome($dados['nome']);
         $cliente->setCpfCnpj($dados['cpf_cnpj']);
@@ -34,8 +38,12 @@ class ClienteController {
         return ['sucesso' => false, 'mensagem' => 'Erro ao salvar cliente.'];
     }
 
-    public function excluir($id) {
-        // Futuramente verificar se existem contas a receber vinculadas
+    public function excluir($id)
+    {
+        if ($this->clienteDAO->temVinculos($id)) {
+            return ['sucesso' => false, 'mensagem' => 'Não é possível excluir o cliente pois existem contas a receber vinculadas.'];
+        }
+
         if ($this->clienteDAO->excluir($id)) {
             return ['sucesso' => true, 'mensagem' => 'Cliente excluído com sucesso!'];
         }

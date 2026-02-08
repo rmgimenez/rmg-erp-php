@@ -2,22 +2,27 @@
 require_once __DIR__ . '/../dao/SetorDAO.php';
 require_once __DIR__ . '/../models/Setor.php';
 
-class SetorController {
+class SetorController
+{
     private $setorDAO;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->setorDAO = new SetorDAO();
     }
 
-    public function listarSetores() {
+    public function listarSetores()
+    {
         return $this->setorDAO->listar();
     }
 
-    public function buscarPorId($id) {
+    public function buscarPorId($id)
+    {
         return $this->setorDAO->buscarPorId($id);
     }
 
-    public function salvar($dados) {
+    public function salvar($dados)
+    {
         $setor = new Setor();
         $setor->setNome($dados['nome']);
         $setor->setDescricao($dados['descricao']);
@@ -35,12 +40,12 @@ class SetorController {
         return ['sucesso' => false, 'mensagem' => 'Erro ao salvar setor.'];
     }
 
-    public function excluir($id) {
-        // Verifica se existem bens vinculados a este setor antes de excluir (opcional, mas recomendável)
-        // Por simplificação do exemplo, tentaremos excluir direto e o banco pode barrar se houver FK, 
-        // ou podemos implementar uma verificação aqui.
-        // O DAO retorna false se falhar (ex: constraint violation)
-        
+    public function excluir($id)
+    {
+        if ($this->setorDAO->temVinculos($id)) {
+            return ['sucesso' => false, 'mensagem' => 'Não é possível excluir o setor pois existem bens vinculados a ele.'];
+        }
+
         if ($this->setorDAO->excluir($id)) {
             return ['sucesso' => true, 'mensagem' => 'Setor excluído com sucesso!'];
         }

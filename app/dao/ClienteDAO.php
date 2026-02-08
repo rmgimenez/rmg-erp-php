@@ -2,14 +2,17 @@
 require_once __DIR__ . '/../models/Cliente.php';
 require_once __DIR__ . '/Conexao.php';
 
-class ClienteDAO {
+class ClienteDAO
+{
     private $conexao;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->conexao = Conexao::getInstance();
     }
 
-    public function salvar(Cliente $cliente) {
+    public function salvar(Cliente $cliente)
+    {
         try {
             $sql = "INSERT INTO rmg_cliente (nome, cpf_cnpj, telefone, email, observacoes) VALUES (:nome, :cpf_cnpj, :telefone, :email, :observacoes)";
             $stmt = $this->conexao->prepare($sql);
@@ -24,7 +27,8 @@ class ClienteDAO {
         }
     }
 
-    public function atualizar(Cliente $cliente) {
+    public function atualizar(Cliente $cliente)
+    {
         try {
             $sql = "UPDATE rmg_cliente SET nome = :nome, cpf_cnpj = :cpf_cnpj, telefone = :telefone, email = :email, observacoes = :observacoes WHERE id_cliente = :id_cliente";
             $stmt = $this->conexao->prepare($sql);
@@ -40,7 +44,8 @@ class ClienteDAO {
         }
     }
 
-    public function excluir($id) {
+    public function excluir($id)
+    {
         try {
             $sql = "DELETE FROM rmg_cliente WHERE id_cliente = :id_cliente";
             $stmt = $this->conexao->prepare($sql);
@@ -51,13 +56,14 @@ class ClienteDAO {
         }
     }
 
-    public function listar() {
+    public function listar()
+    {
         try {
             $sql = "SELECT * FROM rmg_cliente ORDER BY nome";
             $stmt = $this->conexao->prepare($sql);
             $stmt->execute();
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
+
             $clientes = [];
             foreach ($result as $row) {
                 $c = new Cliente();
@@ -75,13 +81,14 @@ class ClienteDAO {
         }
     }
 
-    public function buscarPorId($id) {
+    public function buscarPorId($id)
+    {
         try {
             $sql = "SELECT * FROM rmg_cliente WHERE id_cliente = :id_cliente";
             $stmt = $this->conexao->prepare($sql);
             $stmt->bindValue(':id_cliente', $id);
             $stmt->execute();
-            
+
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             if ($row) {
                 $c = new Cliente();
@@ -96,6 +103,20 @@ class ClienteDAO {
             return null;
         } catch (PDOException $e) {
             return null;
+        }
+    }
+
+    public function temVinculos($id)
+    {
+        try {
+            $sql = "SELECT COUNT(*) as total FROM rmg_conta_receber WHERE cliente_id = :cliente_id";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':cliente_id', $id);
+            $stmt->execute();
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $row['total'] > 0;
+        } catch (PDOException $e) {
+            return false;
         }
     }
 }
