@@ -16,29 +16,95 @@ $fluxo = $service->getFluxoPrevisto($inicio, $fim);
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <title>Relatório de Fluxo de Caixa Previsto</title>
     <style>
-        body { font-family: sans-serif; font-size: 12px; margin: 20px; }
-        .header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
-        .footer { text-align: center; margin-top: 20px; font-size: 10px; color: #666; border-top: 1px solid #ccc; padding-top: 5px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #000; padding: 5px; text-align: left; }
-        th { background-color: #f0f0f0; }
-        .text-right { text-align: right; }
-        .text-center { text-align: center; }
-        .btn-print { padding: 10px 20px; background: #0dcaf0; color: white; border: none; cursor: pointer; border-radius: 4px; font-size: 14px; }
-        .resumo-box { margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; background-color: #f9f9f9; }
-        .text-success { color: green; }
-        .text-danger { color: red; }
-        
+        body {
+            font-family: sans-serif;
+            font-size: 12px;
+            margin: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 10px;
+            color: #666;
+            border-top: 1px solid #ccc;
+            padding-top: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th,
+        td {
+            border: 1px solid #000;
+            padding: 5px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f0f0f0;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .btn-print {
+            padding: 10px 20px;
+            background: #0dcaf0;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .resumo-box {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+        }
+
+        .text-success {
+            color: green;
+        }
+
+        .text-danger {
+            color: red;
+        }
+
         @media print {
-            .no-print { display: none; }
-            body { margin: 0; }
+            .no-print {
+                display: none;
+            }
+
+            body {
+                margin: 0;
+            }
         }
     </style>
 </head>
+
 <body>
 
     <div class="no-print" style="margin-bottom: 20px; text-align: right;">
@@ -47,7 +113,7 @@ $fluxo = $service->getFluxoPrevisto($inicio, $fim);
     </div>
 
     <div class="header">
-        <h2>RMG ERP - Sistema de Gestão</h2>
+        <h2><?php echo defined('COMPANY_NAME') ? htmlspecialchars(COMPANY_NAME) : 'RMG ERP - Sistema de Gestão'; ?></h2>
         <h3>Demonstrativo de Fluxo Previsto (Vencimentos)</h3>
         <p>Período: <?php echo date('d/m/Y', strtotime($inicio)); ?> a <?php echo date('d/m/Y', strtotime($fim)); ?></p>
         <p>Gerado em: <?php echo date('d/m/Y H:i:s'); ?> por <?php echo htmlspecialchars($_SESSION['usuario_nome']); ?></p>
@@ -73,12 +139,12 @@ $fluxo = $service->getFluxoPrevisto($inicio, $fim);
         </thead>
         <tbody>
             <?php foreach ($fluxo['receber'] as $r): ?>
-            <tr>
-                <td><?php echo date('d/m/Y', strtotime($r->getDataVencimento())); ?></td>
-                <td><?php echo htmlspecialchars($r->getNomeCliente() ?? '-'); ?></td>
-                <td><?php echo htmlspecialchars($r->getDescricao()); ?></td>
-                <td class="text-right">R$ <?php echo number_format($r->getValor(), 2, ',', '.'); ?></td>
-            </tr>
+                <tr>
+                    <td><?php echo date('d/m/Y', strtotime($r->getDataVencimento())); ?></td>
+                    <td><?php echo htmlspecialchars($r->getNomeCliente() ?? '-'); ?></td>
+                    <td><?php echo htmlspecialchars($r->getDescricao()); ?></td>
+                    <td class="text-right">R$ <?php echo number_format($r->getValor(), 2, ',', '.'); ?></td>
+                </tr>
             <?php endforeach; ?>
         </tbody>
     </table>
@@ -95,19 +161,20 @@ $fluxo = $service->getFluxoPrevisto($inicio, $fim);
         </thead>
         <tbody>
             <?php foreach ($fluxo['pagar'] as $p): ?>
-            <tr>
-                <td><?php echo date('d/m/Y', strtotime($p->getDataVencimento())); ?></td>
-                <td><?php echo htmlspecialchars($p->getNomeFornecedor() ?? '-'); ?></td>
-                <td><?php echo htmlspecialchars($p->getDescricao()); ?></td>
-                <td class="text-right">R$ <?php echo number_format($p->getValor(), 2, ',', '.'); ?></td>
-            </tr>
+                <tr>
+                    <td><?php echo date('d/m/Y', strtotime($p->getDataVencimento())); ?></td>
+                    <td><?php echo htmlspecialchars($p->getNomeFornecedor() ?? '-'); ?></td>
+                    <td><?php echo htmlspecialchars($p->getDescricao()); ?></td>
+                    <td class="text-right">R$ <?php echo number_format($p->getValor(), 2, ',', '.'); ?></td>
+                </tr>
             <?php endforeach; ?>
         </tbody>
     </table>
 
     <div class="footer">
-        <p>RMG ERP - Controle Financeiro e Patrimonial | Página 1 de 1</p>
+        <p><?php echo defined('COMPANY_NAME') ? htmlspecialchars(COMPANY_NAME) . ' — Controle Financeiro e Patrimonial' : 'RMG ERP - Controle Financeiro e Patrimonial'; ?> | Página 1 de 1</p>
     </div>
 
 </body>
+
 </html>

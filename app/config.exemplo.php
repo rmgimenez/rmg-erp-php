@@ -9,6 +9,10 @@ define('DB_PASS', '');
 // Pode conter texto simples; para HTML avançado, adapte a exibição em `footer.php`
 define('FOOTER_TEXT', 'Desenvolvido por Ricardo Moura Gimenez para ...');
 
+// Nome da empresa que utiliza o sistema — altere para o nome da sua organização
+// Ex.: define('COMPANY_NAME', 'Minha Empresa LTDA');
+define('COMPANY_NAME', 'Nome da Sua Empresa');
+
 // Configurações de Menu - Controle de visibilidade dos itens do menu
 define('SHOW_CONTAS_PAGAR', true);
 define('SHOW_CONTAS_RECEBER', true);

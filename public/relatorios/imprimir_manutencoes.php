@@ -21,26 +21,80 @@ foreach ($registros as $r) {
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <title>Relatório de Manutenções</title>
     <style>
-        body { font-family: sans-serif; font-size: 12px; margin: 20px; }
-        .header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
-        .footer { text-align: center; margin-top: 20px; font-size: 10px; color: #666; border-top: 1px solid #ccc; padding-top: 5px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #000; padding: 5px; text-align: left; }
-        th { background-color: #f0f0f0; }
-        .text-right { text-align: right; }
-        .text-center { text-align: center; }
-        .btn-print { padding: 10px 20px; background: #ffc107; color: black; border: none; cursor: pointer; border-radius: 4px; font-size: 14px; }
-        
+        body {
+            font-family: sans-serif;
+            font-size: 12px;
+            margin: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 10px;
+            color: #666;
+            border-top: 1px solid #ccc;
+            padding-top: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th,
+        td {
+            border: 1px solid #000;
+            padding: 5px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f0f0f0;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .btn-print {
+            padding: 10px 20px;
+            background: #ffc107;
+            color: black;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
         @media print {
-            .no-print { display: none; }
-            body { margin: 0; }
+            .no-print {
+                display: none;
+            }
+
+            body {
+                margin: 0;
+            }
         }
     </style>
 </head>
+
 <body>
 
     <div class="no-print" style="margin-bottom: 20px; text-align: right;">
@@ -49,7 +103,7 @@ foreach ($registros as $r) {
     </div>
 
     <div class="header">
-        <h2>RMG ERP - Sistema de Gestão</h2>
+        <h2><?php echo defined('COMPANY_NAME') ? htmlspecialchars(COMPANY_NAME) : 'RMG ERP - Sistema de Gestão'; ?></h2>
         <h3>Relatório de Manutenções Realizadas</h3>
         <p>Período: <?php echo date('d/m/Y', strtotime($inicio)); ?> a <?php echo date('d/m/Y', strtotime($fim)); ?></p>
         <p>Gerado em: <?php echo date('d/m/Y H:i:s'); ?> por <?php echo htmlspecialchars($_SESSION['usuario_nome']); ?></p>
@@ -72,13 +126,13 @@ foreach ($registros as $r) {
                 </tr>
             <?php else: ?>
                 <?php foreach ($registros as $r): ?>
-                <tr>
-                    <td><?php echo date('d/m/Y', strtotime($r->getDataManutencao())); ?></td>
-                    <td><?php echo htmlspecialchars($r->getDescricaoBem() ?? 'Não inf.'); ?></td>
-                    <td><?php echo htmlspecialchars($r->getDescricao()); ?></td>
-                    <td><?php echo htmlspecialchars(mb_strimwidth($r->getObservacoes() ?? '', 0, 50, "...")); ?></td>
-                    <td class="text-right"><?php echo number_format($r->getCusto(), 2, ',', '.'); ?></td>
-                </tr>
+                    <tr>
+                        <td><?php echo date('d/m/Y', strtotime($r->getDataManutencao())); ?></td>
+                        <td><?php echo htmlspecialchars($r->getDescricaoBem() ?? 'Não inf.'); ?></td>
+                        <td><?php echo htmlspecialchars($r->getDescricao()); ?></td>
+                        <td><?php echo htmlspecialchars(mb_strimwidth($r->getObservacoes() ?? '', 0, 50, "...")); ?></td>
+                        <td class="text-right"><?php echo number_format($r->getCusto(), 2, ',', '.'); ?></td>
+                    </tr>
                 <?php endforeach; ?>
                 <tr>
                     <td colspan="4" class="text-right"><strong>CUSTO TOTAL</strong></td>
@@ -89,8 +143,9 @@ foreach ($registros as $r) {
     </table>
 
     <div class="footer">
-        <p>RMG ERP - Controle Financeiro e Patrimonial | Página 1 de 1</p>
+        <p><?php echo defined('COMPANY_NAME') ? htmlspecialchars(COMPANY_NAME) . ' — Controle Financeiro e Patrimonial' : 'RMG ERP - Controle Financeiro e Patrimonial'; ?> | Página 1 de 1</p>
     </div>
 
 </body>
+
 </html>

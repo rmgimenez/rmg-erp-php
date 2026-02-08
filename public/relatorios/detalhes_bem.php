@@ -34,6 +34,7 @@ $currentDate = date('d/m/Y');
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -44,6 +45,7 @@ $currentDate = date('d/m/Y');
             .no-print {
                 display: none;
             }
+
             .card {
                 border: none;
                 box-shadow: none;
@@ -51,10 +53,11 @@ $currentDate = date('d/m/Y');
         }
     </style>
 </head>
+
 <body class="bg-light">
 
     <div class="container mt-4 mb-4">
-        
+
         <div class="no-print mb-3">
             <a href="javascript:window.history.back()" class="btn btn-secondary">Voltar</a>
             <button onclick="window.print()" class="btn btn-primary">Imprimir</button>
@@ -62,6 +65,7 @@ $currentDate = date('d/m/Y');
 
         <div class="card p-4">
             <div class="text-center mb-4">
+                <h4 class="text-secondary"><?php echo defined('COMPANY_NAME') ? htmlspecialchars(COMPANY_NAME) : 'RMG ERP - Sistema de Gestão'; ?></h4>
                 <h2>Relatório Detalhado do Bem</h2>
                 <h4 class="text-muted"><?php echo htmlspecialchars($bem->getDescricao()); ?></h4>
                 <p class="text-muted">Gerado em: <?php echo $currentDate; ?></p>
@@ -82,7 +86,7 @@ $currentDate = date('d/m/Y');
                             <td><?php echo htmlspecialchars($bem->getNomeSetor()); ?></td>
                         </tr>
                         <tr>
-                             <th>Status:</th>
+                            <th>Status:</th>
                             <td>
                                 <?php if ($bem->getStatus() == 'ativo'): ?>
                                     <span class="badge bg-success">Ativo</span>
@@ -92,7 +96,7 @@ $currentDate = date('d/m/Y');
                             </td>
                         </tr>
                         <tr>
-                             <th>Observações:</th>
+                            <th>Observações:</th>
                             <td><?php echo nl2br(htmlspecialchars($bem->getObservacoes() ?? '')); ?></td>
                         </tr>
                     </table>
@@ -136,12 +140,12 @@ $currentDate = date('d/m/Y');
                         </thead>
                         <tbody>
                             <?php foreach ($manutencoes as $m): ?>
-                            <tr>
-                                <td width="15%"><?php echo date('d/m/Y', strtotime($m->getDataManutencao())); ?></td>
-                                <td width="30%"><?php echo htmlspecialchars($m->getDescricao()); ?></td>
-                                <td><?php echo nl2br(htmlspecialchars($m->getObservacoes() ?? '')); ?></td>
-                                <td width="15%" class="text-end">R$ <?php echo number_format($m->getCusto(), 2, ',', '.'); ?></td>
-                            </tr>
+                                <tr>
+                                    <td width="15%"><?php echo date('d/m/Y', strtotime($m->getDataManutencao())); ?></td>
+                                    <td width="30%"><?php echo htmlspecialchars($m->getDescricao()); ?></td>
+                                    <td><?php echo nl2br(htmlspecialchars($m->getObservacoes() ?? '')); ?></td>
+                                    <td width="15%" class="text-end">R$ <?php echo number_format($m->getCusto(), 2, ',', '.'); ?></td>
+                                </tr>
                             <?php endforeach; ?>
                         </tbody>
                         <tfoot>
@@ -160,4 +164,5 @@ $currentDate = date('d/m/Y');
     </div>
 
 </body>
+
 </html>
