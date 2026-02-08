@@ -8,3 +8,10 @@ define('DB_PASS', '');
 // Texto do rodapé do sistema — altere aqui para personalizar o rodapé da aplicação
 // Pode conter texto simples; para HTML avançado, adapte a exibição em `footer.php`
 define('FOOTER_TEXT', 'Desenvolvido por Ricardo Moura Gimenez para ...');
+
+// Configurações de Menu - Controle de visibilidade dos itens do menu
+define('SHOW_CONTAS_PAGAR', true);
+define('SHOW_CONTAS_RECEBER', true);
+define('SHOW_BENS', true);
+define('SHOW_CLIENTES', true);
+define('SHOW_FORNECEDORES', true);

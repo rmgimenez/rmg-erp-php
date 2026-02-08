@@ -3,6 +3,8 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+require_once __DIR__ . '/../../app/config.php';
+
 $usuarioNome = $_SESSION['usuario_nome'] ?? 'Usuário';
 $tipoUsuario = $_SESSION['usuario_tipo'] ?? 'visitante';
 $paginaAtual = basename($_SERVER['PHP_SELF']);
@@ -22,9 +24,15 @@ $paginaAtual = basename($_SERVER['PHP_SELF']);
                     <a class="nav-link dropdown-toggle <?php echo in_array($paginaAtual, ['setores.php', 'clientes.php', 'fornecedores.php', 'usuarios.php']) ? 'active' : ''; ?>" href="#" role="button" data-bs-toggle="dropdown"><i class="fas fa-folder-open me-2" aria-hidden="true"></i>Cadastros</a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item <?php echo $paginaAtual === 'setores.php' ? 'active' : ''; ?>" href="setores.php">Setores</a></li>
-                        <li><a class="dropdown-item <?php echo $paginaAtual === 'bens.php' || $paginaAtual === 'manutencoes.php' ? 'active' : ''; ?>" href="bens.php">Bens/Equipamentos</a></li>
-                        <li><a class="dropdown-item <?php echo $paginaAtual === 'clientes.php' ? 'active' : ''; ?>" href="clientes.php">Clientes</a></li>
-                        <li><a class="dropdown-item <?php echo $paginaAtual === 'fornecedores.php' ? 'active' : ''; ?>" href="fornecedores.php">Fornecedores</a></li>
+                        <?php if (defined('SHOW_BENS') && SHOW_BENS): ?>
+                            <li><a class="dropdown-item <?php echo $paginaAtual === 'bens.php' || $paginaAtual === 'manutencoes.php' ? 'active' : ''; ?>" href="bens.php">Bens/Equipamentos</a></li>
+                        <?php endif; ?>
+                        <?php if (defined('SHOW_CLIENTES') && SHOW_CLIENTES): ?>
+                            <li><a class="dropdown-item <?php echo $paginaAtual === 'clientes.php' ? 'active' : ''; ?>" href="clientes.php">Clientes</a></li>
+                        <?php endif; ?>
+                        <?php if (defined('SHOW_FORNECEDORES') && SHOW_FORNECEDORES): ?>
+                            <li><a class="dropdown-item <?php echo $paginaAtual === 'fornecedores.php' ? 'active' : ''; ?>" href="fornecedores.php">Fornecedores</a></li>
+                        <?php endif; ?>
                         <?php if ($tipoUsuario === 'administrador'): ?>
                             <li>
                                 <hr class="dropdown-divider">
@@ -36,8 +44,12 @@ $paginaAtual = basename($_SERVER['PHP_SELF']);
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle <?php echo in_array($paginaAtual, ['contas_pagar.php', 'contas_receber.php']) ? 'active' : ''; ?>" href="#" role="button" data-bs-toggle="dropdown"><i class="fas fa-wallet me-2" aria-hidden="true"></i>Financeiro</a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item <?php echo $paginaAtual === 'contas_pagar.php' ? 'active' : ''; ?>" href="contas_pagar.php">Contas a Pagar</a></li>
-                        <li><a class="dropdown-item <?php echo $paginaAtual === 'contas_receber.php' ? 'active' : ''; ?>" href="contas_receber.php">Contas a Receber</a></li>
+                        <?php if (defined('SHOW_CONTAS_PAGAR') && SHOW_CONTAS_PAGAR): ?>
+                            <li><a class="dropdown-item <?php echo $paginaAtual === 'contas_pagar.php' ? 'active' : ''; ?>" href="contas_pagar.php">Contas a Pagar</a></li>
+                        <?php endif; ?>
+                        <?php if (defined('SHOW_CONTAS_RECEBER') && SHOW_CONTAS_RECEBER): ?>
+                            <li><a class="dropdown-item <?php echo $paginaAtual === 'contas_receber.php' ? 'active' : ''; ?>" href="contas_receber.php">Contas a Receber</a></li>
+                        <?php endif; ?>
                         <li><a class="dropdown-item <?php echo $paginaAtual === 'calendario.php' ? 'active' : ''; ?>" href="calendario.php">Calendário</a></li>
                     </ul>
                 </li>
