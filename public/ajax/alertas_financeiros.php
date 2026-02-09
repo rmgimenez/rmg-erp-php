@@ -18,8 +18,8 @@ $receberDAO = new ContaReceberDAO();
 // janela (dias) usada para buscar vencimentos — manter em variável para consistência
 $dias = 10;
 // Busca contas vencidas e a vencer nos próximos $dias dias
-$contasPagar = $pagarDAO->buscarVencidasEProximas($dias, $empresaId);
-$contasReceber = $receberDAO->buscarVencidasEProximas($dias, $empresaId);
+$contasPagar = $pagarDAO->buscarVencidasEProximas($empresaId, $dias);
+$contasReceber = $receberDAO->buscarVencidasEProximas($empresaId, $dias);
 
 // mapeia e marca itens vencidos (para destaque no front)
 $pagar_arr = array_map(function ($c) {

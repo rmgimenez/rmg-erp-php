@@ -18,7 +18,7 @@ class UsuarioDAO
     public function buscarPorLoginEEmpresa($login, $empresaId)
     {
         try {
-            $sql = "SELECT u.*, COALESCE(e.nome_fantasia, e.razao_social) AS nome_empresa
+            $sql = "SELECT u.*, COALESCE(NULLIF(e.nome_fantasia, ''), NULLIF(e.razao_social, ''), e.codigo) AS nome_empresa
                     FROM rmg_usuario u
                     LEFT JOIN rmg_empresa e ON u.empresa_id = e.id_empresa
                     WHERE u.usuario = :usuario AND u.empresa_id = :empresa_id";
@@ -144,7 +144,7 @@ class UsuarioDAO
     public function listar($empresaId = null)
     {
         try {
-            $sql = "SELECT u.*, COALESCE(e.nome_fantasia, e.razao_social) AS nome_empresa
+            $sql = "SELECT u.*, COALESCE(NULLIF(e.nome_fantasia, ''), NULLIF(e.razao_social, ''), e.codigo) AS nome_empresa
                     FROM rmg_usuario u
                     LEFT JOIN rmg_empresa e ON u.empresa_id = e.id_empresa";
 
@@ -180,7 +180,7 @@ class UsuarioDAO
     public function listarPorEmpresa($empresaId)
     {
         try {
-            $sql = "SELECT u.*, COALESCE(e.nome_fantasia, e.razao_social) AS nome_empresa
+            $sql = "SELECT u.*, COALESCE(NULLIF(e.nome_fantasia, ''), NULLIF(e.razao_social, ''), e.codigo) AS nome_empresa
                     FROM rmg_usuario u
                     LEFT JOIN rmg_empresa e ON u.empresa_id = e.id_empresa
                     WHERE u.empresa_id = :empresa_id
@@ -207,7 +207,7 @@ class UsuarioDAO
     public function buscarPorId($id)
     {
         try {
-            $sql = "SELECT u.*, COALESCE(e.nome_fantasia, e.razao_social) AS nome_empresa
+            $sql = "SELECT u.*, COALESCE(NULLIF(e.nome_fantasia, ''), NULLIF(e.razao_social, ''), e.codigo) AS nome_empresa
                     FROM rmg_usuario u
                     LEFT JOIN rmg_empresa e ON u.empresa_id = e.id_empresa
                     WHERE u.id_usuario = :id_usuario";
