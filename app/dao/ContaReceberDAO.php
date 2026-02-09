@@ -14,9 +14,10 @@ class ContaReceberDAO
     public function salvar(ContaReceber $conta)
     {
         try {
-            $sql = "INSERT INTO rmg_conta_receber (cliente_id, descricao, valor, data_vencimento, status, observacoes) 
-                    VALUES (:cliente_id, :descricao, :valor, :data_vencimento, :status, :observacoes)";
+            $sql = "INSERT INTO rmg_conta_receber (empresa_id, cliente_id, descricao, valor, data_vencimento, status, observacoes) 
+                    VALUES (:empresa_id, :cliente_id, :descricao, :valor, :data_vencimento, :status, :observacoes)";
             $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':empresa_id', $conta->getEmpresaId());
             $stmt->bindValue(':cliente_id', $conta->getClienteId());
             $stmt->bindValue(':descricao', $conta->getDescricao());
             $stmt->bindValue(':valor', $conta->getValor());
@@ -61,14 +62,16 @@ class ContaReceberDAO
         }
     }
 
-    public function listar()
+    public function listar($empresaId)
     {
         try {
             $sql = "SELECT c.*, cli.nome as nome_cliente 
                     FROM rmg_conta_receber c
                     LEFT JOIN rmg_cliente cli ON c.cliente_id = cli.id_cliente
+                    WHERE c.empresa_id = :empresa_id
                     ORDER BY c.data_vencimento ASC";
             $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':empresa_id', $empresaId);
             $stmt->execute();
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -76,6 +79,7 @@ class ContaReceberDAO
             foreach ($result as $row) {
                 $c = new ContaReceber();
                 $c->setIdContaReceber($row['id_conta_receber']);
+                $c->setEmpresaId($row['empresa_id']);
                 $c->setClienteId($row['cliente_id']);
                 $c->setNomeCliente($row['nome_cliente']);
                 $c->setDescricao($row['descricao']);
@@ -106,6 +110,7 @@ class ContaReceberDAO
             if ($row) {
                 $c = new ContaReceber();
                 $c->setIdContaReceber($row['id_conta_receber']);
+                $c->setEmpresaId($row['empresa_id']);
                 $c->setClienteId($row['cliente_id']);
                 $c->setNomeCliente($row['nome_cliente']);
                 $c->setDescricao($row['descricao']);
@@ -121,7 +126,7 @@ class ContaReceberDAO
         }
     }
 
-    public function buscarVencidasEProximas($dias = 10)
+    public function buscarVencidasEProximas($empresaId, $dias = 10)
     {
         try {
             // Seleciona Pendentes que estão Vencidas (qualquer data passada) OU Vencem nos próximos X dias
@@ -129,10 +134,12 @@ class ContaReceberDAO
                     FROM rmg_conta_receber c
                     LEFT JOIN rmg_cliente cli ON c.cliente_id = cli.id_cliente
                     WHERE c.status != 'recebida' 
+                    AND c.empresa_id = :empresa_id
                     AND c.data_vencimento <= DATE_ADD(CURDATE(), INTERVAL :dias DAY)
                     ORDER BY (c.data_vencimento < CURDATE()) DESC, c.data_vencimento ASC";
 
             $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':empresa_id', $empresaId);
             $stmt->bindValue(':dias', $dias, PDO::PARAM_INT);
             $stmt->execute();
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -141,6 +148,7 @@ class ContaReceberDAO
             foreach ($result as $row) {
                 $c = new ContaReceber();
                 $c->setIdContaReceber($row['id_conta_receber']);
+                $c->setEmpresaId($row['empresa_id']);
                 $c->setClienteId($row['cliente_id']);
                 $c->setNomeCliente($row['nome_cliente']);
                 $c->setDescricao($row['descricao']);
@@ -156,17 +164,19 @@ class ContaReceberDAO
         }
     }
 
-    public function buscarPorPeriodo($inicio, $fim)
+    public function buscarPorPeriodo($inicio, $fim, $empresaId)
     {
         try {
             $sql = "SELECT c.*, cli.nome as nome_cliente 
                     FROM rmg_conta_receber c
                     LEFT JOIN rmg_cliente cli ON c.cliente_id = cli.id_cliente
                     WHERE c.data_vencimento BETWEEN :inicio AND :fim
+                    AND c.empresa_id = :empresa_id
                     ORDER BY c.data_vencimento ASC";
             $stmt = $this->conexao->prepare($sql);
             $stmt->bindValue(':inicio', $inicio);
             $stmt->bindValue(':fim', $fim);
+            $stmt->bindValue(':empresa_id', $empresaId);
             $stmt->execute();
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -174,6 +184,7 @@ class ContaReceberDAO
             foreach ($result as $row) {
                 $c = new ContaReceber();
                 $c->setIdContaReceber($row['id_conta_receber']);
+                $c->setEmpresaId($row['empresa_id']);
                 $c->setClienteId($row['cliente_id']);
                 $c->setNomeCliente($row['nome_cliente']);
                 $c->setDescricao($row['descricao']);
@@ -189,11 +200,12 @@ class ContaReceberDAO
         }
     }
 
-    public function obterTotais()
+    public function obterTotais($empresaId)
     {
         try {
-            $sql = "SELECT status, SUM(valor) as total FROM rmg_conta_receber GROUP BY status";
+            $sql = "SELECT status, SUM(valor) as total FROM rmg_conta_receber WHERE empresa_id = :empresa_id GROUP BY status";
             $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':empresa_id', $empresaId);
             $stmt->execute();
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 

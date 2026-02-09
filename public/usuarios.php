@@ -5,8 +5,14 @@ require_once __DIR__ . '/../app/controllers/UsuarioController.php';
 $loginController = new LoginController();
 $loginController->verificarLogado();
 
-// Verifica se é administrador
-if ($_SESSION['usuario_tipo'] !== 'administrador') {
+// Super admin tem sua própria página de usuários
+if ($_SESSION['usuario_tipo'] === 'super_admin') {
+    header('Location: admin/usuarios.php');
+    exit;
+}
+
+// Apenas gerentes podem acessar esta página
+if ($_SESSION['usuario_tipo'] !== 'gerente') {
     header('Location: index.php');
     exit;
 }
@@ -85,7 +91,7 @@ include __DIR__ . '/includes/header.php';
                                 <td>
                                     <?php
                                     $badges = [
-                                        'administrador' => 'bg-danger',
+                                        'super_admin' => 'bg-danger',
                                         'gerente' => 'bg-warning text-dark',
                                         'operador' => 'bg-info text-dark'
                                     ];
@@ -178,8 +184,6 @@ include __DIR__ . '/includes/header.php';
                             <label for="tipo_usuario" class="form-label">Tipo de Usuário *</label>
                             <select class="form-select" id="tipo_usuario" name="tipo_usuario" required>
                                 <option value="operador">Operador</option>
-                                <option value="gerente">Gerente</option>
-                                <option value="administrador">Administrador</option>
                             </select>
                         </div>
                         <div class="col-md-6 mb-3 pt-4">

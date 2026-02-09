@@ -1,18 +1,18 @@
 <?php
 require_once __DIR__ . '/../../app/services/RelatorioService.php';
+require_once __DIR__ . '/../../app/controllers/LoginController.php';
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-if (!isset($_SESSION['usuario_id'])) {
-    die("Acesso negado.");
-}
+$loginController = new LoginController();
+$loginController->verificarLogado();
+$loginController->verificarAcessoEmpresa();
+
+$empresaId = $_SESSION['empresa_id'];
 
 $inicio = $_GET['inicio'] ?? date('Y-m-01');
 $fim = $_GET['fim'] ?? date('Y-m-t');
 
 $service = new RelatorioService();
-$fluxo = $service->getFluxoPrevisto($inicio, $fim);
+$fluxo = $service->getFluxoPrevisto($inicio, $fim, $empresaId);
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -113,7 +113,7 @@ $fluxo = $service->getFluxoPrevisto($inicio, $fim);
     </div>
 
     <div class="header">
-        <h2><?php echo defined('COMPANY_NAME') ? htmlspecialchars(COMPANY_NAME) : 'RMG ERP - Sistema de Gestão'; ?></h2>
+        <h2><?php echo htmlspecialchars($_SESSION['empresa_nome'] ?? 'RMG ERP - Sistema de Gestão'); ?></h2>
         <h3>Demonstrativo de Fluxo Previsto (Vencimentos)</h3>
         <p>Período: <?php echo date('d/m/Y', strtotime($inicio)); ?> a <?php echo date('d/m/Y', strtotime($fim)); ?></p>
         <p>Gerado em: <?php echo date('d/m/Y H:i:s'); ?> por <?php echo htmlspecialchars($_SESSION['usuario_nome']); ?></p>
@@ -172,7 +172,7 @@ $fluxo = $service->getFluxoPrevisto($inicio, $fim);
     </table>
 
     <div class="footer">
-        <p><?php echo defined('COMPANY_NAME') ? htmlspecialchars(COMPANY_NAME) . ' — Controle Financeiro e Patrimonial' : 'RMG ERP - Controle Financeiro e Patrimonial'; ?> | Página 1 de 1</p>
+        <p><?php echo htmlspecialchars(($_SESSION['empresa_nome'] ?? 'RMG ERP') . ' — Controle Financeiro e Patrimonial'); ?> | Página 1 de 1</p>
     </div>
 
 </body>

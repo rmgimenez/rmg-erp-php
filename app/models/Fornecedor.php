@@ -1,58 +1,82 @@
 <?php
 
-class Fornecedor {
+class Fornecedor
+{
     private $id_fornecedor;
+    private $empresa_id;
     private $nome;
     private $cnpj;
     private $telefone;
     private $email;
     private $observacoes;
 
-    public function getIdFornecedor() {
+    public function getIdFornecedor()
+    {
         return $this->id_fornecedor;
     }
 
-    public function setIdFornecedor($id_fornecedor) {
+    public function setIdFornecedor($id_fornecedor)
+    {
         $this->id_fornecedor = $id_fornecedor;
     }
 
-    public function getNome() {
+    public function getEmpresaId()
+    {
+        return $this->empresa_id;
+    }
+
+    public function setEmpresaId($empresa_id)
+    {
+        $this->empresa_id = $empresa_id;
+    }
+
+    public function getNome()
+    {
         return $this->nome;
     }
 
-    public function setNome($nome) {
+    public function setNome($nome)
+    {
         $this->nome = $nome;
     }
 
-    public function getCnpj() {
+    public function getCnpj()
+    {
         return $this->cnpj;
     }
 
-    public function setCnpj($cnpj) {
+    public function setCnpj($cnpj)
+    {
         $this->cnpj = $cnpj;
     }
 
-    public function getTelefone() {
+    public function getTelefone()
+    {
         return $this->telefone;
     }
 
-    public function setTelefone($telefone) {
+    public function setTelefone($telefone)
+    {
         $this->telefone = $telefone;
     }
 
-    public function getEmail() {
+    public function getEmail()
+    {
         return $this->email;
     }
 
-    public function setEmail($email) {
+    public function setEmail($email)
+    {
         $this->email = $email;
     }
 
-    public function getObservacoes() {
+    public function getObservacoes()
+    {
         return $this->observacoes;
     }
 
-    public function setObservacoes($observacoes) {
+    public function setObservacoes($observacoes)
+    {
         $this->observacoes = $observacoes;
     }
 }

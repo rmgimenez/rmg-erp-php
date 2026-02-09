@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../app/controllers/LoginController.php';
 $loginController = new LoginController();
 $loginController->verificarLogado();
+$loginController->verificarAcessoEmpresa();
 
 $usuarioNome = $_SESSION['usuario_nome'] ?? 'Usuário';
 

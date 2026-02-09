@@ -10,6 +10,11 @@ require_once __DIR__ . '/../app/dao/ManutencaoDAO.php';
 $loginController = new LoginController();
 $loginController->verificarLogado();
 
+// Super admin é redirecionado para o painel admin
+$loginController->verificarAcessoEmpresa();
+
+$empresaId = $_SESSION['empresa_id'];
+
 $contaPagarDAO = new ContaPagarDAO();
 $contaReceberDAO = new ContaReceberDAO();
 $pagamentoDAO = new PagamentoDAO();
@@ -17,15 +22,15 @@ $recebimentoDAO = new RecebimentoDAO();
 $bemDAO = new BemDAO();
 $manutencaoDAO = new ManutencaoDAO();
 
-// Coletar Estatísticas Gerais
-$totaisPagar = $contaPagarDAO->obterTotais(); // ['pendente' => X, 'paga' => Y]
-$totaisReceber = $contaReceberDAO->obterTotais(); // ['pendente' => X, 'recebida' => Y]
-$statsBens = $bemDAO->contarPorStatus(); // ['ativo' => X, 'baixado' => Y]
-$totalManutencoes = $manutencaoDAO->contarTotal();
+// Coletar Estatísticas Gerais (filtradas por empresa)
+$totaisPagar = $contaPagarDAO->obterTotais($empresaId); // ['pendente' => X, 'paga' => Y]
+$totaisReceber = $contaReceberDAO->obterTotais($empresaId); // ['pendente' => X, 'recebida' => Y]
+$statsBens = $bemDAO->contarPorStatus($empresaId); // ['ativo' => X, 'baixado' => Y]
+$totalManutencoes = $manutencaoDAO->contarTotal($empresaId);
 
 // Totais de custo de manutenção para o dashboard
-$gastoManutencao30Dias = $manutencaoDAO->somaCustoUltimos30Dias();
-$gastoManutencao12Meses = $manutencaoDAO->somaCustoUltimos12Meses();
+$gastoManutencao30Dias = $manutencaoDAO->somaCustoUltimos30Dias($empresaId);
+$gastoManutencao12Meses = $manutencaoDAO->somaCustoUltimos12Meses($empresaId);
 
 $totalPagarPendente = $totaisPagar['pendente'] ?? 0;
 $totalReceberPendente = $totaisReceber['pendente'] ?? 0;
@@ -53,9 +58,9 @@ for ($i = 11; $i >= 0; $i--) {
 }
 
 // 2. Buscar dados do banco
-$rawPago = $pagamentoDAO->obterTotalPagoPorMesUltimos12Meses();
-$rawRecebido = $recebimentoDAO->obterTotalRecebidoPorMesUltimos12Meses();
-$rawManutencao = $manutencaoDAO->obterCustoPorMesUltimos12Meses();
+$rawPago = $pagamentoDAO->obterTotalPagoPorMesUltimos12Meses($empresaId);
+$rawRecebido = $recebimentoDAO->obterTotalRecebidoPorMesUltimos12Meses($empresaId);
+$rawManutencao = $manutencaoDAO->obterCustoPorMesUltimos12Meses($empresaId);
 
 // 3. Preencher os dados
 foreach ($rawPago as $row) {
@@ -98,7 +103,7 @@ include __DIR__ . '/includes/header.php';
         <div class="d-flex justify-content-between align-items-center">
             <div>
                 <h4><i class="fas fa-hand-sparkles me-2" style="opacity:0.8"></i>Olá, <?php echo htmlspecialchars($usuarioNome); ?>!</h4>
-                <p>Você está acessando como <strong><?php echo ucfirst($tipoUsuario); ?></strong> &mdash; <?php echo date('d/m/Y'); ?></p>
+                <p>Você está acessando como <strong><?php echo ucfirst($tipoUsuario); ?></strong> na empresa <strong><?php echo htmlspecialchars($_SESSION['empresa_nome'] ?? ''); ?></strong> &mdash; <?php echo date('d/m/Y'); ?></p>
             </div>
             <div class="d-none d-md-block">
                 <i class="fas fa-chart-pie" style="font-size: 2.5rem; opacity: 0.15;"></i>

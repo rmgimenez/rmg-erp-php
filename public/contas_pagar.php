@@ -5,6 +5,7 @@ require_once __DIR__ . '/../app/controllers/FornecedorController.php';
 
 $loginController = new LoginController();
 $loginController->verificarLogado();
+$loginController->verificarAcessoEmpresa();
 
 $contaController = new ContaPagarController();
 $fornecedorController = new FornecedorController();

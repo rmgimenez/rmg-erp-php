@@ -14,8 +14,9 @@ class FornecedorDAO
     public function salvar(Fornecedor $fornecedor)
     {
         try {
-            $sql = "INSERT INTO rmg_fornecedor (nome, cnpj, telefone, email, observacoes) VALUES (:nome, :cnpj, :telefone, :email, :observacoes)";
+            $sql = "INSERT INTO rmg_fornecedor (empresa_id, nome, cnpj, telefone, email, observacoes) VALUES (:empresa_id, :nome, :cnpj, :telefone, :email, :observacoes)";
             $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':empresa_id', $fornecedor->getEmpresaId());
             $stmt->bindValue(':nome', $fornecedor->getNome());
             $stmt->bindValue(':cnpj', $fornecedor->getCnpj());
             $stmt->bindValue(':telefone', $fornecedor->getTelefone());
@@ -56,11 +57,12 @@ class FornecedorDAO
         }
     }
 
-    public function listar()
+    public function listar($empresaId)
     {
         try {
-            $sql = "SELECT * FROM rmg_fornecedor ORDER BY nome";
+            $sql = "SELECT * FROM rmg_fornecedor WHERE empresa_id = :empresa_id ORDER BY nome";
             $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':empresa_id', $empresaId);
             $stmt->execute();
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -68,6 +70,7 @@ class FornecedorDAO
             foreach ($result as $row) {
                 $f = new Fornecedor();
                 $f->setIdFornecedor($row['id_fornecedor']);
+                $f->setEmpresaId($row['empresa_id']);
                 $f->setNome($row['nome']);
                 $f->setCnpj($row['cnpj']);
                 $f->setTelefone($row['telefone']);
@@ -93,6 +96,7 @@ class FornecedorDAO
             if ($row) {
                 $f = new Fornecedor();
                 $f->setIdFornecedor($row['id_fornecedor']);
+                $f->setEmpresaId($row['empresa_id']);
                 $f->setNome($row['nome']);
                 $f->setCnpj($row['cnpj']);
                 $f->setTelefone($row['telefone']);

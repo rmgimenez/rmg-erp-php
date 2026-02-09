@@ -13,7 +13,7 @@ class FornecedorController
 
     public function listarFornecedores()
     {
-        return $this->fornecedorDAO->listar();
+        return $this->fornecedorDAO->listar($_SESSION['empresa_id']);
     }
 
     public function salvar($dados)
@@ -24,6 +24,7 @@ class FornecedorController
         $fornecedor->setTelefone($dados['telefone']);
         $fornecedor->setEmail($dados['email']);
         $fornecedor->setObservacoes($dados['observacoes']);
+        $fornecedor->setEmpresaId($_SESSION['empresa_id']);
 
         if (!empty($dados['id_fornecedor'])) {
             $fornecedor->setIdFornecedor($dados['id_fornecedor']);

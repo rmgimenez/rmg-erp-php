@@ -1,15 +1,25 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+if (!isset($_SESSION['usuario_id']) || empty($_SESSION['empresa_id'])) {
+    header('Content-Type: application/json');
+    echo json_encode(['pagar' => [], 'receber' => [], 'count_pagar' => 0, 'count_receber' => 0]);
+    exit;
+}
+
 require_once __DIR__ . '/../../app/dao/ContaPagarDAO.php';
 require_once __DIR__ . '/../../app/dao/ContaReceberDAO.php';
 
+$empresaId = $_SESSION['empresa_id'];
 $pagarDAO = new ContaPagarDAO();
 $receberDAO = new ContaReceberDAO();
 
 // janela (dias) usada para buscar vencimentos — manter em variável para consistência
 $dias = 10;
 // Busca contas vencidas e a vencer nos próximos $dias dias
-$contasPagar = $pagarDAO->buscarVencidasEProximas($dias);
-$contasReceber = $receberDAO->buscarVencidasEProximas($dias);
+$contasPagar = $pagarDAO->buscarVencidasEProximas($dias, $empresaId);
+$contasReceber = $receberDAO->buscarVencidasEProximas($dias, $empresaId);
 
 // mapeia e marca itens vencidos (para destaque no front)
 $pagar_arr = array_map(function ($c) {

@@ -4,16 +4,19 @@ require_once __DIR__ . '/../dao/RecebimentoDAO.php';
 require_once __DIR__ . '/../models/ContaReceber.php';
 require_once __DIR__ . '/../models/Recebimento.php';
 
-class ContaReceberController {
+class ContaReceberController
+{
     private $dao;
     private $recebimentoDAO;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->dao = new ContaReceberDAO();
         $this->recebimentoDAO = new RecebimentoDAO();
     }
 
-    public function salvar($dados) {
+    public function salvar($dados)
+    {
         $conta = new ContaReceber();
         $conta->setClienteId($dados['cliente_id']);
         $conta->setDescricao($dados['descricao']);
@@ -21,6 +24,7 @@ class ContaReceberController {
         $conta->setDataVencimento($dados['data_vencimento']);
         $conta->setStatus($dados['status']);
         $conta->setObservacoes($dados['observacoes'] ?? '');
+        $conta->setEmpresaId($_SESSION['empresa_id']);
 
         if (!empty($dados['id_conta_receber'])) {
             $conta->setIdContaReceber($dados['id_conta_receber']);
@@ -38,11 +42,12 @@ class ContaReceberController {
         }
     }
 
-    public function excluir($id) {
+    public function excluir($id)
+    {
         $conta = $this->buscarPorId($id);
-        
+
         if ($conta && $conta->getStatus() === 'recebida') {
-             return ['sucesso' => false, 'mensagem' => "Não é possível excluir uma conta já recebida."];
+            return ['sucesso' => false, 'mensagem' => "Não é possível excluir uma conta já recebida."];
         }
 
         if ($this->dao->excluir($id)) {
@@ -52,7 +57,8 @@ class ContaReceberController {
         }
     }
 
-    public function registrarRecebimento($dados) {
+    public function registrarRecebimento($dados)
+    {
         $idConta = $dados['id_conta_receber'] ?? null;
         $valor = $dados['valor_recebido'] ?? 0;
         $data = $dados['data_recebimento'] ?? date('Y-m-d');
@@ -65,6 +71,7 @@ class ContaReceberController {
         $recebimento->setContaReceberId($idConta);
         $recebimento->setValorRecebido($valor);
         $recebimento->setDataRecebimento($data);
+        $recebimento->setEmpresaId($_SESSION['empresa_id']);
 
         if ($this->recebimentoDAO->salvar($recebimento)) {
             return ['sucesso' => true, 'mensagem' => "Recebimento registrado com sucesso!"];
@@ -73,11 +80,13 @@ class ContaReceberController {
         }
     }
 
-    public function listarContas() {
-        return $this->dao->listar();
+    public function listarContas()
+    {
+        return $this->dao->listar($_SESSION['empresa_id']);
     }
 
-    public function buscarPorId($id) {
+    public function buscarPorId($id)
+    {
         return $this->dao->buscarPorId($id);
     }
 }

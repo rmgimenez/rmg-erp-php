@@ -5,6 +5,7 @@ require_once __DIR__ . '/../../app/controllers/ManutencaoController.php';
 
 $loginController = new LoginController();
 $loginController->verificarLogado();
+$loginController->verificarAcessoEmpresa();
 
 $bemController = new BemController();
 $manutencaoController = new ManutencaoController();
@@ -65,7 +66,7 @@ $currentDate = date('d/m/Y');
 
         <div class="card p-4">
             <div class="text-center mb-4">
-                <h4 class="text-secondary"><?php echo defined('COMPANY_NAME') ? htmlspecialchars(COMPANY_NAME) : 'RMG ERP - Sistema de Gestão'; ?></h4>
+                <h4 class="text-secondary"><?php echo htmlspecialchars($_SESSION['empresa_nome'] ?? 'RMG ERP - Sistema de Gestão'); ?></h4>
                 <h2>Relatório Detalhado do Bem</h2>
                 <h4 class="text-muted"><?php echo htmlspecialchars($bem->getDescricao()); ?></h4>
                 <p class="text-muted">Gerado em: <?php echo $currentDate; ?></p>

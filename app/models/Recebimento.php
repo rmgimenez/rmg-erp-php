@@ -1,40 +1,60 @@
 <?php
 
-class Recebimento {
+class Recebimento
+{
     private $id_recebimento;
+    private $empresa_id;
     private $conta_receber_id;
     private $data_recebimento;
     private $valor_recebido;
 
-    public function getIdRecebimento() {
+    public function getIdRecebimento()
+    {
         return $this->id_recebimento;
     }
 
-    public function setIdRecebimento($id_recebimento) {
+    public function setIdRecebimento($id_recebimento)
+    {
         $this->id_recebimento = $id_recebimento;
     }
 
-    public function getContaReceberId() {
+    public function getEmpresaId()
+    {
+        return $this->empresa_id;
+    }
+
+    public function setEmpresaId($empresa_id)
+    {
+        $this->empresa_id = $empresa_id;
+    }
+
+    public function getContaReceberId()
+    {
         return $this->conta_receber_id;
     }
 
-    public function setContaReceberId($conta_receber_id) {
+    public function setContaReceberId($conta_receber_id)
+    {
         $this->conta_receber_id = $conta_receber_id;
     }
 
-    public function getDataRecebimento() {
+    public function getDataRecebimento()
+    {
         return $this->data_recebimento;
     }
 
-    public function setDataRecebimento($data_recebimento) {
+    public function setDataRecebimento($data_recebimento)
+    {
         $this->data_recebimento = $data_recebimento;
     }
 
-    public function getValorRecebido() {
+    public function getValorRecebido()
+    {
         return $this->valor_recebido;
     }
 
-    public function setValorRecebido($valor_recebido) {
+    public function setValorRecebido($valor_recebido)
+    {
         $this->valor_recebido = $valor_recebido;
     }
 }

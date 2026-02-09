@@ -4,14 +4,20 @@ require_once __DIR__ . '/../app/controllers/LoginController.php';
 $erro = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $codigoEmpresa = $_POST['codigo_empresa'] ?? '';
     $usuario = $_POST['usuario'] ?? '';
     $senha = $_POST['senha'] ?? '';
 
     $loginController = new LoginController();
-    $resultado = $loginController->logar($usuario, $senha);
+    $resultado = $loginController->logar($codigoEmpresa, $usuario, $senha);
 
     if ($resultado['sucesso']) {
-        header('Location: index.php');
+        // Super admin vai para o painel admin, demais para o dashboard
+        if (isset($_SESSION['usuario_tipo']) && $_SESSION['usuario_tipo'] === 'super_admin') {
+            header('Location: admin/index.php');
+        } else {
+            header('Location: index.php');
+        }
         exit;
     } else {
         $erro = $resultado['mensagem'];
@@ -52,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <i class="fas fa-cube"></i>
                 </div>
                 <h1 class="brand-title">RMG ERP</h1>
-                <p class="brand-tagline">Sistema de Gestão Financeira<br>e Controle de Bens</p>
+                <p class="brand-tagline">Sistema de Gestão Financeira<br>e Controle de Bens — SaaS</p>
                 <div class="brand-features">
                     <div class="feature-item">
                         <i class="fas fa-chart-line"></i>
@@ -101,9 +107,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <form action="login.php" method="POST" id="loginForm" novalidate>
                     <div class="form-floating-group">
                         <div class="input-wrapper">
+                            <i class="fas fa-building input-icon"></i>
+                            <input type="text" class="form-input" id="codigo_empresa" name="codigo_empresa"
+                                placeholder=" " autofocus
+                                value="<?php echo isset($_POST['codigo_empresa']) ? htmlspecialchars($_POST['codigo_empresa']) : ''; ?>"
+                                style="text-transform: uppercase;">
+                            <label for="codigo_empresa" class="form-label-float">Código da Empresa</label>
+                        </div>
+                        <small class="text-muted d-block mt-1" style="font-size: 0.7rem; opacity: 0.6; padding-left: 2.5rem;">Deixe vazio ou digite ADMIN para acesso administrativo</small>
+                    </div>
+
+                    <div class="form-floating-group">
+                        <div class="input-wrapper">
                             <i class="fas fa-user input-icon"></i>
                             <input type="text" class="form-input" id="usuario" name="usuario"
-                                placeholder=" " required autofocus
+                                placeholder=" " required
                                 value="<?php echo isset($_POST['usuario']) ? htmlspecialchars($_POST['usuario']) : ''; ?>">
                             <label for="usuario" class="form-label-float">Usuário</label>
                         </div>
@@ -163,6 +181,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 e.preventDefault();
                 return;
             }
+            // Forçar uppercase no código da empresa antes de enviar
+            const codigoEmpresa = document.getElementById('codigo_empresa');
+            codigoEmpresa.value = codigoEmpresa.value.toUpperCase().trim();
+
             const btn = document.getElementById('btnLogin');
             btn.classList.add('loading');
             btn.querySelector('.btn-text').style.display = 'none';

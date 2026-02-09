@@ -5,6 +5,7 @@ require_once __DIR__ . '/../../app/dao/PagamentoDAO.php';
 
 $loginController = new LoginController();
 $loginController->verificarLogado();
+$loginController->verificarAcessoEmpresa();
 
 header('Content-Type: application/json');
 

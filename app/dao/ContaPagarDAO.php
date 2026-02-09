@@ -14,9 +14,10 @@ class ContaPagarDAO
     public function salvar(ContaPagar $conta)
     {
         try {
-            $sql = "INSERT INTO rmg_conta_pagar (fornecedor_id, descricao, valor, data_vencimento, status, observacoes) 
-                    VALUES (:fornecedor_id, :descricao, :valor, :data_vencimento, :status, :observacoes)";
+            $sql = "INSERT INTO rmg_conta_pagar (empresa_id, fornecedor_id, descricao, valor, data_vencimento, status, observacoes) 
+                    VALUES (:empresa_id, :fornecedor_id, :descricao, :valor, :data_vencimento, :status, :observacoes)";
             $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':empresa_id', $conta->getEmpresaId());
             $stmt->bindValue(':fornecedor_id', $conta->getFornecedorId());
             $stmt->bindValue(':descricao', $conta->getDescricao());
             $stmt->bindValue(':valor', $conta->getValor());
@@ -62,14 +63,16 @@ class ContaPagarDAO
         }
     }
 
-    public function listar()
+    public function listar($empresaId)
     {
         try {
             $sql = "SELECT c.*, f.nome as nome_fornecedor 
                     FROM rmg_conta_pagar c
                     LEFT JOIN rmg_fornecedor f ON c.fornecedor_id = f.id_fornecedor
+                    WHERE c.empresa_id = :empresa_id
                     ORDER BY c.data_vencimento ASC";
             $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':empresa_id', $empresaId);
             $stmt->execute();
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -77,6 +80,7 @@ class ContaPagarDAO
             foreach ($result as $row) {
                 $c = new ContaPagar();
                 $c->setIdContaPagar($row['id_conta_pagar']);
+                $c->setEmpresaId($row['empresa_id']);
                 $c->setFornecedorId($row['fornecedor_id']);
                 $c->setNomeFornecedor($row['nome_fornecedor']);
                 $c->setDescricao($row['descricao']);
@@ -107,6 +111,7 @@ class ContaPagarDAO
             if ($row) {
                 $c = new ContaPagar();
                 $c->setIdContaPagar($row['id_conta_pagar']);
+                $c->setEmpresaId($row['empresa_id']);
                 $c->setFornecedorId($row['fornecedor_id']);
                 $c->setNomeFornecedor($row['nome_fornecedor']);
                 $c->setDescricao($row['descricao']);
@@ -122,7 +127,7 @@ class ContaPagarDAO
         }
     }
 
-    public function buscarVencidasEProximas($dias = 10)
+    public function buscarVencidasEProximas($empresaId, $dias = 10)
     {
         try {
             // Seleciona Pendentes que estão Vencidas (qualquer data passada) OU Vencem nos próximos X dias
@@ -130,10 +135,12 @@ class ContaPagarDAO
                     FROM rmg_conta_pagar c
                     LEFT JOIN rmg_fornecedor f ON c.fornecedor_id = f.id_fornecedor
                     WHERE c.status != 'paga' 
+                    AND c.empresa_id = :empresa_id
                     AND c.data_vencimento <= DATE_ADD(CURDATE(), INTERVAL :dias DAY)
                     ORDER BY (c.data_vencimento < CURDATE()) DESC, c.data_vencimento ASC";
 
             $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':empresa_id', $empresaId);
             $stmt->bindValue(':dias', $dias, PDO::PARAM_INT);
             $stmt->execute();
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -142,6 +149,7 @@ class ContaPagarDAO
             foreach ($result as $row) {
                 $c = new ContaPagar();
                 $c->setIdContaPagar($row['id_conta_pagar']);
+                $c->setEmpresaId($row['empresa_id']);
                 $c->setFornecedorId($row['fornecedor_id']);
                 $c->setNomeFornecedor($row['nome_fornecedor']);
                 $c->setDescricao($row['descricao']);
@@ -157,17 +165,19 @@ class ContaPagarDAO
         }
     }
 
-    public function buscarPorPeriodo($inicio, $fim)
+    public function buscarPorPeriodo($inicio, $fim, $empresaId)
     {
         try {
             $sql = "SELECT c.*, f.nome as nome_fornecedor 
                     FROM rmg_conta_pagar c
                     LEFT JOIN rmg_fornecedor f ON c.fornecedor_id = f.id_fornecedor
                     WHERE c.data_vencimento BETWEEN :inicio AND :fim
+                    AND c.empresa_id = :empresa_id
                     ORDER BY c.data_vencimento ASC";
             $stmt = $this->conexao->prepare($sql);
             $stmt->bindValue(':inicio', $inicio);
             $stmt->bindValue(':fim', $fim);
+            $stmt->bindValue(':empresa_id', $empresaId);
             $stmt->execute();
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -175,6 +185,7 @@ class ContaPagarDAO
             foreach ($result as $row) {
                 $c = new ContaPagar();
                 $c->setIdContaPagar($row['id_conta_pagar']);
+                $c->setEmpresaId($row['empresa_id']);
                 $c->setFornecedorId($row['fornecedor_id']);
                 $c->setNomeFornecedor($row['nome_fornecedor']);
                 $c->setDescricao($row['descricao']);
@@ -190,11 +201,12 @@ class ContaPagarDAO
         }
     }
 
-    public function obterTotais()
+    public function obterTotais($empresaId)
     {
         try {
-            $sql = "SELECT status, SUM(valor) as total FROM rmg_conta_pagar GROUP BY status";
+            $sql = "SELECT status, SUM(valor) as total FROM rmg_conta_pagar WHERE empresa_id = :empresa_id GROUP BY status";
             $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':empresa_id', $empresaId);
             $stmt->execute();
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 

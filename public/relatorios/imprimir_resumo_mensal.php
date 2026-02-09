@@ -1,16 +1,15 @@
 <?php
 require_once __DIR__ . '/../../app/services/RelatorioService.php';
+require_once __DIR__ . '/../../app/controllers/LoginController.php';
 
-// Auth check
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-if (!isset($_SESSION['usuario_id'])) {
-    die("Acesso negado.");
-}
+$loginController = new LoginController();
+$loginController->verificarLogado();
+$loginController->verificarAcessoEmpresa();
+
+$empresaId = $_SESSION['empresa_id'];
 
 $service = new RelatorioService();
-$rows = $service->getResumoMensalUltimos12Meses();
+$rows = $service->getResumoMensalUltimos12Meses($empresaId);
 
 $totReceb = 0.0;
 $totPago = 0.0;
@@ -104,7 +103,7 @@ $totSaldo = $totReceb - $totPago;
     </div>
 
     <div class="header">
-        <h2><?php echo defined('COMPANY_NAME') ? htmlspecialchars(COMPANY_NAME) : 'RMG ERP - Sistema de Gestão'; ?></h2>
+        <h2><?php echo htmlspecialchars($_SESSION['empresa_nome'] ?? 'RMG ERP - Sistema de Gestão'); ?></h2>
         <h3>Resumo Mensal — Receitas x Despesas (últimos 12 meses)</h3>
         <p>Gerado em: <?php echo date('d/m/Y H:i:s'); ?> por <?php echo htmlspecialchars($_SESSION['usuario_nome']); ?></p>
     </div>
@@ -152,7 +151,7 @@ $totSaldo = $totReceb - $totPago;
     </table>
 
     <div class="footer">
-        <p><?php echo defined('COMPANY_NAME') ? htmlspecialchars(COMPANY_NAME) . ' — Controle Financeiro e Patrimonial' : 'RMG ERP - Controle Financeiro e Patrimonial'; ?> | Página 1 de 1</p>
+        <p><?php echo htmlspecialchars(($_SESSION['empresa_nome'] ?? 'RMG ERP') . ' — Controle Financeiro e Patrimonial'); ?> | Página 1 de 1</p>
     </div>
 
     <!-- Chart.js (CDN) + inicialização do gráfico -->

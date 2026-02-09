@@ -1,8 +1,19 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+header('Content-Type: application/json');
+
+if (!isset($_SESSION['usuario_id']) || empty($_SESSION['empresa_id'])) {
+    echo json_encode([]);
+    exit;
+}
+
 require_once __DIR__ . '/../../app/dao/ContaPagarDAO.php';
 require_once __DIR__ . '/../../app/dao/ContaReceberDAO.php';
 
-header('Content-Type: application/json');
+$empresaId = $_SESSION['empresa_id'];
 
 $inicio = $_GET['start'] ?? date('Y-m-d');
 $fim = $_GET['end'] ?? date('Y-m-d');
@@ -14,8 +25,8 @@ $fim = substr($fim, 0, 10);
 $pagarDAO = new ContaPagarDAO();
 $receberDAO = new ContaReceberDAO();
 
-$pagar = $pagarDAO->buscarPorPeriodo($inicio, $fim);
-$receber = $receberDAO->buscarPorPeriodo($inicio, $fim);
+$pagar = $pagarDAO->buscarPorPeriodo($inicio, $fim, $empresaId);
+$receber = $receberDAO->buscarPorPeriodo($inicio, $fim, $empresaId);
 
 $eventos = [];
 
@@ -26,7 +37,7 @@ foreach ($pagar as $c) {
     } else {
         $title = "A PAGAR: " . $c->getDescricao();
     }
-    
+
     $eventos[] = [
         'title' => $title . ' (R$ ' . number_format($c->getValor(), 2, ',', '.') . ')',
         'start' => $c->getDataVencimento(),

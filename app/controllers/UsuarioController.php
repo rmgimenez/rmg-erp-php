@@ -11,45 +11,80 @@ class UsuarioController
         $this->usuarioDAO = new UsuarioDAO();
     }
 
-    public function listarUsuarios()
+    /**
+     * Lista usuários conforme o tipo de usuário logado:
+     * - super_admin: lista todos ou por empresa específica
+     * - gerente: lista apenas da própria empresa
+     */
+    public function listarUsuarios($empresaId = null)
     {
-        return $this->usuarioDAO->listar();
+        if ($_SESSION['usuario_tipo'] === 'super_admin') {
+            return $this->usuarioDAO->listar($empresaId);
+        }
+        // Gerente: lista apenas os usuários da sua empresa
+        return $this->usuarioDAO->listarPorEmpresa($_SESSION['empresa_id']);
     }
 
     public function salvar($dados)
     {
-        // Valida se o usuário que está tentando cadastrar é admin
-        if ($_SESSION['usuario_tipo'] !== 'administrador') {
-            return ['sucesso' => false, 'mensagem' => 'Acesso negado. Apenas administradores podem gerenciar usuários.'];
+        $tipoLogado = $_SESSION['usuario_tipo'];
+
+        // Verificar permissões: apenas super_admin e gerente podem gerenciar usuários
+        if (!in_array($tipoLogado, ['super_admin', 'gerente'])) {
+            return ['sucesso' => false, 'mensagem' => 'Acesso negado. Você não tem permissão para gerenciar usuários.'];
         }
 
         $usuario = new Usuario();
         $usuario->setNome($dados['nome']);
         $usuario->setUsuario($dados['usuario']);
         $usuario->setTipoUsuario($dados['tipo_usuario']);
-        // Se a checkbox 'ativo' vier marcada, é 1, senão 0
         $ativo = isset($dados['ativo']) ? 1 : 0;
         $usuario->setAtivo($ativo);
 
-        // Impedir alterações no usuário de login 'admin' e evitar atribuir o login 'admin' a outro registro
+        // Definir empresa_id conforme regras:
+        if ($tipoLogado === 'super_admin') {
+            // Super admin pode criar gerentes e operadores para qualquer empresa
+            $empresa_id = $dados['empresa_id'] ?? null;
+            $usuario->setEmpresaId($empresa_id);
+
+            // Super admin só pode criar gerentes e operadores (não outro super_admin)
+            if ($dados['tipo_usuario'] === 'super_admin') {
+                return ['sucesso' => false, 'mensagem' => 'Não é possível criar outro super administrador.'];
+            }
+
+            // Validar que empresa_id é obrigatório para gerente/operador
+            if (empty($empresa_id)) {
+                return ['sucesso' => false, 'mensagem' => 'É necessário selecionar uma empresa para este usuário.'];
+            }
+        } elseif ($tipoLogado === 'gerente') {
+            // Gerente só pode criar operadores na sua própria empresa
+            if ($dados['tipo_usuario'] !== 'operador') {
+                return ['sucesso' => false, 'mensagem' => 'Gerentes só podem criar usuários do tipo operador.'];
+            }
+            $usuario->setEmpresaId($_SESSION['empresa_id']);
+        }
+
+        // Impedir alterações no usuário de login 'admin'
         if (!empty($dados['id_usuario'])) {
-            // edição: bloquear se o registro alvo for o admin
+            // Edição
             $existente = $this->usuarioDAO->buscarPorId($dados['id_usuario']);
             if ($existente && $existente->getUsuario() === 'admin') {
                 return ['sucesso' => false, 'mensagem' => 'O usuário "admin" não pode ser alterado.'];
             }
 
-            // impedir que outro usuário receba o login 'admin' se já existir
-            if (isset($dados['usuario']) && $dados['usuario'] === 'admin') {
-                $adminExist = $this->usuarioDAO->buscarPorLogin('admin');
-                if ($adminExist && $adminExist->getIdUsuario() != $dados['id_usuario']) {
-                    return ['sucesso' => false, 'mensagem' => 'O login "admin" já está em uso.'];
+            // Gerente só pode editar usuários da própria empresa
+            if ($tipoLogado === 'gerente') {
+                if ($existente && $existente->getEmpresaId() != $_SESSION['empresa_id']) {
+                    return ['sucesso' => false, 'mensagem' => 'Você não tem permissão para editar este usuário.'];
+                }
+                // Gerente não pode alterar tipo para algo diferente de operador
+                if ($dados['tipo_usuario'] !== 'operador') {
+                    return ['sucesso' => false, 'mensagem' => 'Gerentes só podem ter usuários do tipo operador.'];
                 }
             }
 
             $usuario->setIdUsuario($dados['id_usuario']);
 
-            // Se digitou senha, atualiza. Se vazio, o DAO ignora a senha na atualização
             if (!empty($dados['senha'])) {
                 $usuario->setSenha(password_hash($dados['senha'], PASSWORD_DEFAULT));
             }
@@ -63,19 +98,6 @@ class UsuarioController
                 return ['sucesso' => false, 'mensagem' => 'A senha é obrigatória para novos usuários.'];
             }
 
-            // impedir criação de um segundo registro com login 'admin'
-            if (isset($dados['usuario']) && $dados['usuario'] === 'admin') {
-                $adminExist = $this->usuarioDAO->buscarPorLogin('admin');
-                if ($adminExist) {
-                    return ['sucesso' => false, 'mensagem' => 'O login "admin" já está em uso.'];
-                }
-            }
-
-            // Verificar se usuário já existe (opcional, mas bom)
-            if ($this->usuarioDAO->buscarPorLogin($dados['usuario'])) {
-                return ['sucesso' => false, 'mensagem' => 'Login de usuário já existe.'];
-            }
-
             $usuario->setSenha(password_hash($dados['senha'], PASSWORD_DEFAULT));
 
             if ($this->usuarioDAO->salvar($usuario)) {
@@ -87,12 +109,15 @@ class UsuarioController
 
     public function excluir($id)
     {
-        if ($_SESSION['usuario_tipo'] !== 'administrador') {
+        $tipoLogado = $_SESSION['usuario_tipo'];
+
+        if (!in_array($tipoLogado, ['super_admin', 'gerente'])) {
             return ['sucesso' => false, 'mensagem' => 'Acesso negado.'];
         }
 
-        // Não permitir excluir o usuário 'admin'
         $usuarioAlvo = $this->usuarioDAO->buscarPorId($id);
+
+        // Não permitir excluir o usuário 'admin'
         if ($usuarioAlvo && $usuarioAlvo->getUsuario() === 'admin') {
             return ['sucesso' => false, 'mensagem' => 'O usuário "admin" não pode ser excluído.'];
         }
@@ -100,6 +125,16 @@ class UsuarioController
         // Não permitir excluir o próprio usuário logado
         if ($id == $_SESSION['usuario_id']) {
             return ['sucesso' => false, 'mensagem' => 'Você não pode excluir seu próprio usuário.'];
+        }
+
+        // Gerente só pode excluir operadores da própria empresa
+        if ($tipoLogado === 'gerente') {
+            if ($usuarioAlvo && $usuarioAlvo->getEmpresaId() != $_SESSION['empresa_id']) {
+                return ['sucesso' => false, 'mensagem' => 'Você não tem permissão para excluir este usuário.'];
+            }
+            if ($usuarioAlvo && $usuarioAlvo->getTipoUsuario() !== 'operador') {
+                return ['sucesso' => false, 'mensagem' => 'Gerentes só podem excluir operadores.'];
+            }
         }
 
         if ($this->usuarioDAO->excluir($id)) {

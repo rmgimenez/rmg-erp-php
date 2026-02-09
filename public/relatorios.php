@@ -1,12 +1,8 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-// Validate Login
-if (!isset($_SESSION['usuario_id'])) {
-    header("Location: ../login.php");
-    exit;
-}
+require_once __DIR__ . '/../app/controllers/LoginController.php';
+$loginController = new LoginController();
+$loginController->verificarLogado();
+$loginController->verificarAcessoEmpresa();
 
 $usuarioNome = $_SESSION['usuario_nome'] ?? 'Usuário';
 $tipoUsuario = $_SESSION['usuario_tipo'] ?? 'visitante';

@@ -5,6 +5,7 @@ require_once __DIR__ . '/../app/controllers/SetorController.php';
 
 $loginController = new LoginController();
 $loginController->verificarLogado();
+$loginController->verificarAcessoEmpresa();
 
 $bemController = new BemController();
 $setorController = new SetorController();

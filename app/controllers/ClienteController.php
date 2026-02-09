@@ -13,7 +13,7 @@ class ClienteController
 
     public function listarClientes()
     {
-        return $this->clienteDAO->listar();
+        return $this->clienteDAO->listar($_SESSION['empresa_id']);
     }
 
     public function salvar($dados)
@@ -24,6 +24,7 @@ class ClienteController
         $cliente->setTelefone($dados['telefone']);
         $cliente->setEmail($dados['email']);
         $cliente->setObservacoes($dados['observacoes']);
+        $cliente->setEmpresaId($_SESSION['empresa_id']);
 
         if (!empty($dados['id_cliente'])) {
             $cliente->setIdCliente($dados['id_cliente']);

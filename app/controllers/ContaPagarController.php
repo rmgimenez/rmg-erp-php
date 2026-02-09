@@ -4,16 +4,19 @@ require_once __DIR__ . '/../dao/PagamentoDAO.php';
 require_once __DIR__ . '/../models/ContaPagar.php';
 require_once __DIR__ . '/../models/Pagamento.php';
 
-class ContaPagarController {
+class ContaPagarController
+{
     private $dao;
     private $pagamentoDAO;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->dao = new ContaPagarDAO();
         $this->pagamentoDAO = new PagamentoDAO();
     }
 
-    public function salvar($dados) {
+    public function salvar($dados)
+    {
         $conta = new ContaPagar();
         $conta->setFornecedorId($dados['fornecedor_id']);
         $conta->setDescricao($dados['descricao']);
@@ -21,6 +24,7 @@ class ContaPagarController {
         $conta->setDataVencimento($dados['data_vencimento']);
         $conta->setStatus($dados['status']);
         $conta->setObservacoes($dados['observacoes'] ?? '');
+        $conta->setEmpresaId($_SESSION['empresa_id']);
 
         if (!empty($dados['id_conta_pagar'])) {
             $conta->setIdContaPagar($dados['id_conta_pagar']);
@@ -38,12 +42,13 @@ class ContaPagarController {
         }
     }
 
-    public function excluir($id) {
+    public function excluir($id)
+    {
         // Regra de negócio: não deveria excluir se já foi paga? 
         $conta = $this->buscarPorId($id);
-        
+
         if ($conta && $conta->getStatus() === 'paga') {
-             return ['sucesso' => false, 'mensagem' => "Não é possível excluir uma conta já paga."];
+            return ['sucesso' => false, 'mensagem' => "Não é possível excluir uma conta já paga."];
         }
 
         if ($this->dao->excluir($id)) {
@@ -53,7 +58,8 @@ class ContaPagarController {
         }
     }
 
-    public function registrarPagamento($dados) {
+    public function registrarPagamento($dados)
+    {
         $idConta = $dados['id_conta_pagar'] ?? null;
         $valor = $dados['valor_pago'] ?? 0;
         $data = $dados['data_pagamento'] ?? date('Y-m-d');
@@ -66,6 +72,7 @@ class ContaPagarController {
         $pagamento->setContaPagarId($idConta);
         $pagamento->setValorPago($valor);
         $pagamento->setDataPagamento($data);
+        $pagamento->setEmpresaId($_SESSION['empresa_id']);
 
         if ($this->pagamentoDAO->salvar($pagamento)) {
             return ['sucesso' => true, 'mensagem' => "Pagamento registrado com sucesso!"];
@@ -74,11 +81,13 @@ class ContaPagarController {
         }
     }
 
-    public function listarContas() {
-        return $this->dao->listar();
+    public function listarContas()
+    {
+        return $this->dao->listar($_SESSION['empresa_id']);
     }
 
-    public function buscarPorId($id) {
+    public function buscarPorId($id)
+    {
         return $this->dao->buscarPorId($id);
     }
 }

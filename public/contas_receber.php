@@ -5,6 +5,7 @@ require_once __DIR__ . '/../app/controllers/ClienteController.php';
 
 $loginController = new LoginController();
 $loginController->verificarLogado();
+$loginController->verificarAcessoEmpresa();
 
 $contaController = new ContaReceberController();
 $clienteController = new ClienteController();

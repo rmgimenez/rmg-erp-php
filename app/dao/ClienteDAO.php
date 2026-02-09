@@ -14,8 +14,9 @@ class ClienteDAO
     public function salvar(Cliente $cliente)
     {
         try {
-            $sql = "INSERT INTO rmg_cliente (nome, cpf_cnpj, telefone, email, observacoes) VALUES (:nome, :cpf_cnpj, :telefone, :email, :observacoes)";
+            $sql = "INSERT INTO rmg_cliente (empresa_id, nome, cpf_cnpj, telefone, email, observacoes) VALUES (:empresa_id, :nome, :cpf_cnpj, :telefone, :email, :observacoes)";
             $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':empresa_id', $cliente->getEmpresaId());
             $stmt->bindValue(':nome', $cliente->getNome());
             $stmt->bindValue(':cpf_cnpj', $cliente->getCpfCnpj());
             $stmt->bindValue(':telefone', $cliente->getTelefone());
@@ -56,11 +57,12 @@ class ClienteDAO
         }
     }
 
-    public function listar()
+    public function listar($empresaId)
     {
         try {
-            $sql = "SELECT * FROM rmg_cliente ORDER BY nome";
+            $sql = "SELECT * FROM rmg_cliente WHERE empresa_id = :empresa_id ORDER BY nome";
             $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':empresa_id', $empresaId);
             $stmt->execute();
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -68,6 +70,7 @@ class ClienteDAO
             foreach ($result as $row) {
                 $c = new Cliente();
                 $c->setIdCliente($row['id_cliente']);
+                $c->setEmpresaId($row['empresa_id']);
                 $c->setNome($row['nome']);
                 $c->setCpfCnpj($row['cpf_cnpj']);
                 $c->setTelefone($row['telefone']);
@@ -93,6 +96,7 @@ class ClienteDAO
             if ($row) {
                 $c = new Cliente();
                 $c->setIdCliente($row['id_cliente']);
+                $c->setEmpresaId($row['empresa_id']);
                 $c->setNome($row['nome']);
                 $c->setCpfCnpj($row['cpf_cnpj']);
                 $c->setTelefone($row['telefone']);

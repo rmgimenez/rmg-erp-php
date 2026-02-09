@@ -15,8 +15,9 @@ class SetorDAO
     public function salvar(Setor $setor)
     {
         try {
-            $sql = "INSERT INTO rmg_setor (nome, descricao) VALUES (:nome, :descricao)";
+            $sql = "INSERT INTO rmg_setor (empresa_id, nome, descricao) VALUES (:empresa_id, :nome, :descricao)";
             $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':empresa_id', $setor->getEmpresaId());
             $stmt->bindValue(':nome', $setor->getNome());
             $stmt->bindValue(':descricao', $setor->getDescricao());
             return $stmt->execute();
@@ -51,11 +52,12 @@ class SetorDAO
         }
     }
 
-    public function listar()
+    public function listar($empresaId)
     {
         try {
-            $sql = "SELECT * FROM rmg_setor ORDER BY nome";
+            $sql = "SELECT * FROM rmg_setor WHERE empresa_id = :empresa_id ORDER BY nome";
             $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':empresa_id', $empresaId);
             $stmt->execute();
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -63,6 +65,7 @@ class SetorDAO
             foreach ($result as $row) {
                 $setor = new Setor();
                 $setor->setIdSetor($row['id_setor']);
+                $setor->setEmpresaId($row['empresa_id']);
                 $setor->setNome($row['nome']);
                 $setor->setDescricao($row['descricao']);
                 $setores[] = $setor;
@@ -85,6 +88,7 @@ class SetorDAO
             if ($row) {
                 $setor = new Setor();
                 $setor->setIdSetor($row['id_setor']);
+                $setor->setEmpresaId($row['empresa_id']);
                 $setor->setNome($row['nome']);
                 $setor->setDescricao($row['descricao']);
                 return $setor;

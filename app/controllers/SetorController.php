@@ -13,7 +13,7 @@ class SetorController
 
     public function listarSetores()
     {
-        return $this->setorDAO->listar();
+        return $this->setorDAO->listar($_SESSION['empresa_id']);
     }
 
     public function buscarPorId($id)
@@ -26,6 +26,7 @@ class SetorController
         $setor = new Setor();
         $setor->setNome($dados['nome']);
         $setor->setDescricao($dados['descricao']);
+        $setor->setEmpresaId($_SESSION['empresa_id']);
 
         if (!empty($dados['id_setor'])) {
             $setor->setIdSetor($dados['id_setor']);

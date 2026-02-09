@@ -11,3 +11,4 @@ DROP TABLE IF EXISTS rmg_cliente;
 DROP TABLE IF EXISTS rmg_fornecedor;
 DROP TABLE IF EXISTS rmg_setor;
 DROP TABLE IF EXISTS rmg_usuario;
+DROP TABLE IF EXISTS rmg_empresa;

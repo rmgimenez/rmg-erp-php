@@ -9,9 +9,12 @@ define('DB_PASS', '');
 // Pode conter texto simples; para HTML avançado, adapte a exibição em `footer.php`
 define('FOOTER_TEXT', 'Desenvolvido por Ricardo Moura Gimenez para ...');
 
-// Nome da empresa que utiliza o sistema — altere para o nome da sua organização
-// Ex.: define('COMPANY_NAME', 'Minha Empresa LTDA');
-define('COMPANY_NAME', 'Nome da Sua Empresa');
+// Nome da plataforma SaaS (exibido na tela de login e painel admin)
+define('PLATFORM_NAME', 'RMG ERP SaaS');
+
+// O nome da empresa agora é obtido da tabela rmg_empresa no banco de dados.
+// Cada empresa cadastrada possui seu próprio nome (razao_social / nome_fantasia).
+// A constante COMPANY_NAME não é mais utilizada.
 
 // Configurações de Menu - Controle de visibilidade dos itens do menu
 define('SHOW_CONTAS_PAGAR', true);
