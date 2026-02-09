@@ -375,130 +375,7 @@ include __DIR__ . '/includes/header.php';
     </div>
 
     <!-- ================================ -->
-    <!-- LINHA 3: GRÁFICOS PRINCIPAIS -->
-    <!-- ================================ -->
-    <div class="row g-3 mb-4">
-        <!-- Fluxo de Caixa (Evolução 12 meses) -->
-        <div class="col-lg-8">
-            <div class="card shadow-sm h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-chart-area me-2" style="color:var(--rmg-primary)"></i>Fluxo de Caixa — Últimos 12 Meses</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="fluxoCaixaChart" height="100"></canvas>
-                </div>
-            </div>
-        </div>
-        <!-- Saldo Mensal -->
-        <div class="col-lg-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2" style="color:var(--rmg-info)"></i>Saldo Mensal (12 Meses)</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="saldoMensalChart" height="200"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================================ -->
-    <!-- LINHA 4: GRÁFICOS SECUNDÁRIOS -->
-    <!-- ================================ -->
-    <div class="row g-3 mb-4">
-        <!-- Custos de Manutenção -->
-        <div class="col-lg-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-wrench me-2" style="color:var(--rmg-warning)"></i>Manutenção (12 Meses)</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="evolucaoManutencaoChart"></canvas>
-                </div>
-            </div>
-        </div>
-        <!-- Top Fornecedores -->
-        <div class="col-lg-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-truck me-2" style="color:var(--rmg-danger)"></i>Top Fornecedores (12 Meses)</h5>
-                </div>
-                <div class="card-body">
-                    <?php if (count($topFornecedores) > 0): ?>
-                        <canvas id="topFornecedoresChart"></canvas>
-                    <?php else: ?>
-                        <div class="text-center py-4">
-                            <i class="fas fa-truck fa-3x text-muted mb-3" style="opacity:0.2"></i>
-                            <p class="text-muted">Nenhum pagamento registrado nos últimos 12 meses.</p>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-        <!-- Distribuição de Bens por Setor -->
-        <div class="col-lg-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-th-large me-2" style="color:var(--rmg-primary)"></i>Bens por Setor</h5>
-                </div>
-                <div class="card-body d-flex align-items-center justify-content-center">
-                    <?php if (count($bensPorSetor) > 0): ?>
-                        <div style="height: 260px; width: 100%;">
-                            <canvas id="bensSetorChart"></canvas>
-                        </div>
-                    <?php else: ?>
-                        <div class="text-center py-4">
-                            <i class="fas fa-th-large fa-3x text-muted mb-3" style="opacity:0.2"></i>
-                            <p class="text-muted">Nenhum bem ativo cadastrado.</p>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================================ -->
-    <!-- LINHA 5: TOP BENS MANUTENÇÃO + STATUS BENS -->
-    <!-- ================================ -->
-    <div class="row g-3 mb-4">
-        <div class="col-lg-8">
-            <div class="card shadow-sm h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-tools me-2" style="color:var(--rmg-warning)"></i>Top 5 Bens: Maior Custo de Manutenção</h5>
-                    <small class="text-muted">Manutenção vs Aquisição</small>
-                </div>
-                <div class="card-body">
-                    <?php if (count($topBens) > 0): ?>
-                        <canvas id="topBensChart"></canvas>
-                    <?php else: ?>
-                        <div class="text-center py-4">
-                            <i class="fas fa-tools fa-3x text-muted mb-3" style="opacity:0.2"></i>
-                            <p class="text-muted">Nenhuma manutenção registrada.</p>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-chart-pie me-2" style="color:var(--rmg-info)"></i>Status dos Bens</h5>
-                </div>
-                <div class="card-body d-flex align-items-center justify-content-center">
-                    <div style="height: 240px; width: 100%;">
-                        <canvas id="bensStatusChart"></canvas>
-                    </div>
-                </div>
-                <div class="card-footer bg-transparent border-0 text-center pb-3">
-                    <span class="badge bg-primary bg-opacity-10 text-primary me-2"><i class="fas fa-circle me-1"></i>Ativos: <?php echo $bensAtivos; ?></span>
-                    <span class="badge bg-secondary bg-opacity-10 text-secondary"><i class="fas fa-circle me-1"></i>Baixados: <?php echo $bensBaixados; ?></span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================================ -->
-    <!-- LINHA 6: TABELAS DE PRÓXIMAS CONTAS -->
+    <!-- LINHA 3: TABELAS DE PRÓXIMAS CONTAS -->
     <!-- ================================ -->
     <div class="row g-3 mb-4">
         <!-- Próximas Contas a Pagar -->
@@ -615,6 +492,131 @@ include __DIR__ . '/includes/header.php';
             </div>
         </div>
     </div>
+
+    <!-- ================================ -->
+    <!-- LINHA 4: GRÁFICOS PRINCIPAIS -->
+    <!-- ================================ -->
+    <div class="row g-3 mb-4">
+        <!-- Fluxo de Caixa (Evolução 12 meses) -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-chart-area me-2" style="color:var(--rmg-primary)"></i>Fluxo de Caixa — Últimos 12 Meses</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="fluxoCaixaChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+        <!-- Saldo Mensal -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2" style="color:var(--rmg-info)"></i>Saldo Mensal (12 Meses)</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="saldoMensalChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================ -->
+    <!-- LINHA 5: GRÁFICOS SECUNDÁRIOS -->
+    <!-- ================================ -->
+    <div class="row g-3 mb-4">
+        <!-- Custos de Manutenção -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-wrench me-2" style="color:var(--rmg-warning)"></i>Manutenção (12 Meses)</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="evolucaoManutencaoChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <!-- Top Fornecedores -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-truck me-2" style="color:var(--rmg-danger)"></i>Top Fornecedores (12 Meses)</h5>
+                </div>
+                <div class="card-body">
+                    <?php if (count($topFornecedores) > 0): ?>
+                        <canvas id="topFornecedoresChart"></canvas>
+                    <?php else: ?>
+                        <div class="text-center py-4">
+                            <i class="fas fa-truck fa-3x text-muted mb-3" style="opacity:0.2"></i>
+                            <p class="text-muted">Nenhum pagamento registrado nos últimos 12 meses.</p>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+        <!-- Distribuição de Bens por Setor -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-th-large me-2" style="color:var(--rmg-primary)"></i>Bens por Setor</h5>
+                </div>
+                <div class="card-body d-flex align-items-center justify-content-center">
+                    <?php if (count($bensPorSetor) > 0): ?>
+                        <div style="height: 260px; width: 100%;">
+                            <canvas id="bensSetorChart"></canvas>
+                        </div>
+                    <?php else: ?>
+                        <div class="text-center py-4">
+                            <i class="fas fa-th-large fa-3x text-muted mb-3" style="opacity:0.2"></i>
+                            <p class="text-muted">Nenhum bem ativo cadastrado.</p>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================ -->
+    <!-- LINHA 6: TOP BENS MANUTENÇÃO + STATUS BENS -->
+    <!-- ================================ -->
+    <div class="row g-3 mb-4">
+        <div class="col-lg-8">
+            <div class="card shadow-sm h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-tools me-2" style="color:var(--rmg-warning)"></i>Top 5 Bens: Maior Custo de Manutenção</h5>
+                    <small class="text-muted">Manutenção vs Aquisição</small>
+                </div>
+                <div class="card-body">
+                    <?php if (count($topBens) > 0): ?>
+                        <canvas id="topBensChart"></canvas>
+                    <?php else: ?>
+                        <div class="text-center py-4">
+                            <i class="fas fa-tools fa-3x text-muted mb-3" style="opacity:0.2"></i>
+                            <p class="text-muted">Nenhuma manutenção registrada.</p>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-pie me-2" style="color:var(--rmg-info)"></i>Status dos Bens</h5>
+                </div>
+                <div class="card-body d-flex align-items-center justify-content-center">
+                    <div style="height: 240px; width: 100%;">
+                        <canvas id="bensStatusChart"></canvas>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0 text-center pb-3">
+                    <span class="badge bg-primary bg-opacity-10 text-primary me-2"><i class="fas fa-circle me-1"></i>Ativos: <?php echo $bensAtivos; ?></span>
+                    <span class="badge bg-secondary bg-opacity-10 text-secondary"><i class="fas fa-circle me-1"></i>Baixados: <?php echo $bensBaixados; ?></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 
     <!-- ================================ -->
     <!-- LINHA 7: ÚLTIMAS MANUTENÇÕES + AÇÕES RÁPIDAS -->
