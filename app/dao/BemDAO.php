@@ -149,4 +149,71 @@ class BemDAO
             return ['ativo' => 0, 'baixado' => 0];
         }
     }
+
+    /**
+     * Top N bens com maior custo de manutenção
+     */
+    public function obterTopManutencao($empresaId, $limite = 5)
+    {
+        try {
+            $sql = "SELECT b.id_bem, b.descricao, b.valor_aquisicao, b.status,
+                           s.nome as nome_setor,
+                           COALESCE(SUM(m.custo), 0) as total_manutencao,
+                           COUNT(m.id_manutencao) as qtd_manutencoes
+                    FROM rmg_bem b
+                    LEFT JOIN rmg_setor s ON b.setor_id = s.id_setor
+                    LEFT JOIN rmg_manutencao m ON m.bem_id = b.id_bem
+                    WHERE b.empresa_id = :empresa_id
+                    GROUP BY b.id_bem, b.descricao, b.valor_aquisicao, b.status, s.nome
+                    HAVING total_manutencao > 0
+                    ORDER BY total_manutencao DESC
+                    LIMIT :limite";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':empresa_id', $empresaId);
+            $stmt->bindValue(':limite', $limite, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Conta bens por setor (para gráfico de distribuição)
+     */
+    public function contarPorSetor($empresaId)
+    {
+        try {
+            $sql = "SELECT COALESCE(s.nome, 'Sem Setor') as setor, COUNT(*) as qtd
+                    FROM rmg_bem b
+                    LEFT JOIN rmg_setor s ON b.setor_id = s.id_setor
+                    WHERE b.empresa_id = :empresa_id AND b.status = 'ativo'
+                    GROUP BY s.nome
+                    ORDER BY qtd DESC";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':empresa_id', $empresaId);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Soma valor total de aquisição dos bens ativos
+     */
+    public function somaValorAquisicaoAtivos($empresaId)
+    {
+        try {
+            $sql = "SELECT COALESCE(SUM(valor_aquisicao), 0) as total FROM rmg_bem 
+                    WHERE status = 'ativo' AND empresa_id = :empresa_id";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':empresa_id', $empresaId);
+            $stmt->execute();
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return (float)($row['total'] ?? 0);
+        } catch (PDOException $e) {
+            return 0.0;
+        }
+    }
 }

@@ -224,4 +224,27 @@ class ManutencaoDAO
             return 0.0;
         }
     }
+
+    /**
+     * Últimas N manutenções realizadas (para listagem recente)
+     */
+    public function buscarUltimas($empresaId, $limite = 5)
+    {
+        try {
+            $sql = "SELECT m.id_manutencao, m.data_manutencao, m.descricao, m.custo,
+                           b.descricao as descricao_bem
+                    FROM rmg_manutencao m
+                    JOIN rmg_bem b ON m.bem_id = b.id_bem
+                    WHERE m.empresa_id = :empresa_id
+                    ORDER BY m.data_manutencao DESC
+                    LIMIT :limite";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':empresa_id', $empresaId);
+            $stmt->bindValue(':limite', $limite, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            return [];
+        }
+    }
 }

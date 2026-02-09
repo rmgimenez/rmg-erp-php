@@ -57,4 +57,44 @@ class RecebimentoDAO
             return [];
         }
     }
+
+    /**
+     * Total recebido no mês atual
+     */
+    public function obterTotalRecebidoMesAtual($empresaId)
+    {
+        try {
+            $sql = "SELECT COALESCE(SUM(valor_recebido), 0) as total FROM rmg_recebimento 
+                    WHERE YEAR(data_recebimento) = YEAR(CURDATE()) 
+                    AND MONTH(data_recebimento) = MONTH(CURDATE())
+                    AND empresa_id = :empresa_id";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':empresa_id', $empresaId);
+            $stmt->execute();
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return (float)($row['total'] ?? 0);
+        } catch (PDOException $e) {
+            return 0.0;
+        }
+    }
+
+    /**
+     * Total recebido no mês anterior
+     */
+    public function obterTotalRecebidoMesAnterior($empresaId)
+    {
+        try {
+            $sql = "SELECT COALESCE(SUM(valor_recebido), 0) as total FROM rmg_recebimento 
+                    WHERE YEAR(data_recebimento) = YEAR(DATE_SUB(CURDATE(), INTERVAL 1 MONTH)) 
+                    AND MONTH(data_recebimento) = MONTH(DATE_SUB(CURDATE(), INTERVAL 1 MONTH))
+                    AND empresa_id = :empresa_id";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':empresa_id', $empresaId);
+            $stmt->execute();
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return (float)($row['total'] ?? 0);
+        } catch (PDOException $e) {
+            return 0.0;
+        }
+    }
 }

@@ -107,4 +107,71 @@ class PagamentoDAO
             return [];
         }
     }
+
+    /**
+     * Total pago no mês atual
+     */
+    public function obterTotalPagoMesAtual($empresaId)
+    {
+        try {
+            $sql = "SELECT COALESCE(SUM(valor_pago), 0) as total FROM rmg_pagamento 
+                    WHERE YEAR(data_pagamento) = YEAR(CURDATE()) 
+                    AND MONTH(data_pagamento) = MONTH(CURDATE())
+                    AND empresa_id = :empresa_id";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':empresa_id', $empresaId);
+            $stmt->execute();
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return (float)($row['total'] ?? 0);
+        } catch (PDOException $e) {
+            return 0.0;
+        }
+    }
+
+    /**
+     * Total pago no mês anterior
+     */
+    public function obterTotalPagoMesAnterior($empresaId)
+    {
+        try {
+            $sql = "SELECT COALESCE(SUM(valor_pago), 0) as total FROM rmg_pagamento 
+                    WHERE YEAR(data_pagamento) = YEAR(DATE_SUB(CURDATE(), INTERVAL 1 MONTH)) 
+                    AND MONTH(data_pagamento) = MONTH(DATE_SUB(CURDATE(), INTERVAL 1 MONTH))
+                    AND empresa_id = :empresa_id";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':empresa_id', $empresaId);
+            $stmt->execute();
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return (float)($row['total'] ?? 0);
+        } catch (PDOException $e) {
+            return 0.0;
+        }
+    }
+
+    /**
+     * Top N fornecedores por total pago nos últimos 12 meses
+     */
+    public function obterTopFornecedores($empresaId, $limite = 5)
+    {
+        try {
+            $sql = "SELECT COALESCE(f.nome, 'Sem Fornecedor') as fornecedor, 
+                           SUM(p.valor_pago) as total_pago,
+                           COUNT(p.id_pagamento) as qtd_pagamentos
+                    FROM rmg_pagamento p
+                    JOIN rmg_conta_pagar cp ON cp.id_conta_pagar = p.conta_pagar_id
+                    LEFT JOIN rmg_fornecedor f ON f.id_fornecedor = cp.fornecedor_id
+                    WHERE p.data_pagamento >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
+                    AND p.empresa_id = :empresa_id
+                    GROUP BY f.nome
+                    ORDER BY total_pago DESC
+                    LIMIT :limite";
+            $stmt = $this->conexao->prepare($sql);
+            $stmt->bindValue(':empresa_id', $empresaId);
+            $stmt->bindValue(':limite', $limite, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            return [];
+        }
+    }
 }
