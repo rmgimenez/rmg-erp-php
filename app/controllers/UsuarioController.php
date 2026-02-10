@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../dao/UsuarioDAO.php';
+require_once __DIR__ . '/../dao/LogDAO.php';
 require_once __DIR__ . '/../models/Usuario.php';
 
 class UsuarioController
@@ -90,6 +91,7 @@ class UsuarioController
             }
 
             if ($this->usuarioDAO->atualizar($usuario)) {
+                LogDAO::registrar('rmg_usuario', 'UPDATE', 'Usuário atualizado: ' . $usuario->getNome() . ' (' . $usuario->getUsuario() . ')', $usuario->getIdUsuario());
                 return ['sucesso' => true, 'mensagem' => 'Usuário atualizado com sucesso!'];
             }
         } else {
@@ -101,6 +103,7 @@ class UsuarioController
             $usuario->setSenha(password_hash($dados['senha'], PASSWORD_DEFAULT));
 
             if ($this->usuarioDAO->salvar($usuario)) {
+                LogDAO::registrar('rmg_usuario', 'INSERT', 'Usuário cadastrado: ' . $usuario->getNome() . ' (' . $usuario->getUsuario() . ', tipo: ' . $usuario->getTipoUsuario() . ')');
                 return ['sucesso' => true, 'mensagem' => 'Usuário cadastrado com sucesso!'];
             }
         }
@@ -138,6 +141,7 @@ class UsuarioController
         }
 
         if ($this->usuarioDAO->excluir($id)) {
+            LogDAO::registrar('rmg_usuario', 'DELETE', 'Usuário excluído: ' . ($usuarioAlvo ? $usuarioAlvo->getNome() : 'ID ' . $id), $id);
             return ['sucesso' => true, 'mensagem' => 'Usuário excluído com sucesso!'];
         }
         return ['sucesso' => false, 'mensagem' => 'Erro ao excluir usuário.'];
@@ -158,6 +162,7 @@ class UsuarioController
         $usuario->setSenha(password_hash($novaSenha, PASSWORD_DEFAULT));
 
         if ($this->usuarioDAO->atualizar($usuario)) {
+            LogDAO::registrar('rmg_usuario', 'UPDATE', 'Senha alterada pelo próprio usuário: ' . $usuario->getNome(), $usuario->getIdUsuario());
             return ['sucesso' => true, 'mensagem' => 'Senha alterada com sucesso!'];
         }
 

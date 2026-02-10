@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../dao/BemDAO.php';
 require_once __DIR__ . '/../dao/ManutencaoDAO.php';
+require_once __DIR__ . '/../dao/LogDAO.php';
 require_once __DIR__ . '/../models/Bem.php';
 
 class BemController
@@ -53,10 +54,12 @@ class BemController
         if (!empty($dados['id_bem'])) {
             $bem->setIdBem($dados['id_bem']);
             if ($this->bemDAO->atualizar($bem)) {
+                LogDAO::registrar('rmg_bem', 'UPDATE', 'Bem atualizado: ' . $bem->getDescricao(), $bem->getIdBem());
                 return ['sucesso' => true, 'mensagem' => 'Bem atualizado com sucesso!'];
             }
         } else {
             if ($this->bemDAO->salvar($bem)) {
+                LogDAO::registrar('rmg_bem', 'INSERT', 'Bem cadastrado: ' . $bem->getDescricao());
                 return ['sucesso' => true, 'mensagem' => 'Bem cadastrado com sucesso!'];
             }
         }
@@ -70,6 +73,7 @@ class BemController
             return ['sucesso' => false, 'mensagem' => 'Não é possível excluir o bem, pois existem manutenções cadastradas para ele.'];
         }
         if ($this->bemDAO->excluir($id)) {
+            LogDAO::registrar('rmg_bem', 'DELETE', 'Bem excluído (ID: ' . $id . ')', $id);
             return ['sucesso' => true, 'mensagem' => 'Bem excluído com sucesso!'];
         }
         return ['sucesso' => false, 'mensagem' => 'Erro ao excluir bem.'];

@@ -142,6 +142,28 @@ CREATE TABLE rmg_recebimento (
     CONSTRAINT fk_recebimento_empresa FOREIGN KEY (empresa_id) REFERENCES rmg_empresa(id_empresa)
 );
 
+-- Tabela: Log do Sistema (registro de todas as movimentações)
+CREATE TABLE rmg_log (
+    id_log INT AUTO_INCREMENT PRIMARY KEY,
+    empresa_id INT NULL,
+    usuario_id INT NULL,
+    usuario_nome VARCHAR(100),
+    tabela VARCHAR(50) NOT NULL,
+    acao ENUM('INSERT', 'UPDATE', 'DELETE') NOT NULL,
+    registro_id INT NULL,
+    descricao TEXT,
+    dados_anteriores TEXT NULL,
+    dados_novos TEXT NULL,
+    ip VARCHAR(45),
+    data_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_log_empresa FOREIGN KEY (empresa_id) REFERENCES rmg_empresa(id_empresa) ON DELETE SET NULL,
+    CONSTRAINT fk_log_usuario FOREIGN KEY (usuario_id) REFERENCES rmg_usuario(id_usuario) ON DELETE SET NULL,
+    INDEX idx_log_empresa (empresa_id),
+    INDEX idx_log_tabela (tabela),
+    INDEX idx_log_acao (acao),
+    INDEX idx_log_data_hora (data_hora)
+);
+
 -- Inserção do Super Administrador do SaaS (Senha: admin123)
 -- Este usuário não possui empresa_id (é o dono da plataforma)
 INSERT INTO rmg_usuario (empresa_id, nome, usuario, senha, tipo_usuario, ativo) VALUES 

@@ -1,6 +1,7 @@
 -- Script de exclusão do banco de dados (DROP)
 -- Atenção: Executar este script apagará todos os dados!
 
+DROP TABLE IF EXISTS rmg_log;
 DROP TABLE IF EXISTS rmg_recebimento;
 DROP TABLE IF EXISTS rmg_pagamento;
 DROP TABLE IF EXISTS rmg_conta_receber;

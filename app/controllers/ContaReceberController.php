@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../dao/ContaReceberDAO.php';
 require_once __DIR__ . '/../dao/RecebimentoDAO.php';
+require_once __DIR__ . '/../dao/LogDAO.php';
 require_once __DIR__ . '/../models/ContaReceber.php';
 require_once __DIR__ . '/../models/Recebimento.php';
 
@@ -36,6 +37,9 @@ class ContaReceberController
         }
 
         if ($resultado) {
+            $acao = !empty($dados['id_conta_receber']) ? 'UPDATE' : 'INSERT';
+            $idReg = !empty($dados['id_conta_receber']) ? $dados['id_conta_receber'] : null;
+            LogDAO::registrar('rmg_conta_receber', $acao, 'Conta a receber ' . $msg . ': ' . $conta->getDescricao() . ' (R$ ' . number_format($conta->getValor(), 2, ',', '.') . ')', $idReg);
             return ['sucesso' => true, 'mensagem' => "Conta a receber $msg com sucesso!"];
         } else {
             return ['sucesso' => false, 'mensagem' => "Erro ao salvar conta a receber."];
@@ -51,6 +55,7 @@ class ContaReceberController
         }
 
         if ($this->dao->excluir($id)) {
+            LogDAO::registrar('rmg_conta_receber', 'DELETE', 'Conta a receber excluída (ID: ' . $id . ')', $id);
             return ['sucesso' => true, 'mensagem' => "Conta a receber excluída com sucesso!"];
         } else {
             return ['sucesso' => false, 'mensagem' => "Erro ao excluir conta a receber."];
@@ -74,6 +79,7 @@ class ContaReceberController
         $recebimento->setEmpresaId($_SESSION['empresa_id']);
 
         if ($this->recebimentoDAO->salvar($recebimento)) {
+            LogDAO::registrar('rmg_recebimento', 'INSERT', 'Recebimento registrado para conta ID: ' . $idConta . ' (R$ ' . number_format($valor, 2, ',', '.') . ')', $idConta);
             return ['sucesso' => true, 'mensagem' => "Recebimento registrado com sucesso!"];
         } else {
             return ['sucesso' => false, 'mensagem' => "Erro ao registrar recebimento."];

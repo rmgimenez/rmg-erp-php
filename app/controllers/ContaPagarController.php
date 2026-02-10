@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../dao/ContaPagarDAO.php';
 require_once __DIR__ . '/../dao/PagamentoDAO.php';
+require_once __DIR__ . '/../dao/LogDAO.php';
 require_once __DIR__ . '/../models/ContaPagar.php';
 require_once __DIR__ . '/../models/Pagamento.php';
 
@@ -36,6 +37,9 @@ class ContaPagarController
         }
 
         if ($resultado) {
+            $acao = !empty($dados['id_conta_pagar']) ? 'UPDATE' : 'INSERT';
+            $idReg = !empty($dados['id_conta_pagar']) ? $dados['id_conta_pagar'] : null;
+            LogDAO::registrar('rmg_conta_pagar', $acao, 'Conta a pagar ' . $msg . ': ' . $conta->getDescricao() . ' (R$ ' . number_format($conta->getValor(), 2, ',', '.') . ')', $idReg);
             return ['sucesso' => true, 'mensagem' => "Conta a pagar $msg com sucesso!"];
         } else {
             return ['sucesso' => false, 'mensagem' => "Erro ao salvar conta a pagar."];
@@ -52,6 +56,7 @@ class ContaPagarController
         }
 
         if ($this->dao->excluir($id)) {
+            LogDAO::registrar('rmg_conta_pagar', 'DELETE', 'Conta a pagar excluída (ID: ' . $id . ')', $id);
             return ['sucesso' => true, 'mensagem' => "Conta a pagar excluída com sucesso!"];
         } else {
             return ['sucesso' => false, 'mensagem' => "Erro ao excluir conta a pagar."];
@@ -75,6 +80,7 @@ class ContaPagarController
         $pagamento->setEmpresaId($_SESSION['empresa_id']);
 
         if ($this->pagamentoDAO->salvar($pagamento)) {
+            LogDAO::registrar('rmg_pagamento', 'INSERT', 'Pagamento registrado para conta ID: ' . $idConta . ' (R$ ' . number_format($valor, 2, ',', '.') . ')', $idConta);
             return ['sucesso' => true, 'mensagem' => "Pagamento registrado com sucesso!"];
         } else {
             return ['sucesso' => false, 'mensagem' => "Erro ao registrar pagamento."];

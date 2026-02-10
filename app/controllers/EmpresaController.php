@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../dao/EmpresaDAO.php';
+require_once __DIR__ . '/../dao/LogDAO.php';
 require_once __DIR__ . '/../models/Empresa.php';
 
 class EmpresaController
@@ -48,6 +49,7 @@ class EmpresaController
             $empresa->setIdEmpresa($dados['id_empresa']);
 
             if ($this->empresaDAO->atualizar($empresa)) {
+                LogDAO::registrar('rmg_empresa', 'UPDATE', 'Empresa atualizada: ' . $empresa->getRazaoSocial() . ' (' . $empresa->getCodigo() . ')', $empresa->getIdEmpresa());
                 return ['sucesso' => true, 'mensagem' => 'Empresa atualizada com sucesso!'];
             }
         } else {
@@ -58,6 +60,7 @@ class EmpresaController
             }
 
             if ($this->empresaDAO->salvar($empresa)) {
+                LogDAO::registrar('rmg_empresa', 'INSERT', 'Empresa cadastrada: ' . $empresa->getRazaoSocial() . ' (' . $empresa->getCodigo() . ')');
                 return ['sucesso' => true, 'mensagem' => 'Empresa cadastrada com sucesso!'];
             }
         }
@@ -76,6 +79,7 @@ class EmpresaController
         }
 
         if ($this->empresaDAO->excluir($id)) {
+            LogDAO::registrar('rmg_empresa', 'DELETE', 'Empresa excluída (ID: ' . $id . ')', $id);
             return ['sucesso' => true, 'mensagem' => 'Empresa excluída com sucesso!'];
         }
 

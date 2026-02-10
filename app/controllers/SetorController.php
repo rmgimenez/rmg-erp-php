@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../dao/SetorDAO.php';
+require_once __DIR__ . '/../dao/LogDAO.php';
 require_once __DIR__ . '/../models/Setor.php';
 
 class SetorController
@@ -31,10 +32,12 @@ class SetorController
         if (!empty($dados['id_setor'])) {
             $setor->setIdSetor($dados['id_setor']);
             if ($this->setorDAO->atualizar($setor)) {
+                LogDAO::registrar('rmg_setor', 'UPDATE', 'Setor atualizado: ' . $setor->getNome(), $setor->getIdSetor());
                 return ['sucesso' => true, 'mensagem' => 'Setor atualizado com sucesso!'];
             }
         } else {
             if ($this->setorDAO->salvar($setor)) {
+                LogDAO::registrar('rmg_setor', 'INSERT', 'Setor cadastrado: ' . $setor->getNome());
                 return ['sucesso' => true, 'mensagem' => 'Setor cadastrado com sucesso!'];
             }
         }
@@ -48,6 +51,7 @@ class SetorController
         }
 
         if ($this->setorDAO->excluir($id)) {
+            LogDAO::registrar('rmg_setor', 'DELETE', 'Setor excluído (ID: ' . $id . ')', $id);
             return ['sucesso' => true, 'mensagem' => 'Setor excluído com sucesso!'];
         }
         return ['sucesso' => false, 'mensagem' => 'Erro ao excluir setor. Verifique se não há bens vinculados.'];

@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../dao/FornecedorDAO.php';
+require_once __DIR__ . '/../dao/LogDAO.php';
 require_once __DIR__ . '/../models/Fornecedor.php';
 
 class FornecedorController
@@ -29,10 +30,12 @@ class FornecedorController
         if (!empty($dados['id_fornecedor'])) {
             $fornecedor->setIdFornecedor($dados['id_fornecedor']);
             if ($this->fornecedorDAO->atualizar($fornecedor)) {
+                LogDAO::registrar('rmg_fornecedor', 'UPDATE', 'Fornecedor atualizado: ' . $fornecedor->getNome(), $fornecedor->getIdFornecedor());
                 return ['sucesso' => true, 'mensagem' => 'Fornecedor atualizado com sucesso!'];
             }
         } else {
             if ($this->fornecedorDAO->salvar($fornecedor)) {
+                LogDAO::registrar('rmg_fornecedor', 'INSERT', 'Fornecedor cadastrado: ' . $fornecedor->getNome());
                 return ['sucesso' => true, 'mensagem' => 'Fornecedor cadastrado com sucesso!'];
             }
         }
@@ -46,6 +49,7 @@ class FornecedorController
         }
 
         if ($this->fornecedorDAO->excluir($id)) {
+            LogDAO::registrar('rmg_fornecedor', 'DELETE', 'Fornecedor excluído (ID: ' . $id . ')', $id);
             return ['sucesso' => true, 'mensagem' => 'Fornecedor excluído com sucesso!'];
         }
         return ['sucesso' => false, 'mensagem' => 'Erro ao excluir fornecedor. Verifique se existem registros vinculados.'];

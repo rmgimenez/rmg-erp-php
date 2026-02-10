@@ -32,6 +32,9 @@ $paginaAtual = basename($_SERVER['PHP_SELF']);
                     <li class="nav-item">
                         <a class="nav-link <?php echo $paginaAtual === 'usuarios.php' && strpos($_SERVER['PHP_SELF'], '/admin/') !== false ? 'active' : ''; ?>" href="<?php echo strpos($_SERVER['PHP_SELF'], '/admin/') !== false ? 'usuarios.php' : 'admin/usuarios.php'; ?>"><i class="fas fa-users-cog me-2" aria-hidden="true"></i>Usuários</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?php echo $paginaAtual === 'logs.php' && strpos($_SERVER['PHP_SELF'], '/admin/') !== false ? 'active' : ''; ?>" href="<?php echo strpos($_SERVER['PHP_SELF'], '/admin/') !== false ? 'logs.php' : 'admin/logs.php'; ?>"><i class="fas fa-history me-2" aria-hidden="true"></i>Logs</a>
+                    </li>
                 <?php else: ?>
                     <!-- Menu de Usuários de Empresa (gerente/operador) -->
                     <li class="nav-item">
@@ -73,6 +76,11 @@ $paginaAtual = basename($_SERVER['PHP_SELF']);
                     <li class="nav-item">
                         <a class="nav-link <?php echo $paginaAtual === 'relatorios.php' ? 'active' : ''; ?>" href="relatorios.php"><i class="fas fa-chart-bar me-2" aria-hidden="true"></i>Relatórios</a>
                     </li>
+                    <?php if ($tipoUsuario === 'gerente'): ?>
+                        <li class="nav-item">
+                            <a class="nav-link <?php echo $paginaAtual === 'logs.php' ? 'active' : ''; ?>" href="logs.php"><i class="fas fa-history me-2" aria-hidden="true"></i>Logs</a>
+                        </li>
+                    <?php endif; ?>
                     <li class="nav-item">
                         <?php
                         // exibe ícone/badges server-side (fallback) com contagem separada para pagar/receber
