@@ -168,3 +168,65 @@ CREATE TABLE rmg_log (
 -- Este usuário não possui empresa_id (é o dono da plataforma)
 INSERT INTO rmg_usuario (empresa_id, nome, usuario, senha, tipo_usuario, ativo) VALUES 
 (NULL, 'Administrador SaaS', 'admin', '$2y$10$w9lHUKAQRvDqCUkm959kvO2hmitAWFkdcV0mfCkpHMvzBOG5kSQ9S', 'super_admin', 1);
+
+-- ==================================================
+-- Índices recomendados para melhorar desempenho
+-- (foco: filtros por empresa_id, datas — calendário/relatórios — e joins por FK)
+-- ==================================================
+
+-- rmg_usuario: buscas por empresa_id / tipo
+ALTER TABLE rmg_usuario
+  ADD INDEX idx_usuario_empresa_id (empresa_id),
+  ADD INDEX idx_usuario_tipo_empresa (tipo_usuario, empresa_id);
+
+-- rmg_setor / rmg_fornecedor / rmg_cliente: busca por empresa + nome
+ALTER TABLE rmg_setor
+  ADD INDEX idx_setor_empresa_nome (empresa_id, nome(50));
+
+ALTER TABLE rmg_fornecedor
+  ADD INDEX idx_fornecedor_empresa_nome (empresa_id, nome(50));
+
+ALTER TABLE rmg_cliente
+  ADD INDEX idx_cliente_empresa_nome (empresa_id, nome(50));
+
+-- rmg_bem: filtros por empresa, setor e status
+ALTER TABLE rmg_bem
+  ADD INDEX idx_bem_empresa_setor_status (empresa_id, setor_id, status),
+  ADD INDEX idx_bem_empresa_descricao (empresa_id, descricao(100));
+
+-- rmg_manutencao: relatórios por bem e calendário
+ALTER TABLE rmg_manutencao
+  ADD INDEX idx_manutencao_empresa_bem_date (empresa_id, bem_id, data_manutencao),
+  ADD INDEX idx_manutencao_empresa_date (empresa_id, data_manutencao);
+
+-- rmg_conta_pagar / rmg_conta_receber: consultas por vencimento, status e entidade
+ALTER TABLE rmg_conta_pagar
+  ADD INDEX idx_contapagar_empresa_vencimento_status (empresa_id, data_vencimento, status),
+  ADD INDEX idx_contapagar_empresa_fornecedor (empresa_id, fornecedor_id);
+
+ALTER TABLE rmg_conta_receber
+  ADD INDEX idx_contareceber_empresa_vencimento_status (empresa_id, data_vencimento, status),
+  ADD INDEX idx_contareceber_empresa_cliente (empresa_id, cliente_id);
+
+-- rmg_pagamento / rmg_recebimento: relatórios por data e joins
+ALTER TABLE rmg_pagamento
+  ADD INDEX idx_pagamento_empresa_data (empresa_id, data_pagamento),
+  ADD INDEX idx_pagamento_conta (conta_pagar_id);
+
+ALTER TABLE rmg_recebimento
+  ADD INDEX idx_recebimento_empresa_data (empresa_id, data_recebimento),
+  ADD INDEX idx_recebimento_conta (conta_receber_id);
+
+-- rmg_log: composite comum (empresa + data)
+ALTER TABLE rmg_log
+  ADD INDEX idx_log_empresa_datahora (empresa_id, data_hora);
+
+-- NOTAS:
+-- • Usamos prefixos de tamanho somente onde necessário (nome, descricao) para reduzir tamanho do índice.
+-- • Se estiver aplicando estes ALTERs em um banco em produção, verifique LOCK/tempo de execução (ou usar pt-online-schema-change).
+-- • Se algum índice já existir, adapte para evitar erro (MySQL 8+: CREATE INDEX IF NOT EXISTS ou verificar antes).
+
+-- Pós-criação (executar no servidor):
+-- ANALYZE TABLE rmg_usuario, rmg_setor, rmg_fornecedor, rmg_cliente, rmg_bem, rmg_manutencao, rmg_conta_pagar, rmg_conta_receber, rmg_pagamento, rmg_recebimento, rmg_log;
+-- Revisar com EXPLAIN nas queries críticas e monitorar slow_query_log.
+
