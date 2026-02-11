@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../app/config.php';
 require_once __DIR__ . '/../app/controllers/LoginController.php';
 require_once __DIR__ . '/../app/dao/ContaPagarDAO.php';
 require_once __DIR__ . '/../app/dao/ContaReceberDAO.php';
@@ -26,10 +27,10 @@ $manutencaoDAO = new ManutencaoDAO();
 // ========================================
 // DADOS PARA KPIs PRINCIPAIS
 // ========================================
-$totaisPagar = $contaPagarDAO->obterTotais($empresaId);
-$totaisReceber = $contaReceberDAO->obterTotais($empresaId);
-$statsBens = $bemDAO->contarPorStatus($empresaId);
-$totalManutencoes = $manutencaoDAO->contarTotal($empresaId);
+$totaisPagar = SHOW_CONTAS_PAGAR ? $contaPagarDAO->obterTotais($empresaId) : [];
+$totaisReceber = SHOW_CONTAS_RECEBER ? $contaReceberDAO->obterTotais($empresaId) : [];
+$statsBens = SHOW_BENS ? $bemDAO->contarPorStatus($empresaId) : [];
+$totalManutencoes = SHOW_BENS ? $manutencaoDAO->contarTotal($empresaId) : 0;
 
 $totalPagarPendente = $totaisPagar['pendente'] ?? 0;
 $totalReceberPendente = $totaisReceber['pendente'] ?? 0;
@@ -41,43 +42,43 @@ $bensBaixados = $statsBens['baixado'] ?? 0;
 // ========================================
 // DADOS ADICIONAIS
 // ========================================
-$gastoManutencao30Dias = $manutencaoDAO->somaCustoUltimos30Dias($empresaId);
-$gastoManutencao12Meses = $manutencaoDAO->somaCustoUltimos12Meses($empresaId);
+$gastoManutencao30Dias = SHOW_BENS ? $manutencaoDAO->somaCustoUltimos30Dias($empresaId) : 0;
+$gastoManutencao12Meses = SHOW_BENS ? $manutencaoDAO->somaCustoUltimos12Meses($empresaId) : 0;
 
 // Contas vencidas
-$contasPagarVencidas = $contaPagarDAO->contarVencidas($empresaId);
-$valorPagarVencido = $contaPagarDAO->somaVencidas($empresaId);
-$contasReceberVencidas = $contaReceberDAO->contarVencidas($empresaId);
-$valorReceberVencido = $contaReceberDAO->somaVencidas($empresaId);
+$contasPagarVencidas = SHOW_CONTAS_PAGAR ? $contaPagarDAO->contarVencidas($empresaId) : 0;
+$valorPagarVencido = SHOW_CONTAS_PAGAR ? $contaPagarDAO->somaVencidas($empresaId) : 0;
+$contasReceberVencidas = SHOW_CONTAS_RECEBER ? $contaReceberDAO->contarVencidas($empresaId) : 0;
+$valorReceberVencido = SHOW_CONTAS_RECEBER ? $contaReceberDAO->somaVencidas($empresaId) : 0;
 
 // Mês atual
-$pagoMesAtual = $pagamentoDAO->obterTotalPagoMesAtual($empresaId);
-$pagoMesAnterior = $pagamentoDAO->obterTotalPagoMesAnterior($empresaId);
-$recebidoMesAtual = $recebimentoDAO->obterTotalRecebidoMesAtual($empresaId);
-$recebidoMesAnterior = $recebimentoDAO->obterTotalRecebidoMesAnterior($empresaId);
+$pagoMesAtual = SHOW_CONTAS_PAGAR ? $pagamentoDAO->obterTotalPagoMesAtual($empresaId) : 0;
+$pagoMesAnterior = SHOW_CONTAS_PAGAR ? $pagamentoDAO->obterTotalPagoMesAnterior($empresaId) : 0;
+$recebidoMesAtual = SHOW_CONTAS_RECEBER ? $recebimentoDAO->obterTotalRecebidoMesAtual($empresaId) : 0;
+$recebidoMesAnterior = SHOW_CONTAS_RECEBER ? $recebimentoDAO->obterTotalRecebidoMesAnterior($empresaId) : 0;
 
 // Vencimentos do mês
-$vencePagarMes = $contaPagarDAO->somaVencimentoMesAtual($empresaId);
-$venceReceberMes = $contaReceberDAO->somaVencimentoMesAtual($empresaId);
+$vencePagarMes = SHOW_CONTAS_PAGAR ? $contaPagarDAO->somaVencimentoMesAtual($empresaId) : 0;
+$venceReceberMes = SHOW_CONTAS_RECEBER ? $contaReceberDAO->somaVencimentoMesAtual($empresaId) : 0;
 
 // Saldo líquido
 $saldoLiquido = $totalReceberPendente - $totalPagarPendente;
 $saldoMesAtual = $recebidoMesAtual - $pagoMesAtual;
 
 // Patrimônio
-$valorPatrimonio = $bemDAO->somaValorAquisicaoAtivos($empresaId);
+$valorPatrimonio = SHOW_BENS ? $bemDAO->somaValorAquisicaoAtivos($empresaId) : 0;
 
 // Top bens e fornecedores
-$topBens = $bemDAO->obterTopManutencao($empresaId, 5);
-$topFornecedores = $pagamentoDAO->obterTopFornecedores($empresaId, 5);
-$bensPorSetor = $bemDAO->contarPorSetor($empresaId);
+$topBens = SHOW_BENS ? $bemDAO->obterTopManutencao($empresaId, 5) : [];
+$topFornecedores = SHOW_FORNECEDORES ? $pagamentoDAO->obterTopFornecedores($empresaId, 5) : [];
+$bensPorSetor = SHOW_BENS ? $bemDAO->contarPorSetor($empresaId) : [];
 
 // Próximas contas
-$proximasPagar = $contaPagarDAO->buscarProximasVencer($empresaId, 10, 8);
-$proximasReceber = $contaReceberDAO->buscarProximasVencer($empresaId, 10, 8);
+$proximasPagar = SHOW_CONTAS_PAGAR ? $contaPagarDAO->buscarProximasVencer($empresaId, 10, 8) : [];
+$proximasReceber = SHOW_CONTAS_RECEBER ? $contaReceberDAO->buscarProximasVencer($empresaId, 10, 8) : [];
 
 // Últimas manutenções
-$ultimasManutencoes = $manutencaoDAO->buscarUltimas($empresaId, 5);
+$ultimasManutencoes = SHOW_BENS ? $manutencaoDAO->buscarUltimas($empresaId, 5) : [];
 
 // Variação mês a mês (%)
 $varPago = $pagoMesAnterior > 0 ? (($pagoMesAtual - $pagoMesAnterior) / $pagoMesAnterior * 100) : 0;
@@ -100,9 +101,9 @@ for ($i = 11; $i >= 0; $i--) {
     ];
 }
 
-$rawPago = $pagamentoDAO->obterTotalPagoPorMesUltimos12Meses($empresaId);
-$rawRecebido = $recebimentoDAO->obterTotalRecebidoPorMesUltimos12Meses($empresaId);
-$rawManutencao = $manutencaoDAO->obterCustoPorMesUltimos12Meses($empresaId);
+$rawPago = SHOW_CONTAS_PAGAR ? $pagamentoDAO->obterTotalPagoPorMesUltimos12Meses($empresaId) : [];
+$rawRecebido = SHOW_CONTAS_RECEBER ? $recebimentoDAO->obterTotalRecebidoPorMesUltimos12Meses($empresaId) : [];
+$rawManutencao = SHOW_BENS ? $manutencaoDAO->obterCustoPorMesUltimos12Meses($empresaId) : [];
 
 foreach ($rawPago as $row) {
     if (isset($monthsData[$row['mes']])) {
@@ -195,425 +196,468 @@ include __DIR__ . '/includes/header.php';
     <!-- LINHA 1: KPIs PRINCIPAIS (6 cards) -->
     <!-- ================================ -->
     <div class="row g-3 mb-4">
-        <!-- Saldo Líquido Pendente -->
-        <div class="col-sm-6 col-xl-2">
-            <div class="card dashboard-kpi-card shadow-sm h-100 <?php echo $saldoLiquido >= 0 ? 'border-start-success' : 'border-start-danger'; ?>">
-                <div class="card-body py-3">
-                    <div class="d-flex align-items-center mb-2">
-                        <div class="kpi-icon <?php echo $saldoLiquido >= 0 ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'; ?>">
-                            <i class="fas fa-balance-scale"></i>
+        <?php if (SHOW_CONTAS_PAGAR || SHOW_CONTAS_RECEBER): ?>
+            <!-- Saldo Líquido Pendente -->
+            <div class="col-sm-6 col-xl-2">
+                <div class="card dashboard-kpi-card shadow-sm h-100 <?php echo $saldoLiquido >= 0 ? 'border-start-success' : 'border-start-danger'; ?>">
+                    <div class="card-body py-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="kpi-icon <?php echo $saldoLiquido >= 0 ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'; ?>">
+                                <i class="fas fa-balance-scale"></i>
+                            </div>
+                            <span class="kpi-label ms-2">Saldo Pendente</span>
                         </div>
-                        <span class="kpi-label ms-2">Saldo Pendente</span>
+                        <div class="kpi-value <?php echo $saldoLiquido >= 0 ? 'text-success' : 'text-danger'; ?>">
+                            <?php echo formatarMoeda($saldoLiquido); ?>
+                        </div>
+                        <small class="text-muted">Receber - Pagar</small>
                     </div>
-                    <div class="kpi-value <?php echo $saldoLiquido >= 0 ? 'text-success' : 'text-danger'; ?>">
-                        <?php echo formatarMoeda($saldoLiquido); ?>
-                    </div>
-                    <small class="text-muted">Receber - Pagar</small>
                 </div>
             </div>
-        </div>
+        <?php endif; ?>
 
-        <!-- A Pagar Pendente -->
-        <div class="col-sm-6 col-xl-2">
-            <div class="card dashboard-kpi-card shadow-sm h-100 border-start-danger">
-                <div class="card-body py-3">
-                    <div class="d-flex align-items-center mb-2">
-                        <div class="kpi-icon bg-danger-subtle text-danger">
-                            <i class="fas fa-file-invoice-dollar"></i>
+        <?php if (SHOW_CONTAS_PAGAR): ?>
+            <!-- A Pagar Pendente -->
+            <div class="col-sm-6 col-xl-2">
+                <div class="card dashboard-kpi-card shadow-sm h-100 border-start-danger">
+                    <div class="card-body py-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="kpi-icon bg-danger-subtle text-danger">
+                                <i class="fas fa-file-invoice-dollar"></i>
+                            </div>
+                            <span class="kpi-label ms-2">A Pagar</span>
                         </div>
-                        <span class="kpi-label ms-2">A Pagar</span>
+                        <div class="kpi-value text-danger"><?php echo formatarMoeda($totalPagarPendente); ?></div>
+                        <small class="text-muted"><?php echo $qtdPagarPendentes; ?> conta(s) pendente(s)</small>
                     </div>
-                    <div class="kpi-value text-danger"><?php echo formatarMoeda($totalPagarPendente); ?></div>
-                    <small class="text-muted"><?php echo $qtdPagarPendentes; ?> conta(s) pendente(s)</small>
                 </div>
             </div>
-        </div>
+        <?php endif; ?>
 
-        <!-- A Receber Pendente -->
-        <div class="col-sm-6 col-xl-2">
-            <div class="card dashboard-kpi-card shadow-sm h-100 border-start-success">
-                <div class="card-body py-3">
-                    <div class="d-flex align-items-center mb-2">
-                        <div class="kpi-icon bg-success-subtle text-success">
-                            <i class="fas fa-hand-holding-usd"></i>
+        <?php if (SHOW_CONTAS_RECEBER): ?>
+            <!-- A Receber Pendente -->
+            <div class="col-sm-6 col-xl-2">
+                <div class="card dashboard-kpi-card shadow-sm h-100 border-start-success">
+                    <div class="card-body py-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="kpi-icon bg-success-subtle text-success">
+                                <i class="fas fa-hand-holding-usd"></i>
+                            </div>
+                            <span class="kpi-label ms-2">A Receber</span>
                         </div>
-                        <span class="kpi-label ms-2">A Receber</span>
+                        <div class="kpi-value text-success"><?php echo formatarMoeda($totalReceberPendente); ?></div>
+                        <small class="text-muted">Pendente total</small>
                     </div>
-                    <div class="kpi-value text-success"><?php echo formatarMoeda($totalReceberPendente); ?></div>
-                    <small class="text-muted">Pendente total</small>
                 </div>
             </div>
-        </div>
+        <?php endif; ?>
 
-        <!-- Saldo Mês Atual -->
-        <div class="col-sm-6 col-xl-2">
-            <div class="card dashboard-kpi-card shadow-sm h-100 <?php echo $saldoMesAtual >= 0 ? 'border-start-info' : 'border-start-warning'; ?>">
-                <div class="card-body py-3">
-                    <div class="d-flex align-items-center mb-2">
-                        <div class="kpi-icon <?php echo $saldoMesAtual >= 0 ? 'bg-info-subtle text-info' : 'bg-warning-subtle text-warning'; ?>">
-                            <i class="fas fa-calendar-check"></i>
+        <?php if (SHOW_CONTAS_PAGAR || SHOW_CONTAS_RECEBER): ?>
+            <!-- Saldo Mês Atual -->
+            <div class="col-sm-6 col-xl-2">
+                <div class="card dashboard-kpi-card shadow-sm h-100 <?php echo $saldoMesAtual >= 0 ? 'border-start-info' : 'border-start-warning'; ?>">
+                    <div class="card-body py-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="kpi-icon <?php echo $saldoMesAtual >= 0 ? 'bg-info-subtle text-info' : 'bg-warning-subtle text-warning'; ?>">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <span class="kpi-label ms-2">Saldo do Mês</span>
                         </div>
-                        <span class="kpi-label ms-2">Saldo do Mês</span>
+                        <div class="kpi-value <?php echo $saldoMesAtual >= 0 ? 'text-info' : 'text-warning'; ?>">
+                            <?php echo formatarMoeda($saldoMesAtual); ?>
+                        </div>
+                        <small class="text-muted">Recebido - Pago (mês atual)</small>
                     </div>
-                    <div class="kpi-value <?php echo $saldoMesAtual >= 0 ? 'text-info' : 'text-warning'; ?>">
-                        <?php echo formatarMoeda($saldoMesAtual); ?>
-                    </div>
-                    <small class="text-muted">Recebido - Pago (mês atual)</small>
                 </div>
             </div>
-        </div>
+        <?php endif; ?>
 
-        <!-- Patrimônio (Bens Ativos) -->
-        <div class="col-sm-6 col-xl-2">
-            <div class="card dashboard-kpi-card shadow-sm h-100 border-start-primary">
-                <div class="card-body py-3">
-                    <div class="d-flex align-items-center mb-2">
-                        <div class="kpi-icon bg-primary-subtle text-primary">
-                            <i class="fas fa-building"></i>
+        <?php if (SHOW_BENS): ?>
+            <!-- Patrimônio (Bens Ativos) -->
+            <div class="col-sm-6 col-xl-2">
+                <div class="card dashboard-kpi-card shadow-sm h-100 border-start-primary">
+                    <div class="card-body py-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="kpi-icon bg-primary-subtle text-primary">
+                                <i class="fas fa-building"></i>
+                            </div>
+                            <span class="kpi-label ms-2">Patrimônio</span>
                         </div>
-                        <span class="kpi-label ms-2">Patrimônio</span>
+                        <div class="kpi-value text-primary"><?php echo formatarMoeda($valorPatrimonio); ?></div>
+                        <small class="text-muted"><?php echo $bensAtivos; ?> ben(s) ativo(s)</small>
                     </div>
-                    <div class="kpi-value text-primary"><?php echo formatarMoeda($valorPatrimonio); ?></div>
-                    <small class="text-muted"><?php echo $bensAtivos; ?> ben(s) ativo(s)</small>
                 </div>
             </div>
-        </div>
 
-        <!-- Manutenção -->
-        <div class="col-sm-6 col-xl-2">
-            <div class="card dashboard-kpi-card shadow-sm h-100 border-start-warning">
-                <div class="card-body py-3">
-                    <div class="d-flex align-items-center mb-2">
-                        <div class="kpi-icon bg-warning-subtle text-warning">
-                            <i class="fas fa-tools"></i>
+            <!-- Manutenção -->
+            <div class="col-sm-6 col-xl-2">
+                <div class="card dashboard-kpi-card shadow-sm h-100 border-start-warning">
+                    <div class="card-body py-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="kpi-icon bg-warning-subtle text-warning">
+                                <i class="fas fa-tools"></i>
+                            </div>
+                            <span class="kpi-label ms-2">Manutenção</span>
                         </div>
-                        <span class="kpi-label ms-2">Manutenção</span>
+                        <div class="kpi-value text-warning"><?php echo formatarMoeda($gastoManutencao30Dias); ?></div>
+                        <small class="text-muted">Últimos 30 dias</small>
                     </div>
-                    <div class="kpi-value text-warning"><?php echo formatarMoeda($gastoManutencao30Dias); ?></div>
-                    <small class="text-muted">Últimos 30 dias</small>
                 </div>
             </div>
-        </div>
+        <?php endif; ?>
     </div>
 
     <!-- ================================ -->
     <!-- LINHA 2: RESUMO DO MÊS (cards comparativos) -->
     <!-- ================================ -->
     <div class="row g-3 mb-4">
-        <div class="col-md-3">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <p class="text-muted mb-1 small fw-semibold text-uppercase">Pago este mês</p>
-                            <h4 class="mb-1 fw-bold"><?php echo formatarMoeda($pagoMesAtual); ?></h4>
+        <?php if (SHOW_CONTAS_PAGAR): ?>
+            <div class="col-md-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <p class="text-muted mb-1 small fw-semibold text-uppercase">Pago este mês</p>
+                                <h4 class="mb-1 fw-bold"><?php echo formatarMoeda($pagoMesAtual); ?></h4>
+                            </div>
+                            <?php echo badgeVariacao($varPago, true); ?>
                         </div>
-                        <?php echo badgeVariacao($varPago, true); ?>
-                    </div>
-                    <div class="mt-2">
-                        <small class="text-muted">Mês anterior: <?php echo formatarMoeda($pagoMesAnterior); ?></small>
-                    </div>
-                    <div class="progress mt-2" style="height: 4px;">
-                        <div class="progress-bar bg-danger" style="width: <?php echo $pagoMesAnterior > 0 ? min(100, ($pagoMesAtual / max($pagoMesAnterior, 1)) * 100) : 0; ?>%"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <p class="text-muted mb-1 small fw-semibold text-uppercase">Recebido este mês</p>
-                            <h4 class="mb-1 fw-bold"><?php echo formatarMoeda($recebidoMesAtual); ?></h4>
+                        <div class="mt-2">
+                            <small class="text-muted">Mês anterior: <?php echo formatarMoeda($pagoMesAnterior); ?></small>
                         </div>
-                        <?php echo badgeVariacao($varRecebido); ?>
-                    </div>
-                    <div class="mt-2">
-                        <small class="text-muted">Mês anterior: <?php echo formatarMoeda($recebidoMesAnterior); ?></small>
-                    </div>
-                    <div class="progress mt-2" style="height: 4px;">
-                        <div class="progress-bar bg-success" style="width: <?php echo $recebidoMesAnterior > 0 ? min(100, ($recebidoMesAtual / max($recebidoMesAnterior, 1)) * 100) : 0; ?>%"></div>
+                        <div class="progress mt-2" style="height: 4px;">
+                            <div class="progress-bar bg-danger" style="width: <?php echo $pagoMesAnterior > 0 ? min(100, ($pagoMesAtual / max($pagoMesAnterior, 1)) * 100) : 0; ?>%"></div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <p class="text-muted mb-1 small fw-semibold text-uppercase">Vence este mês (Pagar)</p>
-                    <h4 class="mb-1 fw-bold text-danger"><?php echo formatarMoeda($vencePagarMes); ?></h4>
-                    <div class="mt-2">
-                        <small class="text-muted">
-                            <?php if ($contasPagarVencidas > 0): ?>
-                                <span class="text-danger fw-bold"><i class="fas fa-exclamation-circle me-1"></i><?php echo $contasPagarVencidas; ?> vencida(s)</span>
-                            <?php else: ?>
-                                <span class="text-success"><i class="fas fa-check-circle me-1"></i>Nenhuma vencida</span>
-                            <?php endif; ?>
-                        </small>
+        <?php endif; ?>
+
+        <?php if (SHOW_CONTAS_RECEBER): ?>
+            <div class="col-md-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <p class="text-muted mb-1 small fw-semibold text-uppercase">Recebido este mês</p>
+                                <h4 class="mb-1 fw-bold"><?php echo formatarMoeda($recebidoMesAtual); ?></h4>
+                            </div>
+                            <?php echo badgeVariacao($varRecebido); ?>
+                        </div>
+                        <div class="mt-2">
+                            <small class="text-muted">Mês anterior: <?php echo formatarMoeda($recebidoMesAnterior); ?></small>
+                        </div>
+                        <div class="progress mt-2" style="height: 4px;">
+                            <div class="progress-bar bg-success" style="width: <?php echo $recebidoMesAnterior > 0 ? min(100, ($recebidoMesAtual / max($recebidoMesAnterior, 1)) * 100) : 0; ?>%"></div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <p class="text-muted mb-1 small fw-semibold text-uppercase">Vence este mês (Receber)</p>
-                    <h4 class="mb-1 fw-bold text-success"><?php echo formatarMoeda($venceReceberMes); ?></h4>
-                    <div class="mt-2">
-                        <small class="text-muted">
-                            <?php if ($contasReceberVencidas > 0): ?>
-                                <span class="text-warning fw-bold"><i class="fas fa-clock me-1"></i><?php echo $contasReceberVencidas; ?> em atraso</span>
-                            <?php else: ?>
-                                <span class="text-success"><i class="fas fa-check-circle me-1"></i>Tudo em dia</span>
-                            <?php endif; ?>
-                        </small>
+        <?php endif; ?>
+
+        <?php if (SHOW_CONTAS_PAGAR): ?>
+            <div class="col-md-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <p class="text-muted mb-1 small fw-semibold text-uppercase">Vence este mês (Pagar)</p>
+                        <h4 class="mb-1 fw-bold text-danger"><?php echo formatarMoeda($vencePagarMes); ?></h4>
+                        <div class="mt-2">
+                            <small class="text-muted">
+                                <?php if ($contasPagarVencidas > 0): ?>
+                                    <span class="text-danger fw-bold"><i class="fas fa-exclamation-circle me-1"></i><?php echo $contasPagarVencidas; ?> vencida(s)</span>
+                                <?php else: ?>
+                                    <span class="text-success"><i class="fas fa-check-circle me-1"></i>Nenhuma vencida</span>
+                                <?php endif; ?>
+                            </small>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        <?php endif; ?>
+
+        <?php if (SHOW_CONTAS_RECEBER): ?>
+            <div class="col-md-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <p class="text-muted mb-1 small fw-semibold text-uppercase">Vence este mês (Receber)</p>
+                        <h4 class="mb-1 fw-bold text-success"><?php echo formatarMoeda($venceReceberMes); ?></h4>
+                        <div class="mt-2">
+                            <small class="text-muted">
+                                <?php if ($contasReceberVencidas > 0): ?>
+                                    <span class="text-warning fw-bold"><i class="fas fa-clock me-1"></i><?php echo $contasReceberVencidas; ?> em atraso</span>
+                                <?php else: ?>
+                                    <span class="text-success"><i class="fas fa-check-circle me-1"></i>Tudo em dia</span>
+                                <?php endif; ?>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
     </div>
 
     <!-- ================================ -->
     <!-- LINHA 3: TABELAS DE PRÓXIMAS CONTAS -->
     <!-- ================================ -->
     <div class="row g-3 mb-4">
-        <!-- Próximas Contas a Pagar -->
-        <div class="col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-exclamation-circle me-2 text-danger"></i>Contas a Pagar — Próximas / Vencidas</h5>
-                    <a href="contas_pagar.php" class="btn btn-sm btn-outline-danger">Ver Todas</a>
-                </div>
-                <div class="card-body p-0">
-                    <?php if (count($proximasPagar) > 0): ?>
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0 table-dashboard">
-                                <thead>
-                                    <tr>
-                                        <th>Descrição</th>
-                                        <th>Fornecedor</th>
-                                        <th class="text-end">Valor</th>
-                                        <th class="text-center">Vencimento</th>
-                                        <th class="text-center">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($proximasPagar as $cp): ?>
+        <?php if (SHOW_CONTAS_PAGAR): ?>
+            <!-- Próximas Contas a Pagar -->
+            <div class="col-lg-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-exclamation-circle me-2 text-danger"></i>Contas a Pagar — Próximas / Vencidas</h5>
+                        <a href="contas_pagar.php" class="btn btn-sm btn-outline-danger">Ver Todas</a>
+                    </div>
+                    <div class="card-body p-0">
+                        <?php if (count($proximasPagar) > 0): ?>
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0 table-dashboard">
+                                    <thead>
                                         <tr>
-                                            <td class="fw-medium"><?php echo htmlspecialchars(mb_strimwidth($cp['descricao'], 0, 30, '...')); ?></td>
-                                            <td><small class="text-muted"><?php echo htmlspecialchars($cp['nome_fornecedor'] ?? '—'); ?></small></td>
-                                            <td class="text-end fw-bold"><?php echo formatarMoeda($cp['valor']); ?></td>
-                                            <td class="text-center">
-                                                <?php echo date('d/m/Y', strtotime($cp['data_vencimento'])); ?>
-                                            </td>
-                                            <td class="text-center">
-                                                <?php
-                                                $diasRest = (int)$cp['dias_restantes'];
-                                                if ($diasRest < 0): ?>
-                                                    <span class="badge bg-danger"><i class="fas fa-exclamation-triangle me-1"></i>Vencida (<?php echo abs($diasRest); ?>d)</span>
-                                                <?php elseif ($diasRest == 0): ?>
-                                                    <span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i>Hoje</span>
-                                                <?php elseif ($diasRest <= 3): ?>
-                                                    <span class="badge bg-warning text-dark"><?php echo $diasRest; ?> dia(s)</span>
-                                                <?php else: ?>
-                                                    <span class="badge bg-info"><?php echo $diasRest; ?> dias</span>
-                                                <?php endif; ?>
-                                            </td>
+                                            <th>Descrição</th>
+                                            <th>Fornecedor</th>
+                                            <th class="text-end">Valor</th>
+                                            <th class="text-center">Vencimento</th>
+                                            <th class="text-center">Status</th>
                                         </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    <?php else: ?>
-                        <div class="text-center py-4">
-                            <i class="fas fa-check-circle fa-3x text-success mb-3" style="opacity:0.3"></i>
-                            <p class="text-muted">Nenhuma conta a pagar próxima do vencimento.</p>
-                        </div>
-                    <?php endif; ?>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($proximasPagar as $cp): ?>
+                                            <tr>
+                                                <td class="fw-medium"><?php echo htmlspecialchars(mb_strimwidth($cp['descricao'], 0, 30, '...')); ?></td>
+                                                <td><small class="text-muted"><?php echo htmlspecialchars($cp['nome_fornecedor'] ?? '—'); ?></small></td>
+                                                <td class="text-end fw-bold"><?php echo formatarMoeda($cp['valor']); ?></td>
+                                                <td class="text-center">
+                                                    <?php echo date('d/m/Y', strtotime($cp['data_vencimento'])); ?>
+                                                </td>
+                                                <td class="text-center">
+                                                    <?php
+                                                    $diasRest = (int)$cp['dias_restantes'];
+                                                    if ($diasRest < 0): ?>
+                                                        <span class="badge bg-danger"><i class="fas fa-exclamation-triangle me-1"></i>Vencida (<?php echo abs($diasRest); ?>d)</span>
+                                                    <?php elseif ($diasRest == 0): ?>
+                                                        <span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i>Hoje</span>
+                                                    <?php elseif ($diasRest <= 3): ?>
+                                                        <span class="badge bg-warning text-dark"><?php echo $diasRest; ?> dia(s)</span>
+                                                    <?php else: ?>
+                                                        <span class="badge bg-info"><?php echo $diasRest; ?> dias</span>
+                                                    <?php endif; ?>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <?php else: ?>
+                            <div class="text-center py-4">
+                                <i class="fas fa-check-circle fa-3x text-success mb-3" style="opacity:0.3"></i>
+                                <p class="text-muted">Nenhuma conta a pagar próxima do vencimento.</p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
-        </div>
+        <?php endif; ?>
 
-        <!-- Próximas Contas a Receber -->
-        <div class="col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-hand-holding-usd me-2 text-success"></i>Contas a Receber — Próximas / Vencidas</h5>
-                    <a href="contas_receber.php" class="btn btn-sm btn-outline-success">Ver Todas</a>
-                </div>
-                <div class="card-body p-0">
-                    <?php if (count($proximasReceber) > 0): ?>
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0 table-dashboard">
-                                <thead>
-                                    <tr>
-                                        <th>Descrição</th>
-                                        <th>Cliente</th>
-                                        <th class="text-end">Valor</th>
-                                        <th class="text-center">Vencimento</th>
-                                        <th class="text-center">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($proximasReceber as $cr): ?>
+        <?php if (SHOW_CONTAS_RECEBER): ?>
+            <!-- Próximas Contas a Receber -->
+            <div class="col-lg-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-hand-holding-usd me-2 text-success"></i>Contas a Receber — Próximas / Vencidas</h5>
+                        <a href="contas_receber.php" class="btn btn-sm btn-outline-success">Ver Todas</a>
+                    </div>
+                    <div class="card-body p-0">
+                        <?php if (count($proximasReceber) > 0): ?>
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0 table-dashboard">
+                                    <thead>
                                         <tr>
-                                            <td class="fw-medium"><?php echo htmlspecialchars(mb_strimwidth($cr['descricao'], 0, 30, '...')); ?></td>
-                                            <td><small class="text-muted"><?php echo htmlspecialchars($cr['nome_cliente'] ?? '—'); ?></small></td>
-                                            <td class="text-end fw-bold"><?php echo formatarMoeda($cr['valor']); ?></td>
-                                            <td class="text-center">
-                                                <?php echo date('d/m/Y', strtotime($cr['data_vencimento'])); ?>
-                                            </td>
-                                            <td class="text-center">
-                                                <?php
-                                                $diasRest = (int)$cr['dias_restantes'];
-                                                if ($diasRest < 0): ?>
-                                                    <span class="badge bg-danger"><i class="fas fa-exclamation-triangle me-1"></i>Vencida (<?php echo abs($diasRest); ?>d)</span>
-                                                <?php elseif ($diasRest == 0): ?>
-                                                    <span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i>Hoje</span>
-                                                <?php elseif ($diasRest <= 3): ?>
-                                                    <span class="badge bg-warning text-dark"><?php echo $diasRest; ?> dia(s)</span>
-                                                <?php else: ?>
-                                                    <span class="badge bg-info"><?php echo $diasRest; ?> dias</span>
-                                                <?php endif; ?>
-                                            </td>
+                                            <th>Descrição</th>
+                                            <th>Cliente</th>
+                                            <th class="text-end">Valor</th>
+                                            <th class="text-center">Vencimento</th>
+                                            <th class="text-center">Status</th>
                                         </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    <?php else: ?>
-                        <div class="text-center py-4">
-                            <i class="fas fa-check-circle fa-3x text-success mb-3" style="opacity:0.3"></i>
-                            <p class="text-muted">Nenhuma conta a receber próxima do vencimento.</p>
-                        </div>
-                    <?php endif; ?>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($proximasReceber as $cr): ?>
+                                            <tr>
+                                                <td class="fw-medium"><?php echo htmlspecialchars(mb_strimwidth($cr['descricao'], 0, 30, '...')); ?></td>
+                                                <td><small class="text-muted"><?php echo htmlspecialchars($cr['nome_cliente'] ?? '—'); ?></small></td>
+                                                <td class="text-end fw-bold"><?php echo formatarMoeda($cr['valor']); ?></td>
+                                                <td class="text-center">
+                                                    <?php echo date('d/m/Y', strtotime($cr['data_vencimento'])); ?>
+                                                </td>
+                                                <td class="text-center">
+                                                    <?php
+                                                    $diasRest = (int)$cr['dias_restantes'];
+                                                    if ($diasRest < 0): ?>
+                                                        <span class="badge bg-danger"><i class="fas fa-exclamation-triangle me-1"></i>Vencida (<?php echo abs($diasRest); ?>d)</span>
+                                                    <?php elseif ($diasRest == 0): ?>
+                                                        <span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i>Hoje</span>
+                                                    <?php elseif ($diasRest <= 3): ?>
+                                                        <span class="badge bg-warning text-dark"><?php echo $diasRest; ?> dia(s)</span>
+                                                    <?php else: ?>
+                                                        <span class="badge bg-info"><?php echo $diasRest; ?> dias</span>
+                                                    <?php endif; ?>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <?php else: ?>
+                            <div class="text-center py-4">
+                                <i class="fas fa-check-circle fa-3x text-success mb-3" style="opacity:0.3"></i>
+                                <p class="text-muted">Nenhuma conta a receber próxima do vencimento.</p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
-        </div>
+        <?php endif; ?>
     </div>
 
     <!-- ================================ -->
     <!-- LINHA 4: GRÁFICOS PRINCIPAIS -->
     <!-- ================================ -->
     <div class="row g-3 mb-4">
-        <!-- Fluxo de Caixa (Evolução 12 meses) -->
-        <div class="col-lg-8">
-            <div class="card shadow-sm h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-chart-area me-2" style="color:var(--rmg-primary)"></i>Fluxo de Caixa — Últimos 12 Meses</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="fluxoCaixaChart" height="100"></canvas>
-                </div>
-            </div>
-        </div>
-        <!-- Saldo Mensal -->
-        <div class="col-lg-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2" style="color:var(--rmg-info)"></i>Saldo Mensal (12 Meses)</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="saldoMensalChart" height="200"></canvas>
+        <?php if (SHOW_CONTAS_PAGAR || SHOW_CONTAS_RECEBER || SHOW_BENS): ?>
+            <!-- Fluxo de Caixa (Evolução 12 meses) -->
+            <div class="col-lg-8">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-chart-area me-2" style="color:var(--rmg-primary)"></i>Fluxo de Caixa — Últimos 12 Meses</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="fluxoCaixaChart" height="100"></canvas>
+                    </div>
                 </div>
             </div>
-        </div>
+        <?php endif; ?>
+
+        <?php if (SHOW_CONTAS_PAGAR || SHOW_CONTAS_RECEBER): ?>
+            <!-- Saldo Mensal -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-chart-bar me-2" style="color:var(--rmg-info)"></i>Saldo Mensal (12 Meses)</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="saldoMensalChart" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
     </div>
 
     <!-- ================================ -->
     <!-- LINHA 5: GRÁFICOS SECUNDÁRIOS -->
     <!-- ================================ -->
     <div class="row g-3 mb-4">
-        <!-- Custos de Manutenção -->
-        <div class="col-lg-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-wrench me-2" style="color:var(--rmg-warning)"></i>Manutenção (12 Meses)</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="evolucaoManutencaoChart"></canvas>
-                </div>
-            </div>
-        </div>
-        <!-- Top Fornecedores -->
-        <div class="col-lg-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-truck me-2" style="color:var(--rmg-danger)"></i>Top Fornecedores (12 Meses)</h5>
-                </div>
-                <div class="card-body">
-                    <?php if (count($topFornecedores) > 0): ?>
-                        <canvas id="topFornecedoresChart"></canvas>
-                    <?php else: ?>
-                        <div class="text-center py-4">
-                            <i class="fas fa-truck fa-3x text-muted mb-3" style="opacity:0.2"></i>
-                            <p class="text-muted">Nenhum pagamento registrado nos últimos 12 meses.</p>
-                        </div>
-                    <?php endif; ?>
+        <?php if (SHOW_BENS): ?>
+            <!-- Custos de Manutenção -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-wrench me-2" style="color:var(--rmg-warning)"></i>Manutenção (12 Meses)</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="evolucaoManutencaoChart"></canvas>
+                    </div>
                 </div>
             </div>
-        </div>
-        <!-- Distribuição de Bens por Setor -->
-        <div class="col-lg-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-th-large me-2" style="color:var(--rmg-primary)"></i>Bens por Setor</h5>
-                </div>
-                <div class="card-body d-flex align-items-center justify-content-center">
-                    <?php if (count($bensPorSetor) > 0): ?>
-                        <div style="height: 260px; width: 100%;">
-                            <canvas id="bensSetorChart"></canvas>
-                        </div>
-                    <?php else: ?>
-                        <div class="text-center py-4">
-                            <i class="fas fa-th-large fa-3x text-muted mb-3" style="opacity:0.2"></i>
-                            <p class="text-muted">Nenhum bem ativo cadastrado.</p>
-                        </div>
-                    <?php endif; ?>
+        <?php endif; ?>
+
+        <?php if (SHOW_FORNECEDORES): ?>
+            <!-- Top Fornecedores -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-truck me-2" style="color:var(--rmg-danger)"></i>Top Fornecedores (12 Meses)</h5>
+                    </div>
+                    <div class="card-body">
+                        <?php if (count($topFornecedores) > 0): ?>
+                            <canvas id="topFornecedoresChart"></canvas>
+                        <?php else: ?>
+                            <div class="text-center py-4">
+                                <i class="fas fa-truck fa-3x text-muted mb-3" style="opacity:0.2"></i>
+                                <p class="text-muted">Nenhum pagamento registrado nos últimos 12 meses.</p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
-        </div>
+        <?php endif; ?>
+
+        <?php if (SHOW_BENS): ?>
+            <!-- Distribuição de Bens por Setor -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-th-large me-2" style="color:var(--rmg-primary)"></i>Bens por Setor</h5>
+                    </div>
+                    <div class="card-body d-flex align-items-center justify-content-center">
+                        <?php if (count($bensPorSetor) > 0): ?>
+                            <div style="height: 260px; width: 100%;">
+                                <canvas id="bensSetorChart"></canvas>
+                            </div>
+                        <?php else: ?>
+                            <div class="text-center py-4">
+                                <i class="fas fa-th-large fa-3x text-muted mb-3" style="opacity:0.2"></i>
+                                <p class="text-muted">Nenhum bem ativo cadastrado.</p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
     </div>
 
     <!-- ================================ -->
     <!-- LINHA 6: TOP BENS MANUTENÇÃO + STATUS BENS -->
     <!-- ================================ -->
     <div class="row g-3 mb-4">
-        <div class="col-lg-8">
-            <div class="card shadow-sm h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-tools me-2" style="color:var(--rmg-warning)"></i>Top 5 Bens: Maior Custo de Manutenção</h5>
-                    <small class="text-muted">Manutenção vs Aquisição</small>
-                </div>
-                <div class="card-body">
-                    <?php if (count($topBens) > 0): ?>
-                        <canvas id="topBensChart"></canvas>
-                    <?php else: ?>
-                        <div class="text-center py-4">
-                            <i class="fas fa-tools fa-3x text-muted mb-3" style="opacity:0.2"></i>
-                            <p class="text-muted">Nenhuma manutenção registrada.</p>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-chart-pie me-2" style="color:var(--rmg-info)"></i>Status dos Bens</h5>
-                </div>
-                <div class="card-body d-flex align-items-center justify-content-center">
-                    <div style="height: 240px; width: 100%;">
-                        <canvas id="bensStatusChart"></canvas>
+        <?php if (SHOW_BENS): ?>
+            <div class="col-lg-8">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-tools me-2" style="color:var(--rmg-warning)"></i>Top 5 Bens: Maior Custo de Manutenção</h5>
+                        <small class="text-muted">Manutenção vs Aquisição</small>
+                    </div>
+                    <div class="card-body">
+                        <?php if (count($topBens) > 0): ?>
+                            <canvas id="topBensChart"></canvas>
+                        <?php else: ?>
+                            <div class="text-center py-4">
+                                <i class="fas fa-tools fa-3x text-muted mb-3" style="opacity:0.2"></i>
+                                <p class="text-muted">Nenhuma manutenção registrada.</p>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
-                <div class="card-footer bg-transparent border-0 text-center pb-3">
-                    <span class="badge bg-primary bg-opacity-10 text-primary me-2"><i class="fas fa-circle me-1"></i>Ativos: <?php echo $bensAtivos; ?></span>
-                    <span class="badge bg-secondary bg-opacity-10 text-secondary"><i class="fas fa-circle me-1"></i>Baixados: <?php echo $bensBaixados; ?></span>
+            </div>
+        <?php endif; ?>
+
+        <?php if (SHOW_BENS): ?>
+            <div class="col-lg-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-chart-pie me-2" style="color:var(--rmg-info)"></i>Status dos Bens</h5>
+                    </div>
+                    <div class="card-body d-flex align-items-center justify-content-center">
+                        <div style="height: 240px; width: 100%;">
+                            <canvas id="bensStatusChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-0 text-center pb-3">
+                        <span class="badge bg-primary bg-opacity-10 text-primary me-2"><i class="fas fa-circle me-1"></i>Ativos: <?php echo $bensAtivos; ?></span>
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary"><i class="fas fa-circle me-1"></i>Baixados: <?php echo $bensBaixados; ?></span>
+                    </div>
                 </div>
             </div>
-        </div>
+        <?php endif; ?>
     </div>
 
 
@@ -622,46 +666,48 @@ include __DIR__ . '/includes/header.php';
     <!-- LINHA 7: ÚLTIMAS MANUTENÇÕES + AÇÕES RÁPIDAS -->
     <!-- ================================ -->
     <div class="row g-3 mb-4">
-        <!-- Últimas Manutenções -->
-        <div class="col-lg-8">
-            <div class="card shadow-sm h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-history me-2" style="color:var(--rmg-warning)"></i>Últimas Manutenções Realizadas</h5>
-                    <a href="manutencoes.php" class="btn btn-sm btn-outline-warning">Ver Todas</a>
-                </div>
-                <div class="card-body p-0">
-                    <?php if (count($ultimasManutencoes) > 0): ?>
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0 table-dashboard">
-                                <thead>
-                                    <tr>
-                                        <th>Data</th>
-                                        <th>Bem</th>
-                                        <th>Descrição</th>
-                                        <th class="text-end">Custo</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($ultimasManutencoes as $um): ?>
+        <?php if (SHOW_BENS): ?>
+            <!-- Últimas Manutenções -->
+            <div class="col-lg-8">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-history me-2" style="color:var(--rmg-warning)"></i>Últimas Manutenções Realizadas</h5>
+                        <a href="manutencoes.php" class="btn btn-sm btn-outline-warning">Ver Todas</a>
+                    </div>
+                    <div class="card-body p-0">
+                        <?php if (count($ultimasManutencoes) > 0): ?>
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0 table-dashboard">
+                                    <thead>
                                         <tr>
-                                            <td><?php echo date('d/m/Y', strtotime($um['data_manutencao'])); ?></td>
-                                            <td class="fw-medium"><?php echo htmlspecialchars($um['descricao_bem']); ?></td>
-                                            <td><small class="text-muted"><?php echo htmlspecialchars(mb_strimwidth($um['descricao'], 0, 40, '...')); ?></small></td>
-                                            <td class="text-end fw-bold text-warning"><?php echo formatarMoeda($um['custo']); ?></td>
+                                            <th>Data</th>
+                                            <th>Bem</th>
+                                            <th>Descrição</th>
+                                            <th class="text-end">Custo</th>
                                         </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    <?php else: ?>
-                        <div class="text-center py-4">
-                            <i class="fas fa-wrench fa-3x text-muted mb-3" style="opacity:0.2"></i>
-                            <p class="text-muted">Nenhuma manutenção registrada.</p>
-                        </div>
-                    <?php endif; ?>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($ultimasManutencoes as $um): ?>
+                                            <tr>
+                                                <td><?php echo date('d/m/Y', strtotime($um['data_manutencao'])); ?></td>
+                                                <td class="fw-medium"><?php echo htmlspecialchars($um['descricao_bem']); ?></td>
+                                                <td><small class="text-muted"><?php echo htmlspecialchars(mb_strimwidth($um['descricao'], 0, 40, '...')); ?></small></td>
+                                                <td class="text-end fw-bold text-warning"><?php echo formatarMoeda($um['custo']); ?></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <?php else: ?>
+                            <div class="text-center py-4">
+                                <i class="fas fa-wrench fa-3x text-muted mb-3" style="opacity:0.2"></i>
+                                <p class="text-muted">Nenhuma manutenção registrada.</p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
-        </div>
+        <?php endif; ?>
 
         <!-- Ações Rápidas -->
         <div class="col-lg-4">
@@ -671,18 +717,30 @@ include __DIR__ . '/includes/header.php';
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
-                        <a href="contas_pagar.php" class="btn btn-outline-danger btn-quick-action">
-                            <i class="fas fa-plus-circle me-2"></i>Nova Conta a Pagar
-                        </a>
-                        <a href="contas_receber.php" class="btn btn-outline-success btn-quick-action">
-                            <i class="fas fa-plus-circle me-2"></i>Nova Conta a Receber
-                        </a>
-                        <a href="bens.php" class="btn btn-outline-primary btn-quick-action">
-                            <i class="fas fa-plus-circle me-2"></i>Novo Bem / Equipamento
-                        </a>
-                        <a href="manutencoes.php" class="btn btn-outline-warning btn-quick-action">
-                            <i class="fas fa-wrench me-2"></i>Registrar Manutenção
-                        </a>
+                        <?php if (SHOW_CONTAS_PAGAR): ?>
+                            <a href="contas_pagar.php" class="btn btn-outline-danger btn-quick-action">
+                                <i class="fas fa-plus-circle me-2"></i>Nova Conta a Pagar
+                            </a>
+                        <?php endif; ?>
+
+                        <?php if (SHOW_CONTAS_RECEBER): ?>
+                            <a href="contas_receber.php" class="btn btn-outline-success btn-quick-action">
+                                <i class="fas fa-plus-circle me-2"></i>Nova Conta a Receber
+                            </a>
+                        <?php endif; ?>
+
+                        <?php if (SHOW_BENS): ?>
+                            <a href="bens.php" class="btn btn-outline-primary btn-quick-action">
+                                <i class="fas fa-plus-circle me-2"></i>Novo Bem / Equipamento
+                            </a>
+                        <?php endif; ?>
+
+                        <?php if (SHOW_BENS): ?>
+                            <a href="manutencoes.php" class="btn btn-outline-warning btn-quick-action">
+                                <i class="fas fa-wrench me-2"></i>Registrar Manutenção
+                            </a>
+                        <?php endif; ?>
+
                         <a href="calendario.php" class="btn btn-outline-info btn-quick-action">
                             <i class="fas fa-calendar-alt me-2"></i>Calendário Financeiro
                         </a>
