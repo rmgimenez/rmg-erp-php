@@ -303,6 +303,9 @@ include __DIR__ . '/includes/header.php';
         $('#valor_aquisicao').val('');
         $('#status').val('ativo');
         $('#observacoes').val('');
+        $('#modalBem').one('shown.bs.modal', function() {
+            $('#descricao').focus();
+        });
         $('#modalBem').modal('show');
     }
 
@@ -315,6 +318,9 @@ include __DIR__ . '/includes/header.php';
         $('#valor_aquisicao').val(b.valor_aquisicao);
         $('#status').val(b.status);
         $('#observacoes').val(b.observacoes);
+        $('#modalBem').one('shown.bs.modal', function() {
+            $('#descricao').focus();
+        });
         $('#modalBem').modal('show');
     }
 

@@ -329,6 +329,9 @@ include __DIR__ . '/includes/header.php';
         $('#valor').val('');
         $('#status').val('pendente');
         $('#observacoes').val('');
+        $('#modalConta').one('shown.bs.modal', function() {
+            $('#descricao').focus();
+        });
         $('#modalConta').modal('show');
     }
 
@@ -341,12 +344,18 @@ include __DIR__ . '/includes/header.php';
         $('#valor').val(c.valor);
         $('#status').val(c.status);
         $('#observacoes').val(c.observacoes);
+        $('#modalConta').one('shown.bs.modal', function() {
+            $('#descricao').focus();
+        });
         $('#modalConta').modal('show');
     }
 
     function receberConta(c) {
         $('#id_conta_receber_recebimento').val(c.id_conta_receber);
         $('#valor_recebido').val(c.valor);
+        $('#modalRecebimento').one('shown.bs.modal', function() {
+            $('#valor_recebido').focus();
+        });
         $('#modalRecebimento').modal('show');
     }
 

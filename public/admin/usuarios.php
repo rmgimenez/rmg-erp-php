@@ -311,6 +311,9 @@ include __DIR__ . '/../includes/header.php';
         $('#tipo_usuario').val('gerente');
         $('#empresa_id').val('').trigger('change');
         $('#ativo').prop('checked', true);
+        $('#modalUsuario').one('shown.bs.modal', function() {
+            $('#nome').focus();
+        });
         $('#modalUsuario').modal('show');
     }
 
@@ -325,6 +328,9 @@ include __DIR__ . '/../includes/header.php';
         $('#tipo_usuario').val(u.tipo_usuario);
         $('#empresa_id').val(u.empresa_id).trigger('change');
         $('#ativo').prop('checked', u.ativo == 1);
+        $('#modalUsuario').one('shown.bs.modal', function() {
+            $('#nome').focus();
+        });
         $('#modalUsuario').modal('show');
     }
 

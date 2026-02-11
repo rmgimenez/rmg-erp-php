@@ -109,7 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="input-wrapper">
                             <i class="fas fa-building input-icon"></i>
                             <input type="text" class="form-input" id="codigo_empresa" name="codigo_empresa"
-                                placeholder=" " autofocus
+                                placeholder=" "
                                 value="<?php echo isset($_POST['codigo_empresa']) ? htmlspecialchars($_POST['codigo_empresa']) : ''; ?>"
                                 style="text-transform: uppercase;">
                             <label for="codigo_empresa" class="form-label-float">Código da Empresa</label>
@@ -173,6 +173,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         });
 
+        // Carregar código da empresa do localStorage
+        (function() {
+            var campoCodigoEmpresa = document.getElementById('codigo_empresa');
+            var campoUsuario = document.getElementById('usuario');
+            // Só preenche do localStorage se não houver valor do POST (erro de login)
+            if (!campoCodigoEmpresa.value.trim()) {
+                var codigoSalvo = localStorage.getItem('rmg_codigo_empresa');
+                if (codigoSalvo) {
+                    campoCodigoEmpresa.value = codigoSalvo;
+                }
+            }
+            // Se o código da empresa já está preenchido, foco no usuário
+            if (campoCodigoEmpresa.value.trim() !== '') {
+                if (!campoUsuario.value.trim()) {
+                    campoUsuario.focus();
+                } else {
+                    document.getElementById('senha').focus();
+                }
+            } else {
+                campoCodigoEmpresa.focus();
+            }
+        })();
+
         // Submit button loading state
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             const usuario = document.getElementById('usuario').value.trim();
@@ -184,6 +207,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Forçar uppercase no código da empresa antes de enviar
             const codigoEmpresa = document.getElementById('codigo_empresa');
             codigoEmpresa.value = codigoEmpresa.value.toUpperCase().trim();
+
+            // Salvar código da empresa no localStorage
+            localStorage.setItem('rmg_codigo_empresa', codigoEmpresa.value);
 
             const btn = document.getElementById('btnLogin');
             btn.classList.add('loading');

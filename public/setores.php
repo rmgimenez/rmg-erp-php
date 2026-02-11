@@ -170,6 +170,9 @@ include __DIR__ . '/includes/header.php';
         $('#id_setor').val('');
         $('#nome').val('');
         $('#descricao').val('');
+        $('#modalSetor').one('shown.bs.modal', function() {
+            $('#nome').focus();
+        });
         $('#modalSetor').modal('show');
     }
 
@@ -178,6 +181,9 @@ include __DIR__ . '/includes/header.php';
         $('#id_setor').val(setor.id_setor);
         $('#nome').val(setor.nome);
         $('#descricao').val(setor.descricao);
+        $('#modalSetor').one('shown.bs.modal', function() {
+            $('#nome').focus();
+        });
         $('#modalSetor').modal('show');
     }
 

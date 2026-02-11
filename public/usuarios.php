@@ -250,6 +250,9 @@ include __DIR__ . '/includes/header.php';
         $('#avisoSenha').addClass('d-none');
         $('#tipo_usuario').val('operador');
         $('#ativo').prop('checked', true);
+        $('#modalUsuario').one('shown.bs.modal', function() {
+            $('#nome').focus();
+        });
         $('#modalUsuario').modal('show');
     }
 
@@ -267,6 +270,9 @@ include __DIR__ . '/includes/header.php';
         $('#avisoSenha').removeClass('d-none');
         $('#tipo_usuario').val(u.tipo_usuario);
         $('#ativo').prop('checked', u.ativo == 1);
+        $('#modalUsuario').one('shown.bs.modal', function() {
+            $('#nome').focus();
+        });
         $('#modalUsuario').modal('show');
     }
 

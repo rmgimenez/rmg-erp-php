@@ -237,6 +237,9 @@ include __DIR__ . '/../includes/header.php';
         $('#email').val('');
         $('#ativa').prop('checked', true);
         $('#observacoes').val('');
+        $('#modalEmpresa').one('shown.bs.modal', function() {
+            $('#codigo').focus();
+        });
         $('#modalEmpresa').modal('show');
     }
 
@@ -251,6 +254,9 @@ include __DIR__ . '/../includes/header.php';
         $('#email').val(e.email);
         $('#ativa').prop('checked', e.ativa == 1);
         $('#observacoes').val(e.observacoes);
+        $('#modalEmpresa').one('shown.bs.modal', function() {
+            $('#razao_social').focus();
+        });
         $('#modalEmpresa').modal('show');
     }
 

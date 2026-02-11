@@ -420,6 +420,9 @@ include __DIR__ . '/includes/header.php';
         $('#valor').val('');
         $('#status').val('pendente');
         $('#observacoes').val('');
+        $('#modalConta').one('shown.bs.modal', function() {
+            $('#descricao').focus();
+        });
         $('#modalConta').modal('show');
     }
 
@@ -432,12 +435,18 @@ include __DIR__ . '/includes/header.php';
         $('#valor').val(c.valor);
         $('#status').val(c.status);
         $('#observacoes').val(c.observacoes);
+        $('#modalConta').one('shown.bs.modal', function() {
+            $('#descricao').focus();
+        });
         $('#modalConta').modal('show');
     }
 
     function pagarConta(c) {
         $('#id_conta_pagar_pagamento').val(c.id_conta_pagar);
         $('#valor_pago').val(c.valor);
+        $('#modalPagamento').one('shown.bs.modal', function() {
+            $('#valor_pago').focus();
+        });
         $('#modalPagamento').modal('show');
     }
 

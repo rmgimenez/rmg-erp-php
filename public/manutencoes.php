@@ -258,6 +258,13 @@ include __DIR__ . '/includes/header.php';
         $('#custo').val('');
         $('#descricao').val('');
         $('#observacoes').val('');
+        $('#modalManutencao').one('shown.bs.modal', function() {
+            <?php if ($bemId): ?>
+                $('#data_manutencao').focus();
+            <?php else: ?>
+                $('#bem_id').focus();
+            <?php endif; ?>
+        });
         $('#modalManutencao').modal('show');
     }
 
@@ -269,6 +276,9 @@ include __DIR__ . '/includes/header.php';
         $('#custo').val(m.custo);
         $('#descricao').val(m.descricao);
         $('#observacoes').val(m.observacoes);
+        $('#modalManutencao').one('shown.bs.modal', function() {
+            $('#data_manutencao').focus();
+        });
         $('#modalManutencao').modal('show');
     }
 

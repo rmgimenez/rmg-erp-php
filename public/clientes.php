@@ -196,6 +196,9 @@ include __DIR__ . '/includes/header.php';
         $('#telefone').val('');
         $('#email').val('');
         $('#observacoes').val('');
+        $('#modalCliente').one('shown.bs.modal', function() {
+            $('#nome').focus();
+        });
         $('#modalCliente').modal('show');
     }
 
@@ -207,6 +210,9 @@ include __DIR__ . '/includes/header.php';
         $('#telefone').val(c.telefone);
         $('#email').val(c.email);
         $('#observacoes').val(c.observacoes);
+        $('#modalCliente').one('shown.bs.modal', function() {
+            $('#nome').focus();
+        });
         $('#modalCliente').modal('show');
     }
 
