@@ -1,71 +1,260 @@
 # Futuros desenvolvimentos
 
-## Gráfico de total gasto por setor
+Este documento reúne ideias de evolução do RMG ERP SaaS para aumentar valor de negócio, produtividade operacional e capacidade analítica, mantendo o modelo multi-tenant com isolamento por empresa.
 
-Gráfico de barras mostrando o total gasto por setor, permitindo uma comparação visual rápida entre os diferentes setores.
+---
 
-O gráfico ficará no dashboard e deverá levar em conta os últimos 12 meses de dados para mostrar uma visão atualizada dos gastos por setor.
+## 1) Inteligência no Dashboard e BI
 
-**Prompt para IA:** "Desenvolva um gráfico de barras no dashboard do sistema de gestão financeira para mostrar o total gasto por setor nos últimos 12 meses, utilizando Chart.js e dados de manutenções e contas a pagar vinculadas aos setores. Siga a arquitetura MVC existente, criando métodos no RelatorioService e atualizando o index.php."
+### Gráfico de total gasto por setor
 
-## Dashboard aprimorado com métricas visuais
+Gráfico de barras comparando o total gasto por setor nos últimos 12 meses, consolidando custos de manutenções e contas a pagar relacionadas aos setores.
 
-Expandir o dashboard com gráficos adicionais, como:
+**Valor de negócio:** identificar setores com maior pressão de custos e apoiar decisões de redução de despesas.
 
-- Gráfico de linha para fluxo de caixa mensal (entradas vs saídas)
-- Gráfico de pizza para distribuição de gastos por categoria (manutenções, fornecedores)
-- Indicadores visuais para alertas financeiros
+**Prompt para IA:** "Desenvolva um gráfico de barras no dashboard para mostrar o total gasto por setor nos últimos 12 meses, usando Chart.js e dados de manutenções + contas a pagar vinculadas aos setores. Siga a arquitetura MVC existente, criando métodos no RelatorioService e atualizando o index.php."
 
-**Prompt para IA:** "Aprimore o dashboard (index.php) do sistema de gestão financeira adicionando gráficos visuais usando Chart.js: gráfico de linha para fluxo de caixa mensal, gráfico de pizza para gastos por categoria, e indicadores visuais para alertas. Integre com os DAOs existentes para obter os dados."
+### Dashboard aprimorado com métricas visuais
 
-## Sistema de notificações por email
+Adicionar novos blocos visuais no dashboard:
 
-Implementar notificações automáticas por email para:
+- Gráfico de linha para fluxo de caixa mensal (entradas x saídas)
+- Gráfico de pizza para distribuição de gastos por categoria
+- Indicadores de alertas financeiros (vencimentos próximos, inadimplência, despesas acima da média)
+
+**Valor de negócio:** leitura rápida da saúde financeira da empresa sem navegar por múltiplas telas.
+
+**Prompt para IA:** "Aprimore o dashboard (index.php) com Chart.js: gráfico de linha para fluxo de caixa mensal, gráfico de pizza para gastos por categoria e cards de alertas financeiros. Integre com DAOs/Services já existentes."
+
+### Centro de indicadores (KPIs) configuráveis
+
+Permitir que cada empresa escolha quais KPIs exibir no dashboard (ex.: custo de manutenção por bem, taxa de contas pagas no prazo, ticket médio de recebimento).
+
+**Valor de negócio:** dashboard personalizado por perfil de gestão.
+
+**Prompt para IA:** "Crie um módulo de KPIs configuráveis por empresa, salvando preferências por usuário e exibindo no dashboard apenas os indicadores selecionados."
+
+---
+
+## 2) Automação financeira e produtividade
+
+### Sistema de notificações por email
+
+Implementar envio automático de emails para:
 
 - Contas a vencer nos próximos 3 dias
 - Manutenções programadas
-- Relatórios semanais de resumo financeiro
+- Resumo financeiro semanal
 
-**Prompt para IA:** "Implemente um sistema de notificações por email no sistema de gestão financeira, enviando alertas para contas a vencer em 3 dias, manutenções programadas e relatórios semanais. Use PHPMailer ou similar, crie um novo service EmailService, e integre com os controllers existentes."
+**Valor de negócio:** reduzir atrasos e melhorar previsibilidade de caixa.
 
-## Exportação de relatórios para PDF e Excel
+**Prompt para IA:** "Implemente notificações automáticas por email com PHPMailer para contas próximas do vencimento, manutenções programadas e resumo semanal. Crie EmailService e integre com controllers/rotinas agendadas."
 
-Permitir exportar relatórios financeiros e patrimoniais em formatos PDF e Excel, facilitando compartilhamento e arquivamento.
+### Regras de recorrência para contas
 
-**Prompt para IA:** "Adicione funcionalidade de exportação para relatórios no sistema de gestão financeira, permitindo gerar PDFs e arquivos Excel para relatórios de contas pagar/receber, manutenções e resumos financeiros. Use bibliotecas como FPDF para PDF e PhpSpreadsheet para Excel, atualizando as páginas de relatórios."
+Permitir criação automática de contas a pagar/receber recorrentes (mensal, trimestral, anual), com opção de término por data ou número de repetições.
 
-## Controle de inventário para bens
+**Valor de negócio:** reduzir cadastro manual e erros operacionais.
 
-Adicionar campos de quantidade e localização física aos bens, permitindo controle de inventário básico.
+**Prompt para IA:** "Adicione recorrência em contas a pagar/receber com periodicidade configurável, geração automática de parcelas futuras e controle de status por ocorrência."
 
-**Prompt para IA:** "Expanda o modelo de Bem no sistema de gestão financeira adicionando campos para quantidade e localização física. Atualize o banco de dados (banco-dados.sql), o model Bem, o BemDAO, o BemController e a interface bens.php para gerenciar inventário básico."
+### Conciliação interna simplificada
 
-## Histórico de auditoria (logs de alterações)
+Criar tela para comparar lançamentos previstos x realizados (pagamentos e recebimentos), destacando divergências de valor e atraso.
 
-Implementar logs de auditoria para rastrear alterações em registros importantes, como pagamentos, manutenções e cadastros.
+**Valor de negócio:** melhorar controle financeiro sem integração bancária.
 
-**Prompt para IA:** "Implemente um sistema de auditoria no sistema de gestão financeira, criando uma tabela rmg_auditoria para logs de alterações em pagamentos, manutenções e cadastros. Atualize os DAOs para registrar logs automaticamente e crie uma interface para visualizar o histórico."
+**Prompt para IA:** "Implemente uma visão de conciliação interna que compare valores previstos e realizados de contas, exibindo diferenças, atrasos e percentual de aderência mensal."
 
-## Backup automático do banco de dados
+---
 
-Sistema de backup automático diário do banco de dados, com opção de download manual.
+## 3) Patrimônio, manutenção e inventário
 
-**Prompt para IA:** "Desenvolva um sistema de backup automático para o banco de dados MySQL do sistema de gestão financeira, executando backups diários e permitindo download manual. Crie um script PHP para gerar dumps SQL e integre com um cron job ou agendamento."
+### Controle de inventário para bens
 
-## API REST completa
+Adicionar aos bens os campos:
 
-Expandir a API backend para cobrir todas as entidades, permitindo integrações externas e futuras expansões.
+- quantidade
+- localização_fisica
+- numero_serie (opcional)
+- vida_util_meses (opcional)
 
-**Prompt para IA:** "Expanda a API REST do sistema de gestão financeira para incluir endpoints completos para todas as entidades (usuários, setores, fornecedores, clientes, bens, manutenções, contas pagar/receber, pagamentos, recebimentos). Use roteamento baseado em URL e retorne JSON, seguindo a arquitetura existente."
+**Valor de negócio:** aumentar rastreabilidade e planejamento de reposição.
 
-## Suporte a múltiplas empresas
+**Prompt para IA:** "Expanda o modelo de Bem com quantidade, localização física, número de série e vida útil em meses. Atualize banco-dados.sql, banco-dados-drop.sql, model, DAO, controller e bens.php."
 
-Adicionar suporte para múltiplas empresas no mesmo sistema, com isolamento de dados por empresa.
+### Score de criticidade do bem
 
-**Prompt para IA:** "Implemente suporte a múltiplas empresas no sistema de gestão financeira, adicionando uma tabela rmg_empresa e vinculando todas as entidades a uma empresa. Atualize autenticação, DAOs e interfaces para filtrar dados por empresa do usuário logado."
+Calcular automaticamente um score por bem baseado em frequência de manutenção, custo acumulado e tempo de indisponibilidade.
 
-## Melhorias na interface do usuário
+**Valor de negócio:** priorizar substituição de ativos com pior desempenho.
 
-Melhorar a responsividade, adicionar temas escuros/claros, e otimizar a experiência do usuário com animações e feedback visual.
+**Prompt para IA:** "Crie um score de criticidade de bens usando histórico de manutenções (quantidade, custo e dias indisponíveis), exibindo ranking no módulo de bens e relatórios."
 
-**Prompt para IA:** "Melhore a interface do usuário do sistema de gestão financeira adicionando temas escuros/claros, animações CSS, melhor responsividade e feedback visual aprimorado. Atualize os arquivos CSS e JavaScript existentes."
+### Plano de manutenção preventiva
+
+Cadastrar periodicidade de manutenção preventiva por bem e gerar alertas de execução.
+
+**Valor de negócio:** reduzir manutenção corretiva e paradas inesperadas.
+
+**Prompt para IA:** "Implemente manutenção preventiva por bem com periodicidade configurável, alertas de próxima execução e histórico de cumprimento."
+
+---
+
+## 4) Governança, segurança e auditoria
+
+### Histórico de auditoria (logs de alterações)
+
+Registrar trilha completa de alterações em entidades críticas (contas, pagamentos, recebimentos, bens e manutenções), contendo:
+
+- usuário
+- empresa
+- entidade
+- ação (insert/update/delete)
+- valores antes/depois
+- data/hora
+
+**Valor de negócio:** rastreabilidade para compliance e investigação de inconsistências.
+
+**Prompt para IA:** "Implemente auditoria com tabela rmg_auditoria, registrando alterações automáticas nos DAOs e criando interface de consulta com filtros por empresa, usuário, entidade e período."
+
+### Aprovação em duas etapas para lançamentos críticos
+
+Exigir aprovação de gerente para:
+
+- exclusão de contas
+- pagamentos acima de um limite configurado
+- baixa de bens patrimoniais
+
+**Valor de negócio:** reduzir risco operacional e fraude interna.
+
+**Prompt para IA:** "Implemente fluxo de aprovação em duas etapas para operações críticas, com status pendente/aprovado/rejeitado e trilha de aprovação por usuário."
+
+### Políticas de segurança de senha
+
+Adicionar regras de complexidade mínima, expiração opcional e bloqueio temporário por tentativas inválidas.
+
+**Valor de negócio:** elevar segurança de acesso da plataforma.
+
+**Prompt para IA:** "Aprimore a autenticação com política de senha forte, controle de tentativas de login e bloqueio temporário por usuário/empresa."
+
+---
+
+## 5) Relatórios, exportações e dados
+
+### Exportação de relatórios para PDF e Excel
+
+Permitir exportar relatórios financeiros e patrimoniais em PDF e XLSX.
+
+**Valor de negócio:** facilitar compartilhamento, auditoria e arquivamento.
+
+**Prompt para IA:** "Adicione exportação de relatórios para PDF (FPDF) e Excel (PhpSpreadsheet), cobrindo contas pagar/receber, fluxo de caixa, manutenções e resumo mensal."
+
+### Agendamento de relatórios
+
+Permitir configurar envio automático de relatórios por email (diário, semanal, mensal) para usuários autorizados.
+
+**Valor de negócio:** garantir acompanhamento contínuo sem intervenção manual.
+
+**Prompt para IA:** "Crie agendamento de relatórios com periodicidade configurável e envio automático por email para gerentes da empresa, respeitando permissões."
+
+### Relatório de previsão de caixa
+
+Gerar projeção dos próximos 30/60/90 dias com base em contas a pagar/receber pendentes.
+
+**Valor de negócio:** antecipar riscos de caixa e apoiar planejamento.
+
+**Prompt para IA:** "Implemente relatório de previsão de caixa para 30, 60 e 90 dias, consolidando vencimentos futuros e saldo projetado por período."
+
+---
+
+## 6) Plataforma SaaS e administração
+
+### API REST completa
+
+Expandir API backend para todas as entidades, com autenticação, paginação e filtros por empresa.
+
+**Valor de negócio:** facilitar integrações futuras e automações externas.
+
+**Prompt para IA:** "Expanda a API REST para todas as entidades (usuários, setores, fornecedores, clientes, bens, manutenções, contas, pagamentos e recebimentos), com respostas JSON, paginação e validação de permissões por empresa."
+
+### Backup automático do banco de dados
+
+Implementar rotina de backup diário com retenção configurável e opção de download manual no admin.
+
+**Valor de negócio:** aumentar resiliência e recuperação de desastre.
+
+**Prompt para IA:** "Desenvolva backup automático diário do MySQL com retenção de versões, log de execução e download manual na área administrativa."
+
+### Centro de administração multi-tenant
+
+Ampliar área do Super Admin com:
+
+- métricas de uso por empresa
+- gestão de limites (usuários, armazenamento, volume de registros)
+- status de saúde da plataforma
+
+**Valor de negócio:** gestão operacional SaaS mais eficiente e escalável.
+
+**Prompt para IA:** "Aprimore a área /admin com métricas por tenant, gestão de limites e painel de saúde da plataforma, mantendo isolamento entre empresas."
+
+---
+
+## 7) Experiência do usuário
+
+### Melhorias de interface
+
+Evoluir UX com foco em produtividade:
+
+- modo escuro/claro
+- melhor responsividade em telas menores
+- feedback visual para ações concluídas e erros
+- atalhos de navegação nas telas de maior uso
+
+**Valor de negócio:** reduzir tempo de operação e aumentar adoção do sistema.
+
+**Prompt para IA:** "Melhore a interface com temas claro/escuro, refinamento responsivo, feedback visual de ações e atalhos de produtividade nas telas principais."
+
+### Onboarding guiado para novos usuários
+
+Adicionar tour inicial com passos de configuração mínima (empresa, usuários, setores, fornecedores/clientes e primeiros lançamentos).
+
+**Valor de negócio:** acelerar implantação em novos clientes.
+
+**Prompt para IA:** "Implemente onboarding guiado para novos usuários com checklist de configuração inicial e indicadores de progresso."
+
+---
+
+## 8) Priorização sugerida (roadmap)
+
+### Curto prazo (alto impacto + baixa/média complexidade)
+
+1. Gráfico de gastos por setor (12 meses)
+2. Recorrência de contas a pagar/receber
+3. Exportação PDF/Excel
+4. Auditoria básica de alterações
+
+### Médio prazo
+
+1. Notificações por email
+2. Previsão de caixa 30/60/90 dias
+3. Score de criticidade de bens
+4. Aprovação em duas etapas
+
+### Longo prazo
+
+1. API REST completa
+2. Centro de administração SaaS avançado
+3. Plano de manutenção preventiva completo
+4. Agendamento inteligente de relatórios
+
+---
+
+## Observações técnicas importantes
+
+- Manter o padrão MVC/DAO/Service já adotado no projeto
+- Garantir isolamento multi-tenant em todas as consultas por empresa_id
+- Atualizar sempre os arquivos SQL quando houver criação/alteração de estruturas:
+  - sql/banco-dados.sql
+  - sql/banco-dados-drop.sql
+- Respeitar controle de acesso por perfil (super_admin, gerente, operador)
