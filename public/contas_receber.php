@@ -49,8 +49,11 @@ include __DIR__ . '/includes/header.php';
             <h2><i class="fas fa-hand-holding-usd me-2"></i> Contas a Receber</h2>
         </div>
         <div class="col-md-6 text-end">
+            <button type="button" class="btn btn-outline-secondary me-2" onclick="mostrarAjudaAtalhos()" title="Atalhos de Teclado (F1)">
+                <i class="fas fa-keyboard me-1"></i> Atalhos
+            </button>
             <button type="button" class="btn btn-success" onclick="abrirModal()">
-                <i class="fas fa-plus me-1"></i> Nova Conta
+                <i class="fas fa-plus me-1"></i> Nova Conta <small class="opacity-75">(F2)</small>
             </button>
         </div>
     </div>
@@ -276,6 +279,62 @@ include __DIR__ . '/includes/header.php';
     </div>
 </div>
 
+<!-- Modal Ajuda de Atalhos -->
+<div class="modal fade" id="modalAtalhos" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title"><i class="fas fa-keyboard me-2"></i>Atalhos de Teclado</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted mb-3">Use os atalhos abaixo para agilizar os lançamentos:</p>
+                <table class="table table-sm table-bordered mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 40%;">Tecla</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><kbd>F2</kbd></td>
+                            <td>Nova Conta a Receber</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Alt</kbd> + <kbd>F</kbd></td>
+                            <td>Focar na busca da tabela</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Alt</kbd> + <kbd>R</kbd></td>
+                            <td>Alternar filtro "Ocultar Recebidas"</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Alt</kbd> + <kbd>V</kbd></td>
+                            <td>Alternar filtro "Apenas Vencidas"</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Alt</kbd> + <kbd>S</kbd></td>
+                            <td>Salvar formulário aberto</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Escape</kbd></td>
+                            <td>Fechar modal aberto</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>F1</kbd></td>
+                            <td>Mostrar esta ajuda</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <?php include __DIR__ . '/includes/footer.php'; ?>
 <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
@@ -363,6 +422,85 @@ include __DIR__ . '/includes/header.php';
         $('#id_conta_receber_exclusao').val(id);
         $('#modalExclusao').modal('show');
     }
+
+    function mostrarAjudaAtalhos() {
+        var modal = new bootstrap.Modal(document.getElementById('modalAtalhos'));
+        modal.show();
+    }
+
+    // ====== ATALHOS DE TECLADO ======
+    function isModalOpen() {
+        return $('.modal.show').length > 0;
+    }
+
+    $(document).on('keydown', function(e) {
+        // F1 - Mostrar ajuda de atalhos
+        if (e.key === 'F1') {
+            e.preventDefault();
+            var modalAtalhos = document.getElementById('modalAtalhos');
+            var bsModal = bootstrap.Modal.getInstance(modalAtalhos);
+            if (bsModal && modalAtalhos.classList.contains('show')) {
+                bsModal.hide();
+            } else {
+                mostrarAjudaAtalhos();
+            }
+            return;
+        }
+
+        // F2 - Nova Conta (somente se nenhum modal está aberto)
+        if (e.key === 'F2' && !isModalOpen()) {
+            e.preventDefault();
+            abrirModal();
+            return;
+        }
+
+        // Alt+F - Focar na busca do DataTable
+        if (e.altKey && (e.key === 'f' || e.key === 'F')) {
+            e.preventDefault();
+            if (!isModalOpen()) {
+                var searchInput = $('#tabelaContas_filter input');
+                if (searchInput.length) {
+                    searchInput.focus().select();
+                }
+            }
+            return;
+        }
+
+        // Alt+R - Toggle filtro Ocultar Recebidas
+        if (e.altKey && (e.key === 'r' || e.key === 'R')) {
+            e.preventDefault();
+            if (!isModalOpen()) {
+                var chk = $('#chkOcultarRecebidas');
+                chk.prop('checked', !chk.prop('checked')).trigger('change');
+            }
+            return;
+        }
+
+        // Alt+V - Toggle filtro Apenas Vencidas
+        if (e.altKey && (e.key === 'v' || e.key === 'V')) {
+            e.preventDefault();
+            if (!isModalOpen()) {
+                var chk = $('#chkApenasVencidas');
+                chk.prop('checked', !chk.prop('checked')).trigger('change');
+            }
+            return;
+        }
+
+        // Alt+S - Salvar formulário do modal aberto
+        if (e.altKey && (e.key === 's' || e.key === 'S')) {
+            e.preventDefault();
+            var modalAberto = $('.modal.show');
+            if (modalAberto.length) {
+                var form = modalAberto.find('form');
+                if (form.length && form[0].checkValidity()) {
+                    form.submit();
+                } else if (form.length) {
+                    form[0].reportValidity();
+                }
+            }
+            return;
+        }
+    });
 </script>
 </body>
 
