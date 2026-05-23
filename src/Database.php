@@ -109,6 +109,14 @@ class Database {
             $stmtInsert->execute(['Administrador de TI', 'admin', 'ti@cantina.com.br', $senhaPadrao]);
         }
 
+        // Insere um usuário Gerente padrão inicial para fins de testes e uso imediato do financeiro
+        $stmtGerente = $db->query("SELECT COUNT(*) FROM usuarios WHERE nivel = 'gerente'");
+        if ($stmtGerente->fetchColumn() == 0) {
+            $senhaGerente = password_hash("gerente123", PASSWORD_DEFAULT);
+            $stmtInsertG = $db->prepare("INSERT INTO usuarios (nome, usuario, email, senha, nivel) VALUES (?, ?, ?, ?, 'gerente')");
+            $stmtInsertG->execute(['Gerente Financeiro Cantina', 'gerente', 'financeiro@cantina.com.br', $senhaGerente]);
+        }
+
         // Insere as configurações padrão se não existirem
         $defaultConfigs = [
             'mailgrid_api_url' => 'https://www.mailgrid.com.br/api',

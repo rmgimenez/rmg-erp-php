@@ -1,0 +1,22 @@
+# Arquivos do Banco de Dados SQLite (Não commitar dados reais da cantina)
+/db/cantina.sqlite
+/db/cantina.sqlite.tmp
+/db/cantina.sqlite.journal
+/db/cantina.sqlite-wal
+/db/cantina.sqlite-shm
+
+# Backups do Sistema (Não commitar backups gerados)
+/backups/*.zip
+/backups/*.sqlite
+/backups/*.sqlite.tmp
+/backups/*.sqlite.journal
+/backups/*.sqlite-wal
+/backups/*.sqlite-shm
+
+# Arquivos do Laragon / Ambiente de Desenvolvimento
+.idea/
+.vscode/
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
