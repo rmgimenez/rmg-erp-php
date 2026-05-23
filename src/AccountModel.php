@@ -15,9 +15,13 @@ class AccountModel {
     public static function create(array $data, int $criadoPor): bool {
         $db = Database::getConnection();
 
+        // Resolve os IDs de Categoria e Fornecedor
+        $categoriaId = self::findOrCreateCategory($data['categoria'] ?? null);
+        $fornecedorId = self::findOrCreateSupplier($data['fornecedor'] ?? null);
+
         $stmt = $db->prepare("INSERT INTO contas 
-            (descricao, valor, tipo, status, data_vencimento, data_liquidacao, categoria, observacoes, criado_por) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            (descricao, valor, tipo, status, data_vencimento, data_liquidacao, categoria_id, fornecedor_id, observacoes, criado_por) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         
         $success = $stmt->execute([
             $data['descricao'],
@@ -26,7 +30,8 @@ class AccountModel {
             $data['status'] ?? 'pendente',
             $data['data_vencimento'],
             ($data['status'] ?? 'pendente') === 'pago' ? ($data['data_liquidacao'] ?? date('Y-m-d')) : null,
-            $data['categoria'],
+            $categoriaId,
+            $fornecedorId,
             $data['observacoes'] ?? null,
             $criadoPor
         ]);
@@ -46,13 +51,18 @@ class AccountModel {
     public static function update(int $id, array $data, int $usuarioId): bool {
         $db = Database::getConnection();
 
+        // Resolve os IDs de Categoria e Fornecedor
+        $categoriaId = self::findOrCreateCategory($data['categoria'] ?? null);
+        $fornecedorId = self::findOrCreateSupplier($data['fornecedor'] ?? null);
+
         $stmt = $db->prepare("UPDATE contas SET 
             descricao = ?, 
             valor = ?, 
             status = ?, 
             data_vencimento = ?, 
             data_liquidacao = ?, 
-            categoria = ?, 
+            categoria_id = ?, 
+            fornecedor_id = ?, 
             observacoes = ? 
             WHERE id = ?");
 
@@ -64,7 +74,8 @@ class AccountModel {
             $data['status'],
             $data['data_vencimento'],
             $dataLiquidacao,
-            $data['categoria'],
+            $categoriaId,
+            $fornecedorId,
             $data['observacoes'] ?? null,
             $id
         ]);
@@ -133,9 +144,13 @@ class AccountModel {
     public static function getAll(array $filters = []): array {
         $db = Database::getConnection();
         
-        $sql = "SELECT c.*, u.nome as cadastrado_por_nome 
+        $sql = "SELECT c.*, u.nome as cadastrado_por_nome,
+                       cat.nome as categoria_nome,
+                       forn.nome as fornecedor_nome
                 FROM contas c 
                 LEFT JOIN usuarios u ON c.criado_por = u.id 
+                LEFT JOIN categorias cat ON c.categoria_id = cat.id
+                LEFT JOIN fornecedores forn ON c.fornecedor_id = forn.id
                 WHERE 1=1";
         $params = [];
 
@@ -149,9 +164,14 @@ class AccountModel {
             $params[] = $filters['status'];
         }
 
-        if (!empty($filters['categoria'])) {
-            $sql .= " AND c.categoria = ?";
-            $params[] = $filters['categoria'];
+        if (!empty($filters['categoria_id'])) {
+            $sql .= " AND c.categoria_id = ?";
+            $params[] = $filters['categoria_id'];
+        }
+
+        if (!empty($filters['fornecedor_id'])) {
+            $sql .= " AND c.fornecedor_id = ?";
+            $params[] = $filters['fornecedor_id'];
         }
 
         if (!empty($filters['data_inicio'])) {
@@ -165,7 +185,10 @@ class AccountModel {
         }
 
         if (!empty($filters['busca'])) {
-            $sql .= " AND c.descricao LIKE ?";
+            $sql .= " AND (c.descricao LIKE ? OR cat.nome LIKE ? OR forn.nome LIKE ? OR c.observacoes LIKE ?)";
+            $params[] = '%' . $filters['busca'] . '%';
+            $params[] = '%' . $filters['busca'] . '%';
+            $params[] = '%' . $filters['busca'] . '%';
             $params[] = '%' . $filters['busca'] . '%';
         }
 
@@ -183,20 +206,34 @@ class AccountModel {
     public static function yieldAll(array $filters = []): \Generator {
         $db = Database::getConnection();
         
-        $sql = "SELECT * FROM contas WHERE 1=1";
+        $sql = "SELECT c.*, cat.nome as categoria_nome, forn.nome as fornecedor_nome 
+                FROM contas c 
+                LEFT JOIN categorias cat ON c.categoria_id = cat.id
+                LEFT JOIN fornecedores forn ON c.fornecedor_id = forn.id
+                WHERE 1=1";
         $params = [];
 
         if (!empty($filters['tipo'])) {
-            $sql .= " AND tipo = ?";
+            $sql .= " AND c.tipo = ?";
             $params[] = $filters['tipo'];
         }
 
         if (!empty($filters['status'])) {
-            $sql .= " AND status = ?";
+            $sql .= " AND c.status = ?";
             $params[] = $filters['status'];
         }
 
-        $sql .= " ORDER BY data_vencimento ASC";
+        if (!empty($filters['categoria_id'])) {
+            $sql .= " AND c.categoria_id = ?";
+            $params[] = $filters['categoria_id'];
+        }
+
+        if (!empty($filters['fornecedor_id'])) {
+            $sql .= " AND c.fornecedor_id = ?";
+            $params[] = $filters['fornecedor_id'];
+        }
+
+        $sql .= " ORDER BY c.data_vencimento ASC";
 
         $stmt = $db->prepare($sql);
         $stmt->execute($params);
@@ -249,5 +286,39 @@ class AccountModel {
         $kpis['saldo_previsto'] = ($kpis['total_recebido'] + $kpis['pendente_receber']) - ($kpis['total_pago'] + $kpis['pendente_pagar']);
 
         return $kpis;
+    }
+
+    private static function findOrCreateCategory(?string $name): ?int {
+        if ($name === null || trim($name) === '') {
+            return null;
+        }
+        $name = trim($name);
+        $db = Database::getConnection();
+        $stmt = $db->prepare("SELECT id FROM categorias WHERE TRIM(LOWER(nome)) = TRIM(LOWER(?)) LIMIT 1");
+        $stmt->execute([$name]);
+        $id = $stmt->fetchColumn();
+        if ($id) {
+            return (int)$id;
+        }
+        $stmtInsert = $db->prepare("INSERT INTO categorias (nome) VALUES (?)");
+        $stmtInsert->execute([$name]);
+        return (int)$db->lastInsertId();
+    }
+
+    private static function findOrCreateSupplier(?string $name): ?int {
+        if ($name === null || trim($name) === '') {
+            return null;
+        }
+        $name = trim($name);
+        $db = Database::getConnection();
+        $stmt = $db->prepare("SELECT id FROM fornecedores WHERE TRIM(LOWER(nome)) = TRIM(LOWER(?)) LIMIT 1");
+        $stmt->execute([$name]);
+        $id = $stmt->fetchColumn();
+        if ($id) {
+            return (int)$id;
+        }
+        $stmtInsert = $db->prepare("INSERT INTO fornecedores (nome) VALUES (?)");
+        $stmtInsert->execute([$name]);
+        return (int)$db->lastInsertId();
     }
 }

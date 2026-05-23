@@ -40,9 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $tipo = $_POST['tipo'] ?? '';
         $dataVenc = $_POST['data_vencimento'] ?? '';
         $categoria = trim($_POST['categoria'] ?? '');
-        if ($categoria === '') {
-            $categoria = 'Outros';
-        }
+        $fornecedor = trim($_POST['fornecedor'] ?? '');
         $status = $_POST['status'] ?? 'pendente';
         $obs = trim($_POST['observacoes'] ?? '');
 
@@ -55,6 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'status' => $status,
                 'data_vencimento' => $dataVenc,
                 'categoria' => $categoria,
+                'fornecedor' => $fornecedor,
                 'observacoes' => $obs
             ];
 
@@ -78,9 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $valorRaw = $_POST['valor'] ?? '0';
             $dataVenc = $_POST['data_vencimento'] ?? '';
             $categoria = trim($_POST['categoria'] ?? '');
-            if ($categoria === '') {
-                $categoria = 'Outros';
-            }
+            $fornecedor = trim($_POST['fornecedor'] ?? '');
             $status = $_POST['status'] ?? 'pendente';
             $obs = trim($_POST['observacoes'] ?? '');
             $dataLiquidacao = $_POST['data_liquidacao'] ?? null;
@@ -94,6 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'data_vencimento' => $dataVenc,
                     'data_liquidacao' => $dataLiquidacao,
                     'categoria' => $categoria,
+                    'fornecedor' => $fornecedor,
                     'observacoes' => $obs
                 ];
 
@@ -146,7 +144,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $filtros = [
     'tipo' => $_GET['tipo'] ?? '',
     'status' => $_GET['status'] ?? '',
-    'categoria' => $_GET['categoria'] ?? '',
+    'categoria_id' => $_GET['categoria_id'] ?? '',
+    'fornecedor_id' => $_GET['fornecedor_id'] ?? '',
     'data_inicio' => $_GET['data_inicio'] ?? '',
     'data_fim' => $_GET['data_fim'] ?? '',
     'busca' => $_GET['busca'] ?? ''
@@ -154,10 +153,13 @@ $filtros = [
 
 $listaContas = AccountModel::getAll($filtros);
 
-// Listagem de Categorias únicas para o filtro
+// Listagem de Categorias e Fornecedores cadastrados para filtros e datalists
 $db = \CantinaFinanceiro\Database::getConnection();
-$stmtCategorias = $db->query("SELECT DISTINCT categoria FROM contas ORDER BY categoria ASC");
-$categoriasDisponiveis = $stmtCategorias->fetchAll(PDO::FETCH_COLUMN);
+$stmtCategorias = $db->query("SELECT * FROM categorias ORDER BY nome ASC");
+$categoriasDisponiveis = $stmtCategorias->fetchAll();
+
+$stmtFornecedores = $db->query("SELECT * FROM fornecedores ORDER BY nome ASC");
+$fornecedoresDisponiveis = $stmtFornecedores->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -198,6 +200,9 @@ $categoriasDisponiveis = $stmtCategorias->fetchAll(PDO::FETCH_COLUMN);
                 </a>
                 <a href="relatorios.php" class="nav-link">
                     <i class="fa-solid fa-file-pdf me-2"></i> Relatórios
+                </a>
+                <a href="cadastros.php" class="nav-link">
+                    <i class="fa-solid fa-tags me-2"></i> Cadastros
                 </a>
                 <?php if ($_SESSION['user_nivel'] === 'gerente'): ?>
                     <a href="usuarios.php" class="nav-link">
@@ -241,9 +246,9 @@ $categoriasDisponiveis = $stmtCategorias->fetchAll(PDO::FETCH_COLUMN);
             <!-- Filters Panel -->
             <div class="card card-glass p-3 mb-4">
                 <form method="GET" action="contas.php" class="row g-2 align-items-end">
-                    <div class="col-md-3 col-sm-6">
+                    <div class="col-md-2 col-sm-6">
                         <label class="form-label text-muted small fw-semibold">Busca Rápida</label>
-                        <input type="text" name="busca" class="form-control form-control-premium form-control-sm" placeholder="Descrição da conta..." value="<?= htmlspecialchars($filtros['busca'], ENT_QUOTES, 'UTF-8') ?>">
+                        <input type="text" name="busca" class="form-control form-control-premium form-control-sm" placeholder="Buscar..." value="<?= htmlspecialchars($filtros['busca'], ENT_QUOTES, 'UTF-8') ?>">
                     </div>
                     <div class="col-md-1.5 col-sm-6">
                         <label class="form-label text-muted small fw-semibold">Fluxo</label>
@@ -263,11 +268,29 @@ $categoriasDisponiveis = $stmtCategorias->fetchAll(PDO::FETCH_COLUMN);
                         </select>
                     </div>
                     <div class="col-md-2 col-sm-6">
-                        <label class="form-label text-muted small fw-semibold">Vencimento Início</label>
-                        <input type="date" name="data_inicio" class="form-control form-control-premium form-control-sm" value="<?= htmlspecialchars($filtros['data_inicio'], ENT_QUOTES, 'UTF-8') ?>">
+                        <label class="form-label text-muted small fw-semibold">Categoria</label>
+                        <select name="categoria_id" class="form-select form-select-premium form-select-sm">
+                            <option value="">Todas</option>
+                            <?php foreach ($categoriasDisponiveis as $cat): ?>
+                                <option value="<?= $cat['id'] ?>" <?= (string)$filtros['categoria_id'] === (string)$cat['id'] ? 'selected' : '' ?>><?= htmlspecialchars($cat['nome'], ENT_QUOTES, 'UTF-8') ?></option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
                     <div class="col-md-2 col-sm-6">
-                        <label class="form-label text-muted small fw-semibold">Vencimento Fim</label>
+                        <label class="form-label text-muted small fw-semibold">Fornecedor</label>
+                        <select name="fornecedor_id" class="form-select form-select-premium form-select-sm">
+                            <option value="">Todos</option>
+                            <?php foreach ($fornecedoresDisponiveis as $forn): ?>
+                                <option value="<?= $forn['id'] ?>" <?= (string)$filtros['fornecedor_id'] === (string)$forn['id'] ? 'selected' : '' ?>><?= htmlspecialchars($forn['nome'], ENT_QUOTES, 'UTF-8') ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-md-1.5 col-sm-6">
+                        <label class="form-label text-muted small fw-semibold">Início</label>
+                        <input type="date" name="data_inicio" class="form-control form-control-premium form-control-sm" value="<?= htmlspecialchars($filtros['data_inicio'], ENT_QUOTES, 'UTF-8') ?>">
+                    </div>
+                    <div class="col-md-1.5 col-sm-6">
+                        <label class="form-label text-muted small fw-semibold">Fim</label>
                         <input type="date" name="data_fim" class="form-control form-control-premium form-control-sm" value="<?= htmlspecialchars($filtros['data_fim'], ENT_QUOTES, 'UTF-8') ?>">
                     </div>
                     <div class="col-md-2 col-sm-12 d-flex gap-2">
@@ -302,8 +325,15 @@ $categoriasDisponiveis = $stmtCategorias->fetchAll(PDO::FETCH_COLUMN);
                                     <tr>
                                         <td>
                                             <div class="fw-bold"><?= htmlspecialchars($c['descricao'], ENT_QUOTES, 'UTF-8') ?></div>
+                                            <div class="small text-muted-premium d-flex gap-2 flex-wrap mt-1" style="font-size: 0.75rem;">
+                                                <?php if (!empty($c['fornecedor_nome'])): ?>
+                                                    <span><i class="fa-solid fa-truck-field me-1"></i> <?= htmlspecialchars($c['fornecedor_nome'], ENT_QUOTES, 'UTF-8') ?></span>
+                                                <?php else: ?>
+                                                    <span class="opacity-50"><i class="fa-solid fa-truck-field me-1"></i> Não Informado</span>
+                                                <?php endif; ?>
+                                            </div>
                                             <?php if ($c['observacoes']): ?>
-                                                <small class="text-muted text-truncate d-block" style="max-width: 250px;"><?= htmlspecialchars($c['observacoes'], ENT_QUOTES, 'UTF-8') ?></small>
+                                                <small class="text-muted text-truncate d-block mt-1" style="max-width: 250px;"><?= htmlspecialchars($c['observacoes'], ENT_QUOTES, 'UTF-8') ?></small>
                                             <?php endif; ?>
                                         </td>
                                         <td>
@@ -313,7 +343,13 @@ $categoriasDisponiveis = $stmtCategorias->fetchAll(PDO::FETCH_COLUMN);
                                                 <span class="custom-badge badge-pago px-2 py-1"><i class="fa-solid fa-arrow-up text-success"></i> A Receber</span>
                                             <?php endif; ?>
                                         </td>
-                                        <td><span class="badge bg-light text-secondary"><?= htmlspecialchars($c['categoria'], ENT_QUOTES, 'UTF-8') ?></span></td>
+                                        <td>
+                                            <?php if (!empty($c['categoria_nome'])): ?>
+                                                <span class="badge bg-light text-secondary"><?= htmlspecialchars($c['categoria_nome'], ENT_QUOTES, 'UTF-8') ?></span>
+                                            <?php else: ?>
+                                                <span class="badge bg-light text-secondary text-opacity-50">Não Informado</span>
+                                            <?php endif; ?>
+                                        </td>
                                         <td class="text-muted"><?= date('d/m/Y', strtotime($c['data_vencimento'])) ?></td>
                                         <td>
                                             <?php if ($c['status'] === 'pago'): ?>
@@ -357,7 +393,8 @@ $categoriasDisponiveis = $stmtCategorias->fetchAll(PDO::FETCH_COLUMN);
                                                             data-status="<?= $c['status'] ?>"
                                                             data-vencimento="<?= $c['data_vencimento'] ?>"
                                                             data-liquidacao="<?= $c['data_liquidacao'] ?>"
-                                                            data-categoria="<?= htmlspecialchars($c['categoria'], ENT_QUOTES, 'UTF-8') ?>"
+                                                            data-categoria="<?= htmlspecialchars($c['categoria_nome'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                                            data-fornecedor="<?= htmlspecialchars($c['fornecedor_nome'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                                                             data-observacoes="<?= htmlspecialchars($c['observacoes'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                                                         <i class="fa-solid fa-pen-to-square"></i>
                                                     </button>
@@ -421,24 +458,23 @@ $categoriasDisponiveis = $stmtCategorias->fetchAll(PDO::FETCH_COLUMN);
                             <input type="date" name="data_vencimento" class="form-control form-control-premium" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label text-muted small fw-semibold">Categoria</label>
-                            <input type="text" name="categoria" class="form-control form-control-premium" placeholder="Ex: Fornecedor, Serviços" list="datalist-categorias">
-                            <datalist id="datalist-categorias">
-                                <option value="Alimentos">
-                                <option value="Bebidas">
-                                <option value="Serviços">
-                                <option value="Funcionários">
-                                <option value="Infraestrutura">
-                            </datalist>
+                            <label class="form-label text-muted small fw-semibold">Status Inicial</label>
+                            <select name="status" class="form-select form-select-premium">
+                                <option value="pendente">Pendente</option>
+                                <option value="pago">Pago / Recebido</option>
+                            </select>
                         </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label text-muted small fw-semibold">Status Inicial</label>
-                        <select name="status" class="form-select form-select-premium">
-                            <option value="pendente">Pendente</option>
-                            <option value="pago">Pago / Recebido</option>
-                        </select>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-semibold">Categoria</label>
+                            <input type="text" name="categoria" class="form-control form-control-premium" placeholder="Ex: Alimentos, Serviços" list="datalist-categorias">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-semibold">Fornecedor / Cliente</label>
+                            <input type="text" name="fornecedor" class="form-control form-control-premium" placeholder="Ex: Coca-Cola, Prefeitura" list="datalist-fornecedores">
+                        </div>
                     </div>
 
                     <div class="mb-3">
@@ -482,19 +518,26 @@ $categoriasDisponiveis = $stmtCategorias->fetchAll(PDO::FETCH_COLUMN);
                             <input type="text" name="valor" id="edit-valor" class="form-control form-control-premium money-mask" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label text-muted small fw-semibold">Categoria</label>
-                            <input type="text" name="categoria" id="edit-categoria" class="form-control form-control-premium">
+                            <label class="form-label text-muted small fw-semibold">Data Liquidação</label>
+                            <input type="date" name="data_liquidacao" id="edit-liquidacao" class="form-control form-control-premium">
                         </div>
                     </div>
 
                     <div class="row g-2 mb-3">
                         <div class="col-md-6">
-                            <label class="form-label text-muted small fw-semibold">Data Vencimento *</label>
-                            <input type="date" name="data_vencimento" id="edit-vencimento" class="form-control form-control-premium" required>
+                            <label class="form-label text-muted small fw-semibold">Categoria</label>
+                            <input type="text" name="categoria" id="edit-categoria" class="form-control form-control-premium" placeholder="Ex: Alimentos, Serviços" list="datalist-categorias">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label text-muted small fw-semibold">Data Liquidação</label>
-                            <input type="date" name="data_liquidacao" id="edit-liquidacao" class="form-control form-control-premium">
+                            <label class="form-label text-muted small fw-semibold">Fornecedor / Cliente</label>
+                            <input type="text" name="fornecedor" id="edit-fornecedor" class="form-control form-control-premium" placeholder="Ex: Coca-Cola, Prefeitura" list="datalist-fornecedores">
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-12">
+                            <label class="form-label text-muted small fw-semibold">Data Vencimento *</label>
+                            <input type="date" name="data_vencimento" id="edit-vencimento" class="form-control form-control-premium" required>
                         </div>
                     </div>
 
@@ -550,6 +593,7 @@ $categoriasDisponiveis = $stmtCategorias->fetchAll(PDO::FETCH_COLUMN);
             document.getElementById('edit-descricao').value = button.getAttribute('data-descricao');
             document.getElementById('edit-valor').value = button.getAttribute('data-valor');
             document.getElementById('edit-categoria').value = button.getAttribute('data-categoria');
+            document.getElementById('edit-fornecedor').value = button.getAttribute('data-fornecedor');
             document.getElementById('edit-vencimento').value = button.getAttribute('data-vencimento');
             document.getElementById('edit-liquidacao').value = button.getAttribute('data-liquidacao');
             document.getElementById('edit-status').value = button.getAttribute('data-status');
@@ -557,5 +601,18 @@ $categoriasDisponiveis = $stmtCategorias->fetchAll(PDO::FETCH_COLUMN);
         });
     }
 </script>
+
+<datalist id="datalist-categorias">
+    <?php foreach ($categoriasDisponiveis as $cat): ?>
+        <option value="<?= htmlspecialchars($cat['nome'], ENT_QUOTES, 'UTF-8') ?>">
+    <?php endforeach; ?>
+</datalist>
+
+<datalist id="datalist-fornecedores">
+    <?php foreach ($fornecedoresDisponiveis as $forn): ?>
+        <option value="<?= htmlspecialchars($forn['nome'], ENT_QUOTES, 'UTF-8') ?>">
+    <?php endforeach; ?>
+</datalist>
+
 </body>
 </html>

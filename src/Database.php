@@ -57,6 +57,22 @@ class Database {
             criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
         );");
 
+        // Tabela de Categorias
+        $db->exec("CREATE TABLE IF NOT EXISTS categorias (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nome TEXT NOT NULL UNIQUE,
+            criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+        );");
+
+        // Tabela de Fornecedores
+        $db->exec("CREATE TABLE IF NOT EXISTS fornecedores (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nome TEXT NOT NULL UNIQUE,
+            contato TEXT,
+            observacoes TEXT,
+            criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+        );");
+
         // Tabela de Contas (Pagar/Receber)
         $db->exec("CREATE TABLE IF NOT EXISTS contas (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -66,12 +82,25 @@ class Database {
             status TEXT CHECK(status IN ('pendente', 'pago', 'cancelado')) DEFAULT 'pendente',
             data_vencimento DATE NOT NULL,
             data_liquidacao DATE,
-            categoria TEXT NOT NULL,
+            categoria_id INTEGER,
+            fornecedor_id INTEGER,
             observacoes TEXT,
             criado_por INTEGER,
             criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (categoria_id) REFERENCES categorias(id) ON DELETE SET NULL,
+            FOREIGN KEY (fornecedor_id) REFERENCES fornecedores(id) ON DELETE SET NULL,
             FOREIGN KEY (criado_por) REFERENCES usuarios(id) ON DELETE SET NULL
         );");
+
+        // Insere categorias padrão se a tabela estiver vazia
+        $stmtCats = $db->query("SELECT COUNT(*) FROM categorias");
+        if ($stmtCats->fetchColumn() == 0) {
+            $defaultCategories = ["Alimentos", "Bebidas", "Serviços", "Funcionários", "Infraestrutura", "Outros"];
+            $stmtInsertCat = $db->prepare("INSERT INTO categorias (nome) VALUES (?)");
+            foreach ($defaultCategories as $catName) {
+                $stmtInsertCat->execute([$catName]);
+            }
+        }
 
         // Tabela de Configurações
         $db->exec("CREATE TABLE IF NOT EXISTS configuracoes (

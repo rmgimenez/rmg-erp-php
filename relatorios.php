@@ -23,7 +23,8 @@ $db = Database::getConnection();
 $filtros = [
     'tipo' => $_GET['tipo'] ?? '',
     'status' => $_GET['status'] ?? '',
-    'categoria' => $_GET['categoria'] ?? '',
+    'categoria_id' => $_GET['categoria_id'] ?? '',
+    'fornecedor_id' => $_GET['fornecedor_id'] ?? '',
     'data_inicio' => $_GET['data_inicio'] ?? '',
     'data_fim' => $_GET['data_fim'] ?? '',
     'busca' => $_GET['busca'] ?? ''
@@ -39,6 +40,9 @@ $totalDespesas = 0;
 $totalPendentesPagar = 0;
 $totalPendentesReceber = 0;
 
+$resumoCategorias = [];
+$resumoFornecedores = [];
+
 foreach ($listaContas as $c) {
     if ($c['tipo'] === 'receber') {
         if ($c['status'] === 'pago') {
@@ -53,14 +57,36 @@ foreach ($listaContas as $c) {
             $totalPendentesPagar += $c['valor'];
         }
     }
+
+    // Calcula consolidados para resumo do relatório
+    $catName = $c['categoria_nome'] ?? 'Não Informado';
+    $fornName = $c['fornecedor_nome'] ?? 'Não Informado';
+
+    if (!isset($resumoCategorias[$catName])) {
+        $resumoCategorias[$catName] = 0;
+    }
+    $resumoCategorias[$catName] += $c['valor'];
+
+    if (!empty($c['fornecedor_nome'])) {
+        if (!isset($resumoFornecedores[$fornName])) {
+            $resumoFornecedores[$fornName] = 0;
+        }
+        $resumoFornecedores[$fornName] += $c['valor'];
+    }
 }
+
+arsort($resumoCategorias);
+arsort($resumoFornecedores);
 
 $saldoLiquidoEfetivo = $totalReceitas - $totalDespesas;
 $saldoLiquidoPrevisto = ($totalReceitas + $totalPendentesReceber) - ($totalDespesas + $totalPendentesPagar);
 
-// Carrega categorias únicas do banco para o seletor
-$stmtCat = $db->query("SELECT DISTINCT categoria FROM contas ORDER BY categoria ASC");
-$categorias = $stmtCat->fetchAll(PDO::FETCH_COLUMN);
+// Carrega categorias e fornecedores do banco
+$stmtCat = $db->query("SELECT id, nome FROM categorias ORDER BY nome ASC");
+$categorias = $stmtCat->fetchAll();
+
+$stmtForn = $db->query("SELECT id, nome FROM fornecedores ORDER BY nome ASC");
+$fornecedores = $stmtForn->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -124,6 +150,9 @@ $categorias = $stmtCat->fetchAll(PDO::FETCH_COLUMN);
                 <a href="relatorios.php" class="nav-link active">
                     <i class="fa-solid fa-file-pdf me-2"></i> Relatórios
                 </a>
+                <a href="cadastros.php" class="nav-link">
+                    <i class="fa-solid fa-tags me-2"></i> Cadastros
+                </a>
                 <?php if ($_SESSION['user_nivel'] === 'gerente'): ?>
                     <a href="usuarios.php" class="nav-link">
                         <i class="fa-solid fa-users me-2"></i> Usuários
@@ -152,6 +181,7 @@ $categorias = $stmtCat->fetchAll(PDO::FETCH_COLUMN);
                         <li><a class="dropdown-menu-item nav-link p-2" href="contas.php"><i class="fa-solid fa-file-invoice-dollar me-2"></i> Contas</a></li>
                         <li><a class="dropdown-menu-item nav-link p-2" href="calendario.php"><i class="fa-solid fa-calendar-days me-2"></i> Calendário</a></li>
                         <li><a class="dropdown-menu-item nav-link p-2" href="relatorios.php"><i class="fa-solid fa-file-pdf me-2"></i> Relatórios</a></li>
+                        <li><a class="dropdown-menu-item nav-link p-2" href="cadastros.php"><i class="fa-solid fa-tags me-2"></i> Cadastros</a></li>
                         <?php if ($_SESSION['user_nivel'] === 'gerente'): ?>
                             <li><a class="dropdown-menu-item nav-link p-2" href="usuarios.php"><i class="fa-solid fa-users me-2"></i> Usuários</a></li>
                         <?php endif; ?>
@@ -176,9 +206,9 @@ $categorias = $stmtCat->fetchAll(PDO::FETCH_COLUMN);
             <div class="card card-glass p-3 mb-4">
                 <h6 class="fw-bold text-muted small mb-3"><i class="fa-solid fa-sliders text-primary me-2"></i> Filtros do Demonstrativo</h6>
                 <form method="GET" action="relatorios.php" class="row g-2 align-items-end">
-                    <div class="col-md-3 col-sm-6">
-                        <label class="form-label text-muted small fw-semibold">Busca por Descrição</label>
-                        <input type="text" name="busca" class="form-control form-control-premium form-control-sm" placeholder="Ex: Fornecedor Alimentos..." value="<?= htmlspecialchars($filtros['busca'], ENT_QUOTES, 'UTF-8') ?>">
+                    <div class="col-md-2 col-sm-6">
+                        <label class="form-label text-muted small fw-semibold">Busca Rápida</label>
+                        <input type="text" name="busca" class="form-control form-control-premium form-control-sm" placeholder="Buscar..." value="<?= htmlspecialchars($filtros['busca'], ENT_QUOTES, 'UTF-8') ?>">
                     </div>
                     <div class="col-md-2 col-sm-6">
                         <label class="form-label text-muted small fw-semibold">Tipo (Fluxo)</label>
@@ -188,7 +218,7 @@ $categorias = $stmtCat->fetchAll(PDO::FETCH_COLUMN);
                             <option value="receber" <?= $filtros['tipo'] === 'receber' ? 'selected' : '' ?>>A Receber (Receitas)</option>
                         </select>
                     </div>
-                    <div class="col-md-2 col-sm-6">
+                    <div class="col-md-1.5 col-sm-6">
                         <label class="form-label text-muted small fw-semibold">Status</label>
                         <select name="status" class="form-select form-select-premium form-select-sm">
                             <option value="">Todos</option>
@@ -199,19 +229,28 @@ $categorias = $stmtCat->fetchAll(PDO::FETCH_COLUMN);
                     </div>
                     <div class="col-md-2 col-sm-6">
                         <label class="form-label text-muted small fw-semibold">Categoria</label>
-                        <select name="categoria" class="form-select form-select-premium form-select-sm">
+                        <select name="categoria_id" class="form-select form-select-premium form-select-sm">
                             <option value="">Todas</option>
                             <?php foreach ($categorias as $cat): ?>
-                                <option value="<?= htmlspecialchars($cat, ENT_QUOTES, 'UTF-8') ?>" <?= $filtros['categoria'] === $cat ? 'selected' : '' ?>><?= htmlspecialchars($cat, ENT_QUOTES, 'UTF-8') ?></option>
+                                <option value="<?= $cat['id'] ?>" <?= (string)$filtros['categoria_id'] === (string)$cat['id'] ? 'selected' : '' ?>><?= htmlspecialchars($cat['nome'], ENT_QUOTES, 'UTF-8') ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
                     <div class="col-md-2 col-sm-6">
-                        <label class="form-label text-muted small fw-semibold">Vencimento De</label>
+                        <label class="form-label text-muted small fw-semibold">Fornecedor</label>
+                        <select name="fornecedor_id" class="form-select form-select-premium form-select-sm">
+                            <option value="">Todos</option>
+                            <?php foreach ($fornecedores as $forn): ?>
+                                <option value="<?= $forn['id'] ?>" <?= (string)$filtros['fornecedor_id'] === (string)$forn['id'] ? 'selected' : '' ?>><?= htmlspecialchars($forn['nome'], ENT_QUOTES, 'UTF-8') ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-md-1.5 col-sm-6">
+                        <label class="form-label text-muted small fw-semibold">De</label>
                         <input type="date" name="data_inicio" class="form-control form-control-premium form-control-sm" value="<?= htmlspecialchars($filtros['data_inicio'], ENT_QUOTES, 'UTF-8') ?>">
                     </div>
-                    <div class="col-md-2 col-sm-6">
-                        <label class="form-label text-muted small fw-semibold">Vencimento Até</label>
+                    <div class="col-md-1.5 col-sm-6">
+                        <label class="form-label text-muted small fw-semibold">Até</label>
                         <input type="date" name="data_fim" class="form-control form-control-premium form-control-sm" value="<?= htmlspecialchars($filtros['data_fim'], ENT_QUOTES, 'UTF-8') ?>">
                     </div>
                     <div class="col-md-2 col-sm-12 d-flex gap-2">
@@ -279,7 +318,7 @@ $categorias = $stmtCat->fetchAll(PDO::FETCH_COLUMN);
                         <thead class="table-dark">
                             <tr>
                                 <th>Data Vencimento</th>
-                                <th>Descrição</th>
+                                <th>Descrição / Fornecedor</th>
                                 <th>Fluxo</th>
                                 <th>Categoria</th>
                                 <th>Status</th>
@@ -296,7 +335,12 @@ $categorias = $stmtCat->fetchAll(PDO::FETCH_COLUMN);
                                 <?php foreach ($listaContas as $c): ?>
                                     <tr>
                                         <td><?= date('d/m/Y', strtotime($c['data_vencimento'])) ?></td>
-                                        <td class="fw-bold"><?= htmlspecialchars($c['descricao'], ENT_QUOTES, 'UTF-8') ?></td>
+                                        <td>
+                                            <span class="fw-bold"><?= htmlspecialchars($c['descricao'], ENT_QUOTES, 'UTF-8') ?></span>
+                                            <?php if (!empty($c['fornecedor_nome'])): ?>
+                                                <br><small class="text-muted fw-normal"><i class="fa-solid fa-truck-field me-1"></i> <?= htmlspecialchars($c['fornecedor_nome'], ENT_QUOTES, 'UTF-8') ?></small>
+                                            <?php endif; ?>
+                                        </td>
                                         <td>
                                             <?php if ($c['tipo'] === 'pagar'): ?>
                                                 <span class="text-danger fw-semibold">Pagar</span>
@@ -304,7 +348,7 @@ $categorias = $stmtCat->fetchAll(PDO::FETCH_COLUMN);
                                                 <span class="text-success fw-semibold">Receber</span>
                                             <?php endif; ?>
                                         </td>
-                                        <td><?= htmlspecialchars($c['categoria'], ENT_QUOTES, 'UTF-8') ?></td>
+                                        <td><?= htmlspecialchars($c['categoria_nome'] ?? 'Não Informado', ENT_QUOTES, 'UTF-8') ?></td>
                                         <td>
                                             <?php if ($c['status'] === 'pago'): ?>
                                                 Pago
@@ -326,6 +370,52 @@ $categorias = $stmtCat->fetchAll(PDO::FETCH_COLUMN);
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Resumos por Categorias e Fornecedores -->
+                <?php if (!empty($listaContas)): ?>
+                <div class="row g-3 mt-4">
+                    <div class="col-md-6">
+                        <div class="border rounded-3 p-3 bg-light bg-opacity-75">
+                            <h6 class="fw-bold text-dark mb-2"><i class="fa-solid fa-tags text-primary me-2"></i> Total por Categoria</h6>
+                            <table class="table table-sm table-borderless mb-0" style="font-size: 0.8rem;">
+                                <thead>
+                                    <tr class="border-bottom"><th class="py-1">Categoria</th><th class="text-end py-1">Total</th></tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($resumoCategorias as $catName => $totalVal): ?>
+                                        <tr>
+                                            <td class="py-1 text-muted"><?= htmlspecialchars($catName, ENT_QUOTES, 'UTF-8') ?></td>
+                                            <td class="text-end fw-bold py-1">R$ <?= number_format($totalVal / 100, 2, ',', '.') ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded-3 p-3 bg-light bg-opacity-75">
+                            <h6 class="fw-bold text-dark mb-2"><i class="fa-solid fa-truck-ramp-box text-primary me-2"></i> Total por Fornecedor</h6>
+                            <?php if (empty($resumoFornecedores)): ?>
+                                <p class="text-muted small mb-0 py-2">Nenhum fornecedor informado na listagem ativa.</p>
+                            <?php else: ?>
+                                <table class="table table-sm table-borderless mb-0" style="font-size: 0.8rem;">
+                                    <thead>
+                                        <tr class="border-bottom"><th class="py-1">Fornecedor</th><th class="text-end py-1">Total</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($resumoFornecedores as $fornName => $totalVal): ?>
+                                            <tr>
+                                                <td class="py-1 text-muted"><?= htmlspecialchars($fornName, ENT_QUOTES, 'UTF-8') ?></td>
+                                                <td class="text-end fw-bold py-1">R$ <?= number_format($totalVal / 100, 2, ',', '.') ?></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
 
                 <!-- PDF Footer (Apenas no PDF) -->
                 <div class="text-center mt-4 pt-3 border-top d-none text-muted small" id="pdf-footer-element" style="font-size: 10px;">

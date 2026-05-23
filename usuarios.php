@@ -183,6 +183,9 @@ $usuarios = $stmtList->fetchAll();
                 <a href="relatorios.php" class="nav-link">
                     <i class="fa-solid fa-file-pdf me-2"></i> Relatórios
                 </a>
+                <a href="cadastros.php" class="nav-link">
+                    <i class="fa-solid fa-tags me-2"></i> Cadastros
+                </a>
                 <a href="usuarios.php" class="nav-link active">
                     <i class="fa-solid fa-users me-2"></i> Usuários
                 </a>

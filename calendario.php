@@ -61,7 +61,12 @@ $mesesNomesComp = [
 // Consulta Contas do Mês Selecionado
 // ----------------------------------------------------
 $dataFimMes = "$ano-$mes-$diasNoMes";
-$stmt = $db->prepare("SELECT * FROM contas WHERE data_vencimento BETWEEN ? AND ? ORDER BY status ASC, tipo ASC");
+$stmt = $db->prepare("SELECT c.*, cat.nome as categoria_nome, forn.nome as fornecedor_nome 
+                      FROM contas c 
+                      LEFT JOIN categorias cat ON c.categoria_id = cat.id 
+                      LEFT JOIN fornecedores forn ON c.fornecedor_id = forn.id 
+                      WHERE c.data_vencimento BETWEEN ? AND ? 
+                      ORDER BY c.status ASC, c.tipo ASC");
 $stmt->execute([$dataInicioMes, $dataFimMes]);
 $contasMes = $stmt->fetchAll();
 
@@ -143,6 +148,9 @@ while (count($celulas) % 7 !== 0) {
                 <a href="relatorios.php" class="nav-link">
                     <i class="fa-solid fa-file-pdf me-2"></i> Relatórios
                 </a>
+                <a href="cadastros.php" class="nav-link">
+                    <i class="fa-solid fa-tags me-2"></i> Cadastros
+                </a>
                 <?php if ($_SESSION['user_nivel'] === 'gerente'): ?>
                     <a href="usuarios.php" class="nav-link">
                         <i class="fa-solid fa-users me-2"></i> Usuários
@@ -171,6 +179,7 @@ while (count($celulas) % 7 !== 0) {
                         <li><a class="dropdown-menu-item nav-link p-2" href="contas.php"><i class="fa-solid fa-file-invoice-dollar me-2"></i> Contas</a></li>
                         <li><a class="dropdown-menu-item nav-link p-2" href="calendario.php"><i class="fa-solid fa-calendar-days me-2"></i> Calendário</a></li>
                         <li><a class="dropdown-menu-item nav-link p-2" href="relatorios.php"><i class="fa-solid fa-file-pdf me-2"></i> Relatórios</a></li>
+                        <li><a class="dropdown-menu-item nav-link p-2" href="cadastros.php"><i class="fa-solid fa-tags me-2"></i> Cadastros</a></li>
                         <?php if ($_SESSION['user_nivel'] === 'gerente'): ?>
                             <li><a class="dropdown-menu-item nav-link p-2" href="usuarios.php"><i class="fa-solid fa-users me-2"></i> Usuários</a></li>
                         <?php endif; ?>
@@ -243,7 +252,7 @@ while (count($celulas) % 7 !== 0) {
                                     ?>
                                         <a href="contas.php?busca=<?= urlencode($c['descricao']) ?>" 
                                            class="calendar-event-item <?= $classeTipo ?> <?= $classePago ?>"
-                                           title="<?= htmlspecialchars($c['descricao'], ENT_QUOTES, 'UTF-8') ?> (<?= $c['status'] ?>) - R$ <?= number_format($c['valor'] / 100, 2, ',', '.') ?>">
+                                           title="<?= htmlspecialchars($c['descricao'], ENT_QUOTES, 'UTF-8') ?> [<?= htmlspecialchars($c['categoria_nome'] ?? 'Não Informado', ENT_QUOTES, 'UTF-8') ?>] (<?= $c['status'] ?>) - R$ <?= number_format($c['valor'] / 100, 2, ',', '.') ?>">
                                             <span><?= $icon ?><?= htmlspecialchars($c['descricao'], ENT_QUOTES, 'UTF-8') ?></span>
                                             <span class="ms-1"><?= $valorF ?></span>
                                         </a>

@@ -52,12 +52,16 @@ for ($i = 5; $i >= 0; $i--) {
 // Processamento de Dados para o Gráfico de Categorias (Despesas Pagas)
 // ----------------------------------------------------
 $categoriaChart = ['labels' => [], 'valores' => []];
-$stmtCat = $db->query("SELECT categoria, SUM(valor) as total FROM contas WHERE status = 'pago' AND tipo = 'pagar' GROUP BY categoria");
+$stmtCat = $db->query("SELECT COALESCE(cat.nome, 'Não Informado') as categoria_nome, SUM(c.valor) as total 
+                       FROM contas c 
+                       LEFT JOIN categorias cat ON c.categoria_id = cat.id 
+                       WHERE c.status = 'pago' AND c.tipo = 'pagar' 
+                       GROUP BY c.categoria_id");
 $categoriasResult = $stmtCat->fetchAll();
 
 if (!empty($categoriasResult)) {
     foreach ($categoriasResult as $cat) {
-        $categoriaChart['labels'][] = $cat['categoria'];
+        $categoriaChart['labels'][] = $cat['categoria_nome'];
         $categoriaChart['valores'][] = round($cat['total'] / 100, 2);
     }
 } else {
@@ -114,6 +118,9 @@ $vencidasList = $stmtVencidas->fetchAll();
                 <a href="relatorios.php" class="nav-link">
                     <i class="fa-solid fa-file-pdf me-2"></i> Relatórios
                 </a>
+                <a href="cadastros.php" class="nav-link">
+                    <i class="fa-solid fa-tags me-2"></i> Cadastros
+                </a>
                 <?php if ($_SESSION['user_nivel'] === 'gerente'): ?>
                     <a href="usuarios.php" class="nav-link">
                         <i class="fa-solid fa-users me-2"></i> Usuários
@@ -142,6 +149,7 @@ $vencidasList = $stmtVencidas->fetchAll();
                         <li><a class="dropdown-menu-item nav-link p-2" href="contas.php"><i class="fa-solid fa-file-invoice-dollar me-2"></i> Contas</a></li>
                         <li><a class="dropdown-menu-item nav-link p-2" href="calendario.php"><i class="fa-solid fa-calendar-days me-2"></i> Calendário</a></li>
                         <li><a class="dropdown-menu-item nav-link p-2" href="relatorios.php"><i class="fa-solid fa-file-pdf me-2"></i> Relatórios</a></li>
+                        <li><a class="dropdown-menu-item nav-link p-2" href="cadastros.php"><i class="fa-solid fa-tags me-2"></i> Cadastros</a></li>
                         <?php if ($_SESSION['user_nivel'] === 'gerente'): ?>
                             <li><a class="dropdown-menu-item nav-link p-2" href="usuarios.php"><i class="fa-solid fa-users me-2"></i> Usuários</a></li>
                         <?php endif; ?>
