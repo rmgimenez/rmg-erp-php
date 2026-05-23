@@ -121,6 +121,9 @@ $vencidasList = $stmtVencidas->fetchAll();
                 <a href="cadastros.php" class="nav-link">
                     <i class="fa-solid fa-tags me-2"></i> Cadastros
                 </a>
+                <a href="patrimonio.php" class="nav-link">
+                    <i class="fa-solid fa-screwdriver-wrench me-2"></i> Patrimônio
+                </a>
                 <?php if ($_SESSION['user_nivel'] === 'gerente'): ?>
                     <a href="usuarios.php" class="nav-link">
                         <i class="fa-solid fa-users me-2"></i> Usuários
@@ -150,6 +153,7 @@ $vencidasList = $stmtVencidas->fetchAll();
                         <li><a class="dropdown-menu-item nav-link p-2" href="calendario.php"><i class="fa-solid fa-calendar-days me-2"></i> Calendário</a></li>
                         <li><a class="dropdown-menu-item nav-link p-2" href="relatorios.php"><i class="fa-solid fa-file-pdf me-2"></i> Relatórios</a></li>
                         <li><a class="dropdown-menu-item nav-link p-2" href="cadastros.php"><i class="fa-solid fa-tags me-2"></i> Cadastros</a></li>
+                        <li><a class="dropdown-menu-item nav-link p-2" href="patrimonio.php"><i class="fa-solid fa-screwdriver-wrench me-2"></i> Patrimônio</a></li>
                         <?php if ($_SESSION['user_nivel'] === 'gerente'): ?>
                             <li><a class="dropdown-menu-item nav-link p-2" href="usuarios.php"><i class="fa-solid fa-users me-2"></i> Usuários</a></li>
                         <?php endif; ?>

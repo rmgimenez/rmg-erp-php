@@ -92,6 +92,44 @@ class Database {
             FOREIGN KEY (criado_por) REFERENCES usuarios(id) ON DELETE SET NULL
         );");
 
+        // Tabela de Bens (Ativos)
+        $db->exec("CREATE TABLE IF NOT EXISTS bens (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            codigo_patrimonio TEXT UNIQUE,
+            nome TEXT NOT NULL,
+            descricao TEXT,
+            setor_localizacao TEXT,
+            data_aquisicao DATE,
+            data_baixa DATE,
+            status TEXT CHECK(status IN ('ativo', 'manutencao', 'inativo')) DEFAULT 'ativo',
+            criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+        );");
+
+        // Tabela de Manutenções
+        $db->exec("CREATE TABLE IF NOT EXISTS manutencoes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            bem_id INTEGER NOT NULL,
+            descricao TEXT NOT NULL,
+            tipo TEXT CHECK(tipo IN ('preventiva', 'corretiva')) DEFAULT 'preventiva',
+            custo INTEGER DEFAULT 0, -- em centavos
+            data_programada DATE NOT NULL,
+            data_realizada DATE,
+            status TEXT CHECK(status IN ('agendada', 'realizada', 'cancelada')) DEFAULT 'agendada',
+            tecnico_responsavel TEXT,
+            observacoes TEXT,
+            conta_pagar_id INTEGER,
+            criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (bem_id) REFERENCES bens(id) ON DELETE CASCADE,
+            FOREIGN KEY (conta_pagar_id) REFERENCES contas(id) ON DELETE SET NULL
+        );");
+
+        // Executa migrações dinâmicas para adicionar campos novos, se necessário (SQLite)
+        try {
+            @$db->exec("ALTER TABLE bens ADD COLUMN data_baixa DATE;");
+        } catch (\PDOException $e) {
+            // Ignora se o campo já existir
+        }
+
         // Insere categorias padrão se a tabela estiver vazia
         $stmtCats = $db->query("SELECT COUNT(*) FROM categorias");
         if ($stmtCats->fetchColumn() == 0) {

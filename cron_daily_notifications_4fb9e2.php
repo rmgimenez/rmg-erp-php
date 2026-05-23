@@ -45,6 +45,17 @@ try {
     $stmtProximas->execute([$hoje, $futuro]);
     $contasProximas = $stmtProximas->fetchAll();
 
+    // 5b. Consulta manutenções de BENS agendadas próximas (nos próximos N dias)
+    $stmtBensManutencoes = $db->prepare("
+        SELECT m.*, b.nome AS bem_nome, b.codigo_patrimonio AS bem_codigo
+        FROM manutencoes m
+        JOIN bens b ON m.bem_id = b.id
+        WHERE m.data_programada >= ? AND m.data_programada <= ? AND m.status = 'agendada'
+        ORDER BY m.data_programada ASC
+    ");
+    $stmtBensManutencoes->execute([$hoje, $futuro]);
+    $manutencoesProximas = $stmtBensManutencoes->fetchAll();
+
     // 6. Estruturação do e-mail estilizado em HTML (Design Moderno e Responsivo)
     $corpoHtml = "
     <html>
@@ -138,11 +149,30 @@ try {
         $corpoHtml .= "</tbody></table></div>";
     }
 
+    // Seção: Manutenções de Bens Próximas
+    if (!empty($manutencoesProximas)) {
+        $temPendencias = true;
+        $corpoHtml .= "<div class='secao'>
+            <div class='titulo-secao' style='color: #8e44ad; border-bottom: 2px solid #ebdef0; font-weight: 700; font-size: 15px; text-transform: uppercase; letter-spacing: 0.8px; padding-bottom: 6px; margin-bottom: 12px;'>🔧 Alertas de Manutenção de Bens (Próximos {$diasAlerta} dias)</div>
+            <table>
+                <thead>
+                    <tr><th>Ativo / Bem</th><th>Serviço Programado</th><th>Tipo</th><th style='text-align: right;'>Data Prog.</th></tr>
+                </thead>
+                <tbody>";
+        foreach ($manutencoesProximas as $m) {
+            $dataProg = date('d/m/Y', strtotime($m['data_programada']));
+            $badgeTipo = $m['tipo'] === 'preventiva' ? "<span class='tipo' style='background-color: #e8f8f5; color: #117a65;'>Preventiva</span>" : "<span class='tipo' style='background-color: #fef9e7; color: #b7950b;'>Corretiva</span>";
+            $bemIdent = $m['bem_nome'] . ($m['bem_codigo'] ? " (#{$m['bem_codigo']})" : "");
+            $corpoHtml .= "<tr><td><strong>" . htmlspecialchars($bemIdent, ENT_QUOTES, 'UTF-8') . "</strong></td><td>" . htmlspecialchars($m['descricao'], ENT_QUOTES, 'UTF-8') . "</td><td>{$badgeTipo}</td><td style='text-align: right; font-weight: bold;'>{$dataProg}</td></tr>";
+        }
+        $corpoHtml .= "</tbody></table></div>";
+    }
+
     // Tudo em dia
     if (!$temPendencias) {
         $corpoHtml .= "
         <div class='limpo'>
-            🎉 <strong>Tudo em dia!</strong> Não há nenhuma conta pendente em atraso, vencendo hoje ou a vencer nos próximos {$diasAlerta} dias.
+            🎉 <strong>Tudo em dia!</strong> Não há nenhuma conta ou manutenção pendente, vencendo hoje ou a vencer nos próximos {$diasAlerta} dias.
         </div>";
     }
 
