@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Cantina Financeiro</title>
+    <title>Login - Cantina Sant'Anna</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Google Font -->
@@ -88,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="login-card">
     <div class="text-center mb-4">
         <div style="font-size: 2.2rem; font-weight: 700; color: #1e1b4b; line-height: 1.1;">
-            Cantina<span style="color: var(--primary);">.</span>
+            Sant'Anna<span style="color: var(--primary);">.</span>
         </div>
         <p class="text-muted small mt-1">Gestão de Contas a Pagar e Receber</p>
     </div>

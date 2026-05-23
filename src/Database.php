@@ -106,7 +106,7 @@ class Database {
         if ($stmt->fetchColumn() == 0) {
             $senhaPadrao = password_hash("admin123", PASSWORD_DEFAULT);
             $stmtInsert = $db->prepare("INSERT INTO usuarios (nome, usuario, email, senha, nivel) VALUES (?, ?, ?, ?, 'admin')");
-            $stmtInsert->execute(['Administrador de TI', 'admin', 'ti@cantina.com.br', $senhaPadrao]);
+            $stmtInsert->execute(['Administrador de TI', 'admin', 'ti@santanna.com.br', $senhaPadrao]);
         }
 
         // Insere um usuário Gerente padrão inicial para fins de testes e uso imediato do financeiro
@@ -114,16 +114,16 @@ class Database {
         if ($stmtGerente->fetchColumn() == 0) {
             $senhaGerente = password_hash("gerente123", PASSWORD_DEFAULT);
             $stmtInsertG = $db->prepare("INSERT INTO usuarios (nome, usuario, email, senha, nivel) VALUES (?, ?, ?, ?, 'gerente')");
-            $stmtInsertG->execute(['Gerente Financeiro Cantina', 'gerente', 'financeiro@cantina.com.br', $senhaGerente]);
+            $stmtInsertG->execute(["Gerente Financeiro Cantina Sant'Anna", 'gerente', 'financeiro@santanna.com.br', $senhaGerente]);
         }
 
         // Insere as configurações padrão se não existirem
         $defaultConfigs = [
             'mailgrid_api_url' => 'https://www.mailgrid.com.br/api',
             'mailgrid_api_key' => '',
-            'email_remetente' => 'financeiro@cantina.com.br',
-            'nome_remetente' => 'Financeiro Cantina Escolar',
-            'emails_destinatarios' => 'direcao@cantina.com.br',
+            'email_remetente' => 'financeiro@santanna.com.br',
+            'nome_remetente' => "Financeiro Cantina Sant'Anna",
+            'emails_destinatarios' => 'direcao@santanna.com.br',
             'dias_alerta_vencimento' => '3'
         ];
 

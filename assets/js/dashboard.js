@@ -1,5 +1,5 @@
 /**
- * Dashboard JS - Cantina Financeiro
+ * Dashboard JS - Cantina Sant'Anna
  * Gerencia a renderização de gráficos interativos usando a biblioteca Chart.js.
  */
 

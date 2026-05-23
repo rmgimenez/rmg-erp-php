@@ -1,5 +1,5 @@
 # 📝 Instruções de Uso e Credenciais de Acesso
-## Sistema Financeiro - Cantina Escolar
+## Sistema Financeiro - Cantina Sant'Anna
 
 Este arquivo contém as instruções rápidas de inicialização, credenciais padrões de testes e guias operacionais para o funcionamento do sistema financeiro.
 

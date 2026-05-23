@@ -76,7 +76,7 @@ try {
         <div class='container'>
             <div class='header'>
                 <h2>Relatório Financeiro Diário</h2>
-                <p>Cantina Escolar — " . date('d/m/Y') . "</p>
+                <p>Cantina Sant'Anna — " . date('d/m/Y') . "</p>
             </div>
     ";
 
@@ -148,7 +148,7 @@ try {
 
     $corpoHtml .= "
             <div class='footer'>
-                Mensagem enviada automaticamente pelo sistema <strong>Cantina Financeiro</strong>.<br>
+                Mensagem enviada automaticamente pelo sistema <strong>Cantina Sant'Anna</strong>.<br>
                 Rotina diária de backup automatizada executada com sucesso.<br>
                 " . date('d/m/Y H:i:s') . "
             </div>
@@ -157,7 +157,7 @@ try {
     </html>";
 
     // 7. Envio do E-mail
-    $assunto = "Financeiro Cantina: Alertas Diários de Vencimento - " . date('d/m/Y');
+    $assunto = "Financeiro Cantina Sant'Anna: Alertas Diários de Vencimento - " . date('d/m/Y');
     $enviado = EmailService::enviarRelatorio($assunto, $corpoHtml);
 
     // Registra logs da auditoria

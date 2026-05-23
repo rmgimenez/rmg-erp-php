@@ -1,7 +1,7 @@
 # Documentação Técnica e Arquitetural do Sistema Financeiro da Cantina
-## Contas a Pagar e Receber - "Cantina Financeiro"
+## Contas a Pagar e Receber - "Cantina Sant'Anna"
 
-Esta documentação técnica descreve a arquitetura, o modelo de dados, as especificações de segurança e os blueprints de código para o desenvolvimento e implantação do sistema autônomo **Cantina Financeiro**. O sistema é projetado para operar como uma subpasta independente de um sistema maior em um servidor web Apache, utilizando **PHP 8+**, **SQLite**, **Bootstrap 5** e **Chart.js** para relatórios visuais.
+Esta documentação técnica descreve a arquitetura, o modelo de dados, as especificações de segurança e os blueprints de código para o desenvolvimento e implantação do sistema autônomo **Cantina Sant'Anna**. O sistema é projetado para operar na raiz de um servidor web Apache, utilizando **PHP 8+**, **SQLite**, **Bootstrap 5** e **Chart.js** para relatórios visuais.
 
 ---
 
@@ -22,10 +22,10 @@ Durante a fase de brainstorming com o cliente, as seguintes decisões estruturai
 
 ## 📂 Arquitetura e Estrutura de Pastas
 
-O sistema é 100% autônomo, não dependendo de frameworks externos pesados ou de gerenciadores de pacotes (como Composer), o que garante portabilidade máxima. Basta mover a pasta `/cantina-financeiro` para a raiz ou subpasta do servidor Apache.
+O sistema é 100% autônomo, não dependendo de frameworks externos pesados ou de gerenciadores de pacotes (como Composer), o que garante portabilidade máxima. Basta colocar a pasta na raiz do servidor Apache (ex: `www/rmg-erp-php/`).
 
 ```text
-/cantina-financeiro/
+[raiz do projeto]/
 ├── db/                                  # Banco de Dados
 │   ├── cantina.sqlite                   # Banco de dados SQLite criado automaticamente
 │   └── .htaccess                        # Bloqueia download externo do banco
@@ -123,7 +123,7 @@ CREATE TABLE IF NOT EXISTS logs (
 
 Para assegurar que o banco de dados e os backups armazenados localmente não sejam baixados por usuários externos, criaremos arquivos `.htaccess` dedicados nas pastas sensíveis.
 
-### Arquivo: `/cantina-financeiro/db/.htaccess` e `/cantina-financeiro/backups/.htaccess`
+### Arquivo: `/db/.htaccess` e `/backups/.htaccess`
 ```apache
 # Bloqueia o acesso a qualquer arquivo dentro deste diretório a partir de requisições HTTP externas
 <IfModule mod_authz_core.c>
@@ -243,16 +243,16 @@ class Database {
         if ($stmt->fetchColumn() == 0) {
             $senhaPadrao = password_hash("admin123", PASSWORD_DEFAULT);
             $stmtInsert = $db->prepare("INSERT INTO usuarios (nome, usuario, email, senha, nivel) VALUES (?, ?, ?, ?, 'admin')");
-            $stmtInsert->execute(['Administrador de TI', 'admin', 'ti@cantina.com.br', $senhaPadrao]);
+            $stmtInsert->execute(['Administrador de TI', 'admin', 'ti@santanna.com.br', $senhaPadrao]);
         }
 
         // Insere configurações padrões se não existirem
         $defaultConfigs = [
             'mailgrid_api_url' => 'https://www.mailgrid.com.br/api',
             'mailgrid_api_key' => '',
-            'email_remetente' => 'financeiro@cantina.com.br',
-            'nome_remetente' => 'Financeiro Cantina Escolar',
-            'emails_destinatarios' => 'direcao@cantina.com.br',
+            'email_remetente' => 'financeiro@santanna.com.br',
+            'nome_remetente' => "Financeiro Cantina Sant'Anna",
+            'emails_destinatarios' => 'direcao@santanna.com.br',
             'dias_alerta_vencimento' => '3'
         ];
 
@@ -279,7 +279,7 @@ class Auth {
             // Garante parâmetros de cookie seguros
             session_set_cookie_params([
                 'lifetime' => 0,
-                'path' => '/cantina-financeiro/',
+                'path' => '/',
                 'domain' => '',
                 'secure' => isset($_SERVER['HTTPS']),
                 'httponly' => true,
@@ -373,7 +373,7 @@ class EmailService {
         $apiUrl = $configs['mailgrid_api_url'] ?? 'https://www.mailgrid.com.br/api';
         $apiKey = $configs['mailgrid_api_key'] ?? '';
         $remetenteEmail = $configs['email_remetente'] ?? '';
-        $remetenteNome = $configs['nome_remetente'] ?? 'Financeiro Cantina';
+        $remetenteNome = $configs['nome_remetente'] ?? "Financeiro Cantina Sant'Anna";
         $destinatariosRaw = $configs['emails_destinatarios'] ?? '';
 
         if (empty($apiKey) || empty($remetenteEmail) || empty($destinatariosRaw)) {
@@ -514,7 +514,7 @@ class BackupService {
 
 Este script (`cron_daily_notifications_4fb9e2.php`) é programado em um agendador de tarefas. Ele gera o backup diário automático, reúne as contas a pagar e receber do dia, contas em atraso e contas prestes a vencer, constrói um relatório em tabelas estilizadas e envia via API do MailGrid.
 
-### Arquivo: `/cantina-financeiro/cron_daily_notifications_4fb9e2.php`
+### Arquivo: `/cron_daily_notifications_4fb9e2.php`
 ```php
 <?php
 // Script de execução diária
@@ -661,7 +661,7 @@ try {
     </html>";
 
     // 7. Envia o e-mail via MailGrid
-    $assunto = "Financeiro Cantina: Resumo Diário de Contas - " . date('d/m/Y');
+    $assunto = "Financeiro Cantina Sant'Anna: Resumo Diário de Contas - " . date('d/m/Y');
     $enviado = EmailService::enviarRelatorio($assunto, $corpoHtml);
 
     if ($enviado) {
@@ -880,7 +880,7 @@ crontab -e
 ```
 Adicione a seguinte linha para disparar o script todos os dias às 06:00 da manhã (via HTTP local no Apache):
 ```bash
-0 6 * * * curl -s http://localhost/cantina-financeiro/cron_daily_notifications_4fb9e2.php > /dev/null 2>&1
+0 6 * * * curl -s http://localhost/rmg-erp-php/cron_daily_notifications_4fb9e2.php > /dev/null 2>&1
 ```
 
 #### Exemplo em Servidores Windows (Task Scheduler):
@@ -888,7 +888,7 @@ Adicione a seguinte linha para disparar o script todos os dias às 06:00 da manh
 2. Crie uma **Tarefa Básica** com disparo **Diário** (ex: às 06:00).
 3. Defina a ação como **Iniciar um programa**.
 4. No campo Programa/script, insira o caminho do PHP (ex: `C:\laragon\bin\php\php-8.x\php.exe`).
-5. No campo Adicionar argumentos, insira o caminho completo para o script (ex: `-f D:\laragon\www\rmg-erp-php\cantina-financeiro\cron_daily_notifications_4fb9e2.php`).
+5. No campo Adicionar argumentos, insira o caminho completo para o script (ex: `-f D:\laragon\www\rmg-erp-php\cron_daily_notifications_4fb9e2.php`).
 
 ---
 

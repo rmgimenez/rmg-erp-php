@@ -26,7 +26,7 @@ class EmailService {
         $apiUrl = $configs['mailgrid_api_url'] ?? 'https://www.mailgrid.com.br/api';
         $apiKey = $configs['mailgrid_api_key'] ?? '';
         $remetenteEmail = $configs['email_remetente'] ?? '';
-        $remetenteNome = $configs['nome_remetente'] ?? 'Financeiro Cantina Escolar';
+        $remetenteNome = $configs['nome_remetente'] ?? "Financeiro Cantina Sant'Anna";
         $destinatariosRaw = $configs['emails_destinatarios'] ?? '';
 
         // Valida se as credenciais mínimas foram cadastradas no sistema

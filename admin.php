@@ -139,7 +139,7 @@ $ultimoCron = $stmtLastCron->fetchColumn();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Admin TI - Cantina Financeiro</title>
+    <title>Painel Admin TI - Cantina Sant'Anna</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome Icons -->
@@ -153,7 +153,7 @@ $ultimoCron = $stmtLastCron->fetchColumn();
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h1 class="h3 fw-bold mb-0">Console do Administrador de TI</h1>
-            <p class="text-muted small mb-0">Gerenciamento de infraestrutura, logs de auditoria e rotinas de backups da Cantina.</p>
+            <p class="text-muted small mb-0">Gerenciamento de infraestrutura, logs de auditoria e rotinas de backups da Cantina Sant'Anna.</p>
         </div>
         <div class="d-flex gap-2 align-items-center">
             <span class="badge bg-danger px-3 py-2 rounded-pill"><i class="fa-solid fa-server me-1"></i> TI Admin</span>
@@ -234,7 +234,7 @@ $ultimoCron = $stmtLastCron->fetchColumn();
                         </div>
                         <div class="col-md-6">
                             <label class="form-label text-muted small fw-semibold">Nome Remetente</label>
-                            <input type="text" name="nome_remetente" class="form-control form-control-premium" value="<?= htmlspecialchars($configs['nome_remetente'] ?? 'Financeiro Cantina', ENT_QUOTES, 'UTF-8') ?>">
+                            <input type="text" name="nome_remetente" class="form-control form-control-premium" value="<?= htmlspecialchars($configs['nome_remetente'] ?? "Financeiro Cantina Sant'Anna", ENT_QUOTES, 'UTF-8') ?>">
                         </div>
                     </div>
 

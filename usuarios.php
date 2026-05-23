@@ -148,7 +148,7 @@ $usuarios = $stmtList->fetchAll();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Usuários - Cantina Financeiro</title>
+    <title>Usuários - Cantina Sant'Anna</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome Icons -->
@@ -163,7 +163,7 @@ $usuarios = $stmtList->fetchAll();
         <div class="col-md-3 col-lg-2 px-0 sidebar-panel d-none d-md-block">
             <div class="py-4 text-center border-bottom border-secondary border-opacity-25">
                 <div style="font-size: 1.6rem; font-weight: 700; color: #ffffff; letter-spacing: -0.5px;">
-                    Cantina<span style="color: #6366f1;">.</span>
+                    Sant'Anna<span style="color: #6366f1;">.</span>
                 </div>
                 <span class="badge bg-light text-dark text-opacity-75 small px-3 py-1 rounded-pill mt-1">
                     <?= ucfirst($_SESSION['user_nivel']) ?>
@@ -176,6 +176,12 @@ $usuarios = $stmtList->fetchAll();
                 </a>
                 <a href="contas.php" class="nav-link">
                     <i class="fa-solid fa-file-invoice-dollar me-2"></i> Contas
+                </a>
+                <a href="calendario.php" class="nav-link">
+                    <i class="fa-solid fa-calendar-days me-2"></i> Calendário
+                </a>
+                <a href="relatorios.php" class="nav-link">
+                    <i class="fa-solid fa-file-pdf me-2"></i> Relatórios
                 </a>
                 <a href="usuarios.php" class="nav-link active">
                     <i class="fa-solid fa-users me-2"></i> Usuários

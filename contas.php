@@ -40,10 +40,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $tipo = $_POST['tipo'] ?? '';
         $dataVenc = $_POST['data_vencimento'] ?? '';
         $categoria = trim($_POST['categoria'] ?? '');
+        if ($categoria === '') {
+            $categoria = 'Outros';
+        }
         $status = $_POST['status'] ?? 'pendente';
         $obs = trim($_POST['observacoes'] ?? '');
 
-        if (!empty($descricao) && !empty($valorRaw) && !empty($tipo) && !empty($dataVenc) && !empty($categoria)) {
+        if (!empty($descricao) && !empty($valorRaw) && !empty($tipo) && !empty($dataVenc)) {
             $valorCents = parseBrlToCents($valorRaw);
             $dados = [
                 'descricao' => $descricao,
@@ -75,11 +78,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $valorRaw = $_POST['valor'] ?? '0';
             $dataVenc = $_POST['data_vencimento'] ?? '';
             $categoria = trim($_POST['categoria'] ?? '');
+            if ($categoria === '') {
+                $categoria = 'Outros';
+            }
             $status = $_POST['status'] ?? 'pendente';
             $obs = trim($_POST['observacoes'] ?? '');
             $dataLiquidacao = $_POST['data_liquidacao'] ?? null;
 
-            if ($id > 0 && !empty($descricao) && !empty($valorRaw) && !empty($dataVenc) && !empty($categoria)) {
+            if ($id > 0 && !empty($descricao) && !empty($valorRaw) && !empty($dataVenc)) {
                 $valorCents = parseBrlToCents($valorRaw);
                 $dados = [
                     'descricao' => $descricao,
@@ -158,7 +164,7 @@ $categoriasDisponiveis = $stmtCategorias->fetchAll(PDO::FETCH_COLUMN);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciamento de Contas - Cantina</title>
+    <title>Gerenciamento de Contas - Cantina Sant'Anna</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome Icons -->
@@ -173,7 +179,7 @@ $categoriasDisponiveis = $stmtCategorias->fetchAll(PDO::FETCH_COLUMN);
         <div class="col-md-3 col-lg-2 px-0 sidebar-panel d-none d-md-block">
             <div class="py-4 text-center border-bottom border-secondary border-opacity-25">
                 <div style="font-size: 1.6rem; font-weight: 700; color: #ffffff; letter-spacing: -0.5px;">
-                    Cantina<span style="color: #6366f1;">.</span>
+                    Sant'Anna<span style="color: #6366f1;">.</span>
                 </div>
                 <span class="badge bg-light text-dark text-opacity-75 small px-3 py-1 rounded-pill mt-1">
                     <?= ucfirst($_SESSION['user_nivel']) ?>
@@ -186,6 +192,12 @@ $categoriasDisponiveis = $stmtCategorias->fetchAll(PDO::FETCH_COLUMN);
                 </a>
                 <a href="contas.php" class="nav-link active">
                     <i class="fa-solid fa-file-invoice-dollar me-2"></i> Contas
+                </a>
+                <a href="calendario.php" class="nav-link">
+                    <i class="fa-solid fa-calendar-days me-2"></i> Calendário
+                </a>
+                <a href="relatorios.php" class="nav-link">
+                    <i class="fa-solid fa-file-pdf me-2"></i> Relatórios
                 </a>
                 <?php if ($_SESSION['user_nivel'] === 'gerente'): ?>
                     <a href="usuarios.php" class="nav-link">
@@ -219,7 +231,7 @@ $categoriasDisponiveis = $stmtCategorias->fetchAll(PDO::FETCH_COLUMN);
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h1 class="h3 fw-bold mb-0">Contas a Pagar e Receber</h1>
-                    <p class="text-muted small mb-0">Gerencie todos os lançamentos financeiros da cantina escolar.</p>
+                    <p class="text-muted small mb-0">Gerencie todos os lançamentos financeiros da Cantina Sant'Anna.</p>
                 </div>
                 <button class="btn btn-premium" data-bs-toggle="modal" data-bs-target="#modalCadastrar">
                     <i class="fa-solid fa-plus me-1"></i> Novo Lançamento
@@ -409,8 +421,8 @@ $categoriasDisponiveis = $stmtCategorias->fetchAll(PDO::FETCH_COLUMN);
                             <input type="date" name="data_vencimento" class="form-control form-control-premium" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label text-muted small fw-semibold">Categoria *</label>
-                            <input type="text" name="categoria" class="form-control form-control-premium" placeholder="Ex: Fornecedor, Serviços" list="datalist-categorias" required>
+                            <label class="form-label text-muted small fw-semibold">Categoria</label>
+                            <input type="text" name="categoria" class="form-control form-control-premium" placeholder="Ex: Fornecedor, Serviços" list="datalist-categorias">
                             <datalist id="datalist-categorias">
                                 <option value="Alimentos">
                                 <option value="Bebidas">
@@ -470,8 +482,8 @@ $categoriasDisponiveis = $stmtCategorias->fetchAll(PDO::FETCH_COLUMN);
                             <input type="text" name="valor" id="edit-valor" class="form-control form-control-premium money-mask" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label text-muted small fw-semibold">Categoria *</label>
-                            <input type="text" name="categoria" id="edit-categoria" class="form-control form-control-premium" required>
+                            <label class="form-label text-muted small fw-semibold">Categoria</label>
+                            <input type="text" name="categoria" id="edit-categoria" class="form-control form-control-premium">
                         </div>
                     </div>
 

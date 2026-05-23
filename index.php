@@ -79,7 +79,7 @@ $vencidasList = $stmtVencidas->fetchAll();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Financeiro - Cantina Escolar</title>
+    <title>Painel Financeiro - Cantina Sant'Anna</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome Icons -->
@@ -94,7 +94,7 @@ $vencidasList = $stmtVencidas->fetchAll();
         <div class="col-md-3 col-lg-2 px-0 sidebar-panel d-none d-md-block">
             <div class="py-4 text-center border-bottom border-secondary border-opacity-25">
                 <div style="font-size: 1.6rem; font-weight: 700; color: #ffffff; letter-spacing: -0.5px;">
-                    Cantina<span style="color: #6366f1;">.</span>
+                    Sant'Anna<span style="color: #6366f1;">.</span>
                 </div>
                 <span class="badge bg-light text-dark text-opacity-75 small px-3 py-1 rounded-pill mt-1">
                     <?= ucfirst($_SESSION['user_nivel']) ?>
@@ -107,6 +107,12 @@ $vencidasList = $stmtVencidas->fetchAll();
                 </a>
                 <a href="contas.php" class="nav-link">
                     <i class="fa-solid fa-file-invoice-dollar me-2"></i> Contas
+                </a>
+                <a href="calendario.php" class="nav-link">
+                    <i class="fa-solid fa-calendar-days me-2"></i> Calendário
+                </a>
+                <a href="relatorios.php" class="nav-link">
+                    <i class="fa-solid fa-file-pdf me-2"></i> Relatórios
                 </a>
                 <?php if ($_SESSION['user_nivel'] === 'gerente'): ?>
                     <a href="usuarios.php" class="nav-link">
@@ -125,7 +131,7 @@ $vencidasList = $stmtVencidas->fetchAll();
             <!-- Mobile Header -->
             <div class="d-md-none d-flex justify-content-between align-items-center mb-4 p-3 bg-white rounded-3 shadow-sm">
                 <div style="font-size: 1.3rem; font-weight: 700; color: #1e1b4b;">
-                    Cantina<span style="color: var(--primary);">.</span>
+                    Sant'Anna<span style="color: var(--primary);">.</span>
                 </div>
                 <div class="dropdown">
                     <button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown">
@@ -134,6 +140,8 @@ $vencidasList = $stmtVencidas->fetchAll();
                     <ul class="dropdown-menu dropdown-menu-end border-0 shadow">
                         <li><a class="dropdown-menu-item nav-link p-2" href="index.php"><i class="fa-solid fa-chart-line me-2"></i> Dashboard</a></li>
                         <li><a class="dropdown-menu-item nav-link p-2" href="contas.php"><i class="fa-solid fa-file-invoice-dollar me-2"></i> Contas</a></li>
+                        <li><a class="dropdown-menu-item nav-link p-2" href="calendario.php"><i class="fa-solid fa-calendar-days me-2"></i> Calendário</a></li>
+                        <li><a class="dropdown-menu-item nav-link p-2" href="relatorios.php"><i class="fa-solid fa-file-pdf me-2"></i> Relatórios</a></li>
                         <?php if ($_SESSION['user_nivel'] === 'gerente'): ?>
                             <li><a class="dropdown-menu-item nav-link p-2" href="usuarios.php"><i class="fa-solid fa-users me-2"></i> Usuários</a></li>
                         <?php endif; ?>
@@ -147,7 +155,7 @@ $vencidasList = $stmtVencidas->fetchAll();
             <div class="d-none d-md-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h1 class="h3 fw-bold mb-0">Painel Geral</h1>
-                    <p class="text-muted small mb-0">Olá, <strong><?= htmlspecialchars($_SESSION['user_nome'], ENT_QUOTES, 'UTF-8') ?></strong>! Acompanhe as finanças da cantina escolar.</p>
+                    <p class="text-muted small mb-0">Olá, <strong><?= htmlspecialchars($_SESSION['user_nome'], ENT_QUOTES, 'UTF-8') ?></strong>! Acompanhe as finanças da Cantina Sant'Anna.</p>
                 </div>
                 <div class="text-end">
                     <span class="text-muted small"><?= date('d/m/Y') ?></span>
