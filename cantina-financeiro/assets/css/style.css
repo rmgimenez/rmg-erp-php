@@ -1,0 +1,245 @@
+/* 
+ * Style Customizado - Cantina Financeiro
+ * Design Premium, Glassmorphism, Micro-animações e Layout Responsivo.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --bg-app: #f8fafc;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --card-bg: rgba(255, 255, 255, 0.85);
+    
+    --success: #10b981;
+    --success-bg: #d1fae5;
+    --success-border: #a7f3d0;
+    
+    --danger: #ef4444;
+    --danger-bg: #fee2e2;
+    --danger-border: #fca5a5;
+    
+    --warning: #f59e0b;
+    --warning-bg: #fef3c7;
+    --warning-border: #fde68a;
+    
+    --info: #06b6d4;
+    --info-bg: #cffafe;
+    --info-border: #a5f3fc;
+    
+    --border-color: #e2e8f0;
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--bg-app);
+    color: var(--text-main);
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
+/* Glassmorphism Cards */
+.card-glass {
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-glass:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(79, 70, 229, 0.08);
+}
+
+/* Sidebar Customizada */
+.sidebar-panel {
+    background: linear-gradient(135deg, #1e1b4b 0%, #311042 100%);
+    color: #ffffff;
+    min-height: 100vh;
+    border-radius: 0 24px 24px 0;
+    box-shadow: 4px 0 25px rgba(0,0,0,0.15);
+}
+
+.sidebar-panel .nav-link {
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 500;
+    border-radius: 12px;
+    padding: 12px 20px;
+    margin: 4px 15px;
+    transition: all 0.2s ease;
+}
+
+.sidebar-panel .nav-link:hover,
+.sidebar-panel .nav-link.active {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateX(4px);
+}
+
+/* KPI Badges & Cards */
+.kpi-border-success { border-left: 5px solid var(--success) !important; }
+.kpi-border-danger { border-left: 5px solid var(--danger) !important; }
+.kpi-border-warning { border-left: 5px solid var(--warning) !important; }
+.kpi-border-info { border-left: 5px solid var(--info) !important; }
+
+.kpi-title {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.kpi-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+/* Alertas Animados para Contas Vencidas */
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.badge-pulse-danger {
+    background-color: var(--danger);
+    color: #ffffff;
+    animation: pulse-red 2s infinite;
+}
+
+/* Badges Customizados */
+.custom-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.badge-pago {
+    background-color: var(--success-bg);
+    color: #065f46;
+    border: 1px solid var(--success-border);
+}
+
+.badge-pendente {
+    background-color: var(--warning-bg);
+    color: #92400e;
+    border: 1px solid var(--warning-border);
+}
+
+.badge-cancelado {
+    background-color: #f1f5f9;
+    color: #334155;
+    border: 1px solid #cbd5e1;
+}
+
+/* Inputs Premium */
+.form-control-premium, .form-select-premium {
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-size: 0.95rem;
+    background-color: #ffffff;
+    transition: all 0.2s ease;
+}
+
+.form-control-premium:focus, .form-select-premium:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
+    background-color: #ffffff;
+}
+
+/* Botões Modernos */
+.btn-premium {
+    background: linear-gradient(135deg, var(--primary) 0%, #6366f1 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 24px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+    transition: all 0.2s ease;
+}
+
+.btn-premium:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3);
+    color: #ffffff;
+}
+
+.btn-premium-danger {
+    background: linear-gradient(135deg, var(--danger) 0%, #f87171 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 24px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+    transition: all 0.2s ease;
+}
+
+.btn-premium-danger:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(239, 68, 68, 0.3);
+    color: #ffffff;
+}
+
+/* Modais Glassmorphic */
+.modal-content-glass {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.4);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+}
+
+/* Tabelas Premium */
+.table-premium th {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    font-weight: 600;
+    background-color: rgba(248, 250, 252, 0.8);
+    border-bottom: 2px solid var(--border-color);
+}
+
+.table-premium td {
+    padding: 14px 12px;
+    font-size: 0.92rem;
+    vertical-align: middle;
+}
+
+/* Hover de Linhas com Suavidade */
+.table-premium tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.table-premium tbody tr:hover {
+    background-color: rgba(79, 70, 229, 0.02) !important;
+}
+
+/* Dashboard Grid */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+}
+
+@media (min-width: 992px) {
+    .dashboard-grid {
+        grid-template-columns: 2fr 1fr;
+    }
+}
