@@ -62,6 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="assets/css/style.css" rel="stylesheet">
+    <script src="assets/js/toast.js"></script>
     <style>
         body {
             background: linear-gradient(135deg, #1e1b4b 0%, #311042 100%);
@@ -98,15 +99,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <?php if ($erro): ?>
-        <div class="alert alert-danger border-0 rounded-3 text-center py-2 fs-6 mb-3" role="alert">
-            <?= htmlspecialchars($erro, ENT_QUOTES, 'UTF-8') ?>
-        </div>
+        <script>exibirToast(<?= json_encode($erro) ?>, 'error');</script>
     <?php endif; ?>
 
     <?php if (isset($_GET['mensagem']) && $_GET['mensagem'] === 'logout_sucesso'): ?>
-        <div class="alert alert-success border-0 rounded-3 text-center py-2 fs-6 mb-3" role="alert">
-            Sessão encerrada com sucesso.
-        </div>
+        <script>exibirToast('Sessão encerrada com sucesso.', 'success');</script>
     <?php endif; ?>
 
     <form method="POST" action="login.php">

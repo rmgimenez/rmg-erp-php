@@ -57,18 +57,6 @@ require_once __DIR__ . '/src/includes/layout_start.php';
     </div>
 </div>
 
-<?php if ($sucessoMsg): ?>
-    <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
-        <i class="fa-solid fa-circle-check me-2"></i> <?= $sucessoMsg ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-<?php elseif ($erroMsg): ?>
-    <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
-        <i class="fa-solid fa-circle-exclamation me-2"></i> <?= $erroMsg ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-<?php endif; ?>
-
 <div class="row justify-content-center">
     <div class="col-md-6 col-lg-5">
         <div class="card card-glass p-4">
@@ -101,7 +89,7 @@ require_once __DIR__ . '/src/includes/layout_start.php';
         var nova = document.getElementById('nova_senha').value;
         var confirmar = document.getElementById('confirmar_senha').value;
         if (nova !== confirmar) {
-            alert('A nova senha e a confirmação não conferem.');
+            setTimeout(function () { exibirToast('A nova senha e a confirmação não conferem.', 'error'); }, 100);
             return false;
         }
         return true;

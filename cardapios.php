@@ -480,7 +480,6 @@ require_once __DIR__ . '/src/includes/layout_start.php';
 
 <!-- Scripts -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-<script src="assets/js/toast.js"></script>
 <script src="assets/js/utils.js"></script>
 <script src="assets/js/cardapios.js"></script>
 <?php require_once __DIR__ . '/src/includes/scripts_footer.php'; ?>

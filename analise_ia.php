@@ -160,7 +160,6 @@ require_once __DIR__ . '/src/includes/layout_start.php';
 </div>
 
 <!-- Scripts -->
-<script src="assets/js/toast.js"></script>
 <script src="assets/js/utils.js"></script>
 <script src="assets/js/analise_ia.js"></script>
 <?php require_once __DIR__ . '/src/includes/scripts_footer.php'; ?>
