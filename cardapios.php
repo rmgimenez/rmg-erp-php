@@ -202,6 +202,34 @@ $apiKeyConfigurada = !empty($stmtCheckKey->fetchColumn());
             margin-right: 8px;
         }
 
+        /* Lista de Compras */
+        .lista-compras-content {
+            padding: 16px;
+            background: #fafafa;
+            border-radius: 8px;
+            min-height: 200px;
+        }
+
+        .lista-compras-content h3,
+        .lista-compras-content h4,
+        .lista-compras-content h5 {
+            color: #1e1b4b;
+        }
+
+        .lista-compras-content li {
+            padding: 4px 0;
+            font-size: 0.9rem;
+            color: #334155;
+            list-style: none;
+        }
+
+        .lista-compras-content li::before {
+            content: "•";
+            color: var(--primary);
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
         /* Editor Markdown com Preview */
         .markdown-editor-container {
             display: grid;
@@ -626,83 +654,125 @@ $apiKeyConfigurada = !empty($stmtCheckKey->fetchColumn());
                             <?php endif; ?>
                         </div>
 
-                        <!-- Tab Content -->
-                        <div class="print-cardapio-container">
-                            <!-- TABELA DO CARDÁPIO -->
-                            <div class="card card-glass p-4">
-                                <div class="d-flex justify-content-between align-items-center mb-3 no-print">
-                                    <h5 class="fw-bold mb-0 text-primary"><i class="fa-solid fa-utensils me-2"></i> Cardápio da Semana</h5>
-                                </div>
+                        <!-- Tabs de Navegação -->
+                        <ul class="nav premium-nav-tabs mb-3 border-bottom no-print" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="tab-cardapio-btn" data-bs-toggle="tab" data-bs-target="#tab-cardapio" type="button" role="tab">
+                                    <i class="fa-solid fa-utensils me-1"></i> Cardápio
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="tab-lista-btn" data-bs-toggle="tab" data-bs-target="#tab-lista" type="button" role="tab">
+                                    <i class="fa-solid fa-basket-shopping me-1"></i> Lista de Compras
+                                </button>
+                            </li>
+                        </ul>
 
-                                <div class="table-responsive">
-                                    <table class="table table-cardapio mb-0">
-                                        <thead>
-                                            <tr>
-                                                <th style="width: 15%;">Dia</th>
-                                                <th style="width: 42%;">Almoço (Refeição Principal)</th>
-                                                <th style="width: 42%;">Lanche</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php 
-                                            $diasDisplay = [
-                                                'segunda' => 'Segunda-feira',
-                                                'terca' => 'Terça-feira',
-                                                'quarta' => 'Quarta-feira',
-                                                'quinta' => 'Quinta-feira',
-                                                'sexta' => 'Sexta-feira'
-                                            ];
-                                            ?>
-                                            <?php 
-                                            // Converte markdown para lista HTML
-                                            function convertMarkdownToList($text) {
-                                                if (empty($text)) return '<span class="text-muted">Não informado</span>';
-                                                $lines = explode("\n", $text);
-                                                $html = '<ul class="meal-list">';
-                                                foreach ($lines as $line) {
-                                                    $line = trim($line);
-                                                    if (empty($line)) continue;
-                                                    // Remove marcadores markdown
-                                                    $line = preg_replace('/^[-*]\s+/', '', $line);
-                                                    $line = htmlspecialchars($line, ENT_QUOTES, 'UTF-8');
-                                                    // Converte negrito
-                                                    $line = preg_replace('/\*\*(.*?)\*\*/', '<strong>$1</strong>', $line);
-                                                    $html .= "<li>{$line}</li>";
-                                                }
-                                                $html .= '</ul>';
-                                                return $html;
-                                            }
-                                            ?>
-                                            <?php foreach ($cardapioAtivo['dias'] as $d): ?>
-                                                <?php 
-                                                $hasAlmoco = ($d['refeicao_principal'] !== 'Não planejado' && !empty($d['refeicao_principal']));
-                                                $hasLanche = ($d['lanche'] !== 'Não planejado' && !empty($d['lanche']));
-                                                ?>
+                        <!-- Tab Content -->
+                        <div class="tab-content">
+                            <!-- ABA 1: CARDÁPIO -->
+                            <div class="tab-pane fade show active print-cardapio-container" id="tab-cardapio" role="tabpanel">
+                                <div class="card card-glass p-4">
+                                    <div class="table-responsive">
+                                        <table class="table table-cardapio mb-0">
+                                            <thead>
                                                 <tr>
-                                                    <td>
-                                                        <strong class="text-indigo-950"><?= $diasDisplay[$d['dia_semana']] ?></strong>
-                                                        <button class="btn btn-sm btn-outline-primary mt-2 d-block no-print" 
-                                                                title="Editar Dia"
-                                                                onclick="abrirModalEdicaoDia('<?= $d['dia_semana'] ?>')">
-                                                            <i class="fa-solid fa-pencil"></i> Editar
-                                                        </button>
-                                                    </td>
-                                                    <td>
-                                                        <div class="d-none" id="raw-principal-<?= $d['dia_semana'] ?>"><?= htmlspecialchars($d['refeicao_principal'], ENT_QUOTES, 'UTF-8') ?></div>
-                                                        <div id="lbl-principal-<?= $d['dia_semana'] ?>">
-                                                            <?= convertMarkdownToList($d['refeicao_principal']) ?>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <div class="d-none" id="raw-lanche-<?= $d['dia_semana'] ?>"><?= htmlspecialchars($d['lanche'], ENT_QUOTES, 'UTF-8') ?></div>
-                                                        <div id="lbl-lanche-<?= $d['dia_semana'] ?>">
-                                                            <?= convertMarkdownToList($d['lanche']) ?>
-                                                        </div>
-                                                    </td>
+                                                    <th style="width: 15%;">Dia</th>
+                                                    <th style="width: 42%;">Almoço (Refeição Principal)</th>
+                                                    <th style="width: 42%;">Lanche</th>
                                                 </tr>
-                                            <?php endforeach; ?>
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody>
+                                                <?php 
+                                                $diasDisplay = [
+                                                    'segunda' => 'Segunda-feira',
+                                                    'terca' => 'Terça-feira',
+                                                    'quarta' => 'Quarta-feira',
+                                                    'quinta' => 'Quinta-feira',
+                                                    'sexta' => 'Sexta-feira'
+                                                ];
+                                                ?>
+                                                <?php 
+                                                // Converte markdown para lista HTML
+                                                function convertMarkdownToList($text) {
+                                                    if (empty($text)) return '<span class="text-muted">Não informado</span>';
+                                                    $lines = explode("\n", $text);
+                                                    $html = '<ul class="meal-list">';
+                                                    foreach ($lines as $line) {
+                                                        $line = trim($line);
+                                                        if (empty($line)) continue;
+                                                        // Remove marcadores markdown
+                                                        $line = preg_replace('/^[-*]\s+/', '', $line);
+                                                        $line = htmlspecialchars($line, ENT_QUOTES, 'UTF-8');
+                                                        // Converte negrito
+                                                        $line = preg_replace('/\*\*(.*?)\*\*/', '<strong>$1</strong>', $line);
+                                                        $html .= "<li>{$line}</li>";
+                                                    }
+                                                    $html .= '</ul>';
+                                                    return $html;
+                                                }
+                                                ?>
+                                                <?php foreach ($cardapioAtivo['dias'] as $d): ?>
+                                                    <?php 
+                                                    $hasAlmoco = ($d['refeicao_principal'] !== 'Não planejado' && !empty($d['refeicao_principal']));
+                                                    $hasLanche = ($d['lanche'] !== 'Não planejado' && !empty($d['lanche']));
+                                                    ?>
+                                                    <tr>
+                                                        <td>
+                                                            <strong class="text-indigo-950"><?= $diasDisplay[$d['dia_semana']] ?></strong>
+                                                            <button class="btn btn-sm btn-outline-primary mt-2 d-block no-print" 
+                                                                    title="Editar Dia"
+                                                                    onclick="abrirModalEdicaoDia('<?= $d['dia_semana'] ?>')">
+                                                                <i class="fa-solid fa-pencil"></i> Editar
+                                                            </button>
+                                                        </td>
+                                                        <td>
+                                                            <div class="d-none" id="raw-principal-<?= $d['dia_semana'] ?>"><?= htmlspecialchars($d['refeicao_principal'], ENT_QUOTES, 'UTF-8') ?></div>
+                                                            <div id="lbl-principal-<?= $d['dia_semana'] ?>">
+                                                                <?= convertMarkdownToList($d['refeicao_principal']) ?>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="d-none" id="raw-lanche-<?= $d['dia_semana'] ?>"><?= htmlspecialchars($d['lanche'], ENT_QUOTES, 'UTF-8') ?></div>
+                                                            <div id="lbl-lanche-<?= $d['dia_semana'] ?>">
+                                                                <?= convertMarkdownToList($d['lanche']) ?>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ABA 2: LISTA DE COMPRAS -->
+                            <div class="tab-pane fade print-portrait-container" id="tab-lista" role="tabpanel">
+                                <div class="card card-glass p-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-3 no-print">
+                                        <h5 class="fw-bold mb-0 text-primary"><i class="fa-solid fa-basket-shopping me-2"></i> Lista de Compras</h5>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="abrirModalEdicaoLista()">
+                                            <i class="fa-solid fa-pencil me-1"></i> Editar Lista
+                                        </button>
+                                    </div>
+
+                                    <div id="lista-compras-exibicao" class="lista-compras-content">
+                                        <?php 
+                                        $textoMarkdown = $cardapioAtivo['lista_compras'] ?? '';
+                                        // Converte títulos markdown
+                                        $textoMarkdown = preg_replace('/### (.*?)\n/', '<h5 class="text-indigo-950 fw-bold mt-3 mb-2 border-bottom pb-1">$1</h5>', $textoMarkdown);
+                                        $textoMarkdown = preg_replace('/## (.*?)\n/', '<h4 class="text-indigo-950 fw-bold mt-4 mb-2 border-bottom pb-2">$1</h4>', $textoMarkdown);
+                                        $textoMarkdown = preg_replace('/# (.*?)\n/', '<h3 class="text-indigo-950 fw-bold mt-4 mb-2">$1</h3>', $textoMarkdown);
+                                        // Converte listas em items
+                                        $textoMarkdown = preg_replace('/- (.*?)\n/', '<li class="small mb-1">$1</li>', $textoMarkdown);
+                                        // Quebras de linha
+                                        $textoMarkdown = nl2br($textoMarkdown);
+                                        echo $textoMarkdown;
+                                        ?>
+                                    </div>
+
+                                    <!-- Elemento oculto com markdown bruto -->
+                                    <div class="d-none" id="raw-lista-compras"><?= htmlspecialchars($cardapioAtivo['lista_compras'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
                                 </div>
                             </div>
                         </div>
@@ -1060,7 +1130,9 @@ $apiKeyConfigurada = !empty($stmtCheckKey->fetchColumn());
     }
 
     // EDIÇÃO MANUAL DA LISTA DE COMPRAS - ABRE MODAL
-    function abrirModalEdicaoLista(listaMarkdown) {
+    function abrirModalEdicaoLista() {
+        // Obtém o markdown atual da lista de compras
+        const listaMarkdown = document.getElementById('raw-lista-compras').innerText.trim();
         document.getElementById('modal_edit_lista_texto').value = listaMarkdown;
         
         const modal = new bootstrap.Modal(document.getElementById('modalEditarLista'));
@@ -1089,6 +1161,19 @@ $apiKeyConfigurada = !empty($stmtCheckKey->fetchColumn());
         .then(data => {
             modal.hide();
             if (data.sucesso) {
+                // Atualiza o markdown bruto oculto
+                document.getElementById('raw-lista-compras').innerText = listaComprasVal;
+                
+                // Atualiza a visualização formatada da lista
+                let converted = listaComprasVal
+                    .replace(/### (.*?)\n/g, '<h5 class="text-indigo-950 fw-bold mt-3 mb-2 border-bottom pb-1">$1</h5>')
+                    .replace(/## (.*?)\n/g, '<h4 class="text-indigo-950 fw-bold mt-4 mb-2 border-bottom pb-2">$1</h4>')
+                    .replace(/# (.*?)\n/g, '<h3 class="text-indigo-950 fw-bold mt-4 mb-2">$1</h3>')
+                    .replace(/- (.*?)\n/g, '<li class="small mb-1">$1</li>')
+                    .replace(/\n/g, '<br>');
+                
+                document.getElementById('lista-compras-exibicao').innerHTML = converted;
+                
                 exibirAlerta('success', 'Lista de compras atualizada com sucesso.');
             } else {
                 exibirAlerta('danger', data.erro || 'Erro ao atualizar a lista.');
