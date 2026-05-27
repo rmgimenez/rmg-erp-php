@@ -245,42 +245,53 @@ $apiKeyConfigurada = !empty($stmtCheckKey->fetchColumn());
         .markdown-editor-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            min-height: 300px;
+            gap: 12px;
+            height: 380px;
         }
 
         .markdown-editor-pane,
         .markdown-preview-pane {
             border: 1px solid var(--border-color);
-            border-radius: 12px;
+            border-radius: 10px;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            background: white;
         }
 
         .markdown-editor-pane .pane-header,
         .markdown-preview-pane .pane-header {
-            background: #f8fafc;
-            padding: 8px 16px;
+            background: #f1f5f9;
+            padding: 8px 14px;
             font-weight: 600;
-            font-size: 0.82rem;
-            color: #64748b;
+            font-size: 0.78rem;
+            color: #475569;
             border-bottom: 1px solid var(--border-color);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
         }
 
         .markdown-editor-pane textarea {
             width: 100%;
-            min-height: 250px;
+            flex: 1;
             border: none;
-            padding: 16px;
+            padding: 12px 14px;
             font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
-            resize: vertical;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            resize: none;
             outline: none;
+            background: #fafbfc;
         }
 
         .markdown-preview-pane .preview-content {
-            padding: 16px;
-            min-height: 250px;
+            flex: 1;
+            padding: 12px 14px;
             overflow-y: auto;
+            font-size: 0.88rem;
+            line-height: 1.6;
+            background: white;
         }
 
         /* ==================================================== */
@@ -907,14 +918,14 @@ $apiKeyConfigurada = !empty($stmtCheckKey->fetchColumn());
 
 <!-- Modal: Edição de Markdown do Cardápio (no-print) -->
 <div class="modal fade no-print" id="modalEditarMarkdown" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-xl border-0">
-        <div class="modal-content border-0" style="background: transparent;">
-            <div class="modal-header border-0 pb-0">
+    <div class="modal-dialog modal-dialog-centered modal-lg border-0">
+        <div class="modal-content border-0 shadow-lg" style="background: white; border-radius: 16px;">
+            <div class="modal-header border-0 pb-2" style="background: #f8fafc; border-radius: 16px 16px 0 0;">
                 <h5 class="modal-title fw-bold text-indigo-950"><i class="fa-solid fa-code text-primary me-2"></i> Editar Cardápio em Markdown</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="formEditarMarkdown" onsubmit="salvarMarkdownManual(event)">
-                <div class="modal-body py-4">
+                <div class="modal-body py-3">
                     <div class="markdown-editor-container">
                         <div class="markdown-editor-pane">
                             <div class="pane-header">
@@ -931,7 +942,7 @@ $apiKeyConfigurada = !empty($stmtCheckKey->fetchColumn());
                     </div>
                 </div>
 
-                <div class="modal-footer border-0 pt-0">
+                <div class="modal-footer border-0 pt-0" style="background: #f8fafc; border-radius: 0 0 16px 16px;">
                     <button type="button" class="btn btn-outline-secondary rounded-3 px-3" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-premium shadow"><i class="fa-solid fa-check me-1"></i> Salvar Markdown</button>
                 </div>
@@ -1595,15 +1606,22 @@ $apiKeyConfigurada = !empty($stmtCheckKey->fetchColumn());
         }, 3000);
     }
 
-    // Event listener para atualizar preview do markdown
+    // Event listener para atualizar preview do markdown e sincronizar scroll
     document.addEventListener('DOMContentLoaded', function() {
         const markdownTextarea = document.getElementById('modal_edit_markdown_texto');
-        if (markdownTextarea) {
+        const previewContent = document.getElementById('markdown-preview');
+        
+        if (markdownTextarea && previewContent) {
+            // Atualiza preview ao digitar
             markdownTextarea.addEventListener('input', function() {
-                const preview = document.getElementById('markdown-preview');
-                if (preview) {
-                    preview.innerHTML = parseMarkdownFullJS(this.value);
-                }
+                previewContent.innerHTML = parseMarkdownFullJS(this.value);
+            });
+            
+            // Sincroniza scroll entre editor e preview
+            markdownTextarea.addEventListener('scroll', function() {
+                const scrollPercent = this.scrollTop / (this.scrollHeight - this.clientHeight);
+                const previewScrollMax = previewContent.scrollHeight - previewContent.clientHeight;
+                previewContent.scrollTop = scrollPercent * previewScrollMax;
             });
         }
     });
