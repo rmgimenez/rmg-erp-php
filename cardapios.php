@@ -150,6 +150,17 @@ $apiKeyConfigurada = !empty($stmtCheckKey->fetchColumn());
             100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
         }
 
+        /* Animações Toast */
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes toastOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(20px); }
+        }
+
         /* Tabela do Cardápio */
         .table-cardapio {
             border: 1px solid rgba(226, 232, 240, 0.8);
@@ -1490,13 +1501,13 @@ $apiKeyConfigurada = !empty($stmtCheckKey->fetchColumn());
         .then(response => response.json())
         .then(data => {
             if (data.sucesso) {
-                exibirAlerta('success', 'Observação salva com sucesso.');
+                exibirToast('Observação salva com sucesso.', 'success');
             } else {
-                exibirAlerta('danger', data.erro || 'Erro ao salvar observação.');
+                exibirToast(data.erro || 'Erro ao salvar observação.', 'error');
             }
         })
         .catch(error => {
-            exibirAlerta('danger', 'Erro de conexão com o servidor.');
+            exibirToast('Erro de conexão com o servidor.', 'error');
             console.error(error);
         });
     }
@@ -1544,6 +1555,44 @@ $apiKeyConfigurada = !empty($stmtCheckKey->fetchColumn());
         
         // Auto scroll para o topo do alerta se necessário
         window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // TOAST - Notificação discreta sem scroll
+    function exibirToast(mensagem, tipo = 'success') {
+        // Remove toast anterior se existir
+        const toastAnterior = document.getElementById('toast-notificacao');
+        if (toastAnterior) toastAnterior.remove();
+        
+        const icon = tipo === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation';
+        const bgColor = tipo === 'success' ? '#10b981' : '#ef4444';
+        
+        const toast = document.createElement('div');
+        toast.id = 'toast-notificacao';
+        toast.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: ${bgColor};
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 9999;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: toastIn 0.3s ease;
+        `;
+        toast.innerHTML = `<i class="fa-solid ${icon}"></i> ${mensagem}`;
+        document.body.appendChild(toast);
+        
+        // Remove após 3 segundos
+        setTimeout(() => {
+            toast.style.animation = 'toastOut 0.3s ease forwards';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
     }
 
     // Event listener para atualizar preview do markdown
