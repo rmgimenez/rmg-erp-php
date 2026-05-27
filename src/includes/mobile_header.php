@@ -29,6 +29,9 @@ $activePage = $activePage ?? '';
                 <?php if (in_array($_SESSION['user_nivel'], ['gerente', 'admin'])): ?>
                     <li><a class="dropdown-item <?= $activePage === 'analise_ia' ? 'active' : '' ?>" href="analise_ia.php"><i class="fa-solid fa-chart-simple"></i> Análise IA</a></li>
                 <?php endif; ?>
+                <?php if ($_SESSION['user_nivel'] === 'admin'): ?>
+                    <li><a class="dropdown-item <?= $activePage === 'admin' ? 'active' : '' ?>" href="admin.php"><i class="fa-solid fa-terminal"></i> Admin</a></li>
+                <?php endif; ?>
                 <li><hr class="dropdown-divider"></li>
                 <li class="dropdown-header">Operações</li>
                 <li><a class="dropdown-item <?= $activePage === 'cardapios' ? 'active' : '' ?>" href="cardapios.php"><i class="fa-solid fa-utensils"></i> Cardápio IA</a></li>

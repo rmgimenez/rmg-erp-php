@@ -87,6 +87,12 @@ if (count($nomePartes) > 1) {
                 <span>Análise IA</span>
             </a>
         <?php endif; ?>
+        <?php if ($userNivel === 'admin'): ?>
+            <a href="admin.php" class="nav-link <?= $activePage === 'admin' ? 'active' : '' ?>">
+                <i class="fa-solid fa-terminal"></i>
+                <span>Admin</span>
+            </a>
+        <?php endif; ?>
 
         <div class="nav-section-title">
             <span class="section-line"></span>
