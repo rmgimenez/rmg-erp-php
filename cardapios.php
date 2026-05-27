@@ -231,9 +231,9 @@ require_once __DIR__ . '/src/includes/layout_start.php';
                             <i class="fa-solid fa-basket-shopping me-1"></i> Imprimir Lista
                         </button>
                         <button class="btn btn-sm btn-outline-warning" onclick="gerarListaComprasIA(<?= $idSelecionado ?>)">
-                            <i class="fa-solid fa-rotate me-1"></i> Regenerar Lista
+                            <i class="fa-solid fa-rotate me-1"></i> Regerar Lista
                         </button>
-                        <button class="btn btn-sm btn-outline-info" onclick="abrirModalEdicaoMarkdown()">
+                        <button class="btn btn-sm btn-outline-dark" onclick="abrirModalEdicaoMarkdown()">
                             <i class="fa-solid fa-code me-1"></i> Editar Markdown
                         </button>
                     </div>
