@@ -78,6 +78,12 @@ if (count($nomePartes) > 1) {
                 <span>Usuários</span>
             </a>
         <?php endif; ?>
+        <?php if (in_array($userNivel, ['gerente', 'admin'])): ?>
+            <a href="analise_ia.php" class="nav-link <?= $activePage === 'analise_ia' ? 'active' : '' ?>">
+                <i class="fa-solid fa-chart-simple"></i>
+                <span>Análise IA</span>
+            </a>
+        <?php endif; ?>
 
         <div class="nav-section-title">
             <span class="section-line"></span>

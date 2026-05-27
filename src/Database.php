@@ -57,6 +57,31 @@ class Database {
             criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
         );");
 
+        // Migração: adiciona 'nutricionista' ao CHECK constraint em bancos existentes
+        $stmtSchema = $db->query("SELECT sql FROM sqlite_master WHERE type='table' AND name='usuarios'");
+        $sqlAtual = $stmtSchema->fetchColumn();
+        if ($sqlAtual && strpos($sqlAtual, 'nutricionista') === false) {
+            $db->beginTransaction();
+            try {
+                $db->exec("CREATE TABLE usuarios_novo (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    nome TEXT NOT NULL,
+                    usuario TEXT NOT NULL UNIQUE,
+                    email TEXT,
+                    senha TEXT NOT NULL,
+                    nivel TEXT CHECK(nivel IN ('admin', 'gerente', 'operador', 'nutricionista')) NOT NULL,
+                    criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+                )");
+                $db->exec("INSERT INTO usuarios_novo (id, nome, usuario, email, senha, nivel, criado_em) SELECT id, nome, usuario, email, senha, nivel, criado_em FROM usuarios");
+                $db->exec("DROP TABLE usuarios");
+                $db->exec("ALTER TABLE usuarios_novo RENAME TO usuarios");
+                $db->commit();
+            } catch (\Exception $e2) {
+                $db->rollBack();
+                @$db->exec("DROP TABLE IF EXISTS usuarios_novo");
+            }
+        }
+
         // Tabela de Categorias
         $db->exec("CREATE TABLE IF NOT EXISTS categorias (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
