@@ -11,6 +11,7 @@ use CantinaFinanceiro\Auth;
 use CantinaFinanceiro\MenuModel;
 
 header('Content-Type: application/json; charset=utf-8');
+@set_time_limit(120); // Garante que a requisição AJAX não sofra timeout de PHP
 
 // Garante que o usuário está logado
 try {
@@ -31,15 +32,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $dataInicio = $_POST['data_inicio'] ?? '';
         $dataFim = $_POST['data_fim'] ?? '';
         $observacoes = trim($_POST['observacoes'] ?? '');
+        $tipoRefeicao = trim($_POST['tipo_refeicao'] ?? 'ambos');
 
         if (empty($dataInicio) || empty($dataFim)) {
             echo json_encode(['sucesso' => false, 'erro' => 'Por favor, selecione as datas de início e fim.']);
             exit;
         }
 
+        if (!in_array($tipoRefeicao, ['ambos', 'almoco', 'lanche'])) {
+            $tipoRefeicao = 'ambos';
+        }
+
         try {
             // Chama a geração síncrona do OpenRouter
-            $idCardapio = MenuModel::generateWeeklyMenu($dataInicio, $dataFim, $observacoes, $usuarioId);
+            $idCardapio = MenuModel::generateWeeklyMenu($dataInicio, $dataFim, $observacoes, $usuarioId, $tipoRefeicao);
             echo json_encode(['sucesso' => true, 'id' => $idCardapio]);
         } catch (Exception $e) {
             echo json_encode(['sucesso' => false, 'erro' => $e->getMessage()]);
@@ -93,7 +99,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // 4. EXCLUIR CARDÁPIO
+    // 4. ATUALIZAR CARDÁPIO EM MARKDOWN
+    elseif ($acao === 'editar_cardapio_markdown') {
+        $id = (int)($_POST['id'] ?? 0);
+        $cardapioMarkdown = trim($_POST['cardapio_markdown'] ?? '');
+
+        if ($id <= 0 || empty($cardapioMarkdown)) {
+            echo json_encode(['sucesso' => false, 'erro' => 'Dados incompletos para atualização.']);
+            exit;
+        }
+
+        try {
+            $sucesso = MenuModel::updateCardapioMarkdown($id, $cardapioMarkdown, $usuarioId);
+            echo json_encode(['sucesso' => $sucesso]);
+        } catch (Exception $e) {
+            echo json_encode(['sucesso' => false, 'erro' => $e->getMessage()]);
+        }
+        exit;
+    }
+
+    // 6. SALVAR OBSERVAÇÃO DE IMPRESSÃO
+    elseif ($acao === 'salvar_observacao_impressao') {
+        $id = (int)($_POST['id'] ?? 0);
+        $observacao = trim($_POST['observacao'] ?? '');
+
+        if ($id <= 0) {
+            echo json_encode(['sucesso' => false, 'erro' => 'ID do cardápio inválido.']);
+            exit;
+        }
+
+        try {
+            $sucesso = MenuModel::updateObservacaoImpressao($id, $observacao, $usuarioId);
+            echo json_encode(['sucesso' => $sucesso]);
+        } catch (Exception $e) {
+            echo json_encode(['sucesso' => false, 'erro' => $e->getMessage()]);
+        }
+        exit;
+    }
+
+    // 5. EXCLUIR CARDÁPIO
     elseif ($acao === 'excluir') {
         $id = (int)($_POST['id'] ?? 0);
 

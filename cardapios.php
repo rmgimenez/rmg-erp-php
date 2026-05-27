@@ -15,6 +15,22 @@ Auth::restrictTo(['gerente', 'operador', 'admin']);
 
 $db = CantinaFinanceiro\Database::getConnection();
 
+// Helper para converter Markdown simples em HTML com segurança
+function parseMarkdownToHtml($text) {
+    if (empty($text)) return '';
+    $escaped = htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+    
+    // Converte negritos **texto** em <strong>texto</strong>
+    $escaped = preg_replace('/\*\*(.*?)\*\*/', '<strong>$1</strong>', $escaped);
+    // Converte itálicos *texto* em <em>texto</em>
+    $escaped = preg_replace('/\*(.*?)\*/', '<em>$1</em>', $escaped);
+    // Converte marcadores em li
+    $escaped = preg_replace('/^\* (.*?)$/m', '<li>$1</li>', $escaped);
+    $escaped = preg_replace('/^- (.*?)$/m', '<li>$1</li>', $escaped);
+    
+    return nl2br($escaped);
+}
+
 // Carrega os cardápios semanais do banco
 $cardapios = MenuModel::getAll();
 
@@ -60,31 +76,6 @@ $apiKeyConfigurada = !empty($stmtCheckKey->fetchColumn());
             padding: 4px 10px;
             border-radius: 50px;
             box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2);
-        }
-
-        .card-menu-day {
-            border: 1px solid rgba(226, 232, 240, 0.8);
-            border-radius: 12px;
-            background: white;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            height: 100%;
-        }
-
-        .card-menu-day:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 24px rgba(79, 70, 229, 0.08);
-            border-color: rgba(79, 70, 229, 0.2);
-        }
-
-        .card-menu-day .day-header {
-            background: #f8fafc;
-            border-radius: 12px 12px 0 0;
-            font-weight: 700;
-            color: #1e1b4b;
-            text-transform: uppercase;
-            font-size: 0.82rem;
-            letter-spacing: 0.5px;
-            border-bottom: 1px solid #e2e8f0;
         }
 
         /* Abas de Navegação Premium */
@@ -159,14 +150,108 @@ $apiKeyConfigurada = !empty($stmtCheckKey->fetchColumn());
             100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
         }
 
+        /* Tabela do Cardápio */
+        .table-cardapio {
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            border-radius: 12px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .table-cardapio thead th {
+            background: #f8fafc;
+            border-bottom: 2px solid var(--border-color);
+            font-weight: 700;
+            color: #1e1b4b;
+            text-transform: uppercase;
+            font-size: 0.78rem;
+            letter-spacing: 0.5px;
+            padding: 12px 16px;
+        }
+
+        .table-cardapio tbody td {
+            padding: 12px 16px;
+            vertical-align: top;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+        }
+
+        .table-cardapio tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .table-cardapio tbody tr:hover {
+            background-color: rgba(79, 70, 229, 0.02);
+        }
+
+        .meal-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .meal-list li {
+            padding: 3px 0;
+            font-size: 0.88rem;
+            color: #334155;
+        }
+
+        .meal-list li::before {
+            content: "•";
+            color: var(--primary);
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        /* Editor Markdown com Preview */
+        .markdown-editor-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            min-height: 300px;
+        }
+
+        .markdown-editor-pane,
+        .markdown-preview-pane {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .markdown-editor-pane .pane-header,
+        .markdown-preview-pane .pane-header {
+            background: #f8fafc;
+            padding: 8px 16px;
+            font-weight: 600;
+            font-size: 0.82rem;
+            color: #64748b;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .markdown-editor-pane textarea {
+            width: 100%;
+            min-height: 250px;
+            border: none;
+            padding: 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            resize: vertical;
+            outline: none;
+        }
+
+        .markdown-preview-pane .preview-content {
+            padding: 16px;
+            min-height: 250px;
+            overflow-y: auto;
+        }
+
         /* ==================================================== */
-        /* Estilos Específicos para Impressão A4 */
+        /* Estilos para Impressão A4 Paisagem */
         /* ==================================================== */
         @media print {
             body {
                 background: white !important;
                 color: black !important;
-                font-size: 11pt !important;
+                font-size: 10pt !important;
             }
 
             .sidebar-panel, 
@@ -189,45 +274,11 @@ $apiKeyConfigurada = !empty($stmtCheckKey->fetchColumn());
                 margin: 0 !important;
             }
 
-            /* Ocultações dinâmicas conforme a ação de impressão */
-            body.print-only-cardapio .print-portrait-container {
-                display: none !important;
-            }
-            body.print-only-lista .print-landscape-container {
-                display: none !important;
-            }
-
-            /* Configuração do Cardápio em A4 Paisagem */
-            body.print-only-cardapio .print-landscape-container {
+            .print-cardapio-container {
                 display: block !important;
+                opacity: 1 !important;
+                visibility: visible !important;
                 width: 100% !important;
-                page-break-after: avoid;
-            }
-
-            .print-grid-5 {
-                display: grid !important;
-                grid-template-columns: repeat(5, 1fr) !important;
-                gap: 12px !important;
-                width: 100% !important;
-            }
-
-            .card-menu-day {
-                box-shadow: none !important;
-                border: 1px solid #000000 !important;
-                page-break-inside: avoid;
-                height: auto !important;
-            }
-
-            .card-menu-day .day-header {
-                background: #f1f5f9 !important;
-                color: black !important;
-                border-bottom: 1px solid #000000 !important;
-                padding: 8px !important;
-                font-size: 11pt !important;
-            }
-
-            .card-menu-day .card-body {
-                padding: 10px !important;
             }
 
             .print-header {
@@ -235,31 +286,104 @@ $apiKeyConfigurada = !empty($stmtCheckKey->fetchColumn());
                 justify-content: space-between;
                 align-items: center;
                 border-bottom: 2px solid #000000;
-                padding-bottom: 10px;
-                margin-bottom: 20px;
+                padding-bottom: 8px;
+                margin-bottom: 12px;
             }
 
-            /* Configuração da Lista de Compras em A4 Retrato */
-            body.print-only-lista .print-portrait-container {
-                display: block !important;
-                width: 100% !important;
+            .table-cardapio {
+                border: 1px solid #000 !important;
+                font-size: 9pt !important;
             }
 
-            .print-markdown-list {
-                font-size: 11pt !important;
-                line-height: 1.6;
+            .table-cardapio thead th {
+                background: #f0f0f0 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
             }
 
-            .print-markdown-list h1, 
-            .print-markdown-list h2, 
-            .print-markdown-list h3 {
-                color: black !important;
-                border-bottom: 1px solid #ccc;
-                padding-bottom: 4px;
-                margin-top: 15px;
-                margin-bottom: 10px;
-                font-size: 13pt !important;
+            .table-cardapio tbody td {
+                padding: 8px 10px !important;
             }
+
+            .meal-list li {
+                font-size: 9pt !important;
+                padding: 2px 0;
+            }
+        }
+
+        /* Estilos para html2pdf.js */
+        #cardapio-pdf-content {
+            font-family: 'Arial', sans-serif;
+            padding: 20px;
+            background: white;
+        }
+
+        #cardapio-pdf-content .pdf-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        #cardapio-pdf-content .pdf-title {
+            font-size: 18pt;
+            font-weight: 700;
+            color: #1e1b4b;
+            margin: 0;
+        }
+
+        #cardapio-pdf-content .pdf-subtitle {
+            font-size: 10pt;
+            color: #64748b;
+            margin: 3px 0 0 0;
+        }
+
+        #cardapio-pdf-content .pdf-date {
+            text-align: right;
+            font-size: 11pt;
+            font-weight: 600;
+        }
+
+        #cardapio-pdf-content .pdf-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9pt;
+        }
+
+        #cardapio-pdf-content .pdf-table th {
+            background: #f0f0f0;
+            border: 1px solid #000;
+            padding: 8px 10px;
+            text-align: left;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 8pt;
+        }
+
+        #cardapio-pdf-content .pdf-table td {
+            border: 1px solid #000;
+            padding: 8px 10px;
+            vertical-align: top;
+        }
+
+        #cardapio-pdf-content .pdf-table ul {
+            margin: 0;
+            padding-left: 16px;
+        }
+
+        #cardapio-pdf-content .pdf-table li {
+            margin-bottom: 2px;
+        }
+
+        #cardapio-pdf-content .pdf-footer {
+            margin-top: 15px;
+            padding-top: 8px;
+            border-top: 1px solid #ccc;
+            font-size: 8pt;
+            color: #64748b;
+            text-align: center;
         }
     </style>
 </head>
@@ -447,7 +571,7 @@ $apiKeyConfigurada = !empty($stmtCheckKey->fetchColumn());
                         <div class="d-none print-header">
                             <div>
                                 <h3 style="margin: 0; font-weight: 700; letter-spacing: -0.5px;">Cantina Colégio Sant'Anna</h3>
-                                <p style="margin: 3px 0 0 0; font-size: 10pt; color: #444;">Planejamento Nutricional Semanal e Controle de Insumos</p>
+                                <p style="margin: 3px 0 0 0; font-size: 10pt; color: #444;">Planejamento Nutricional Semanal</p>
                             </div>
                             <div style="text-align: right;">
                                 <h4 style="margin: 0; font-weight: 600;">CARDÁPIO SEMANAL</h4>
@@ -468,13 +592,30 @@ $apiKeyConfigurada = !empty($stmtCheckKey->fetchColumn());
                                     <button class="btn btn-sm btn-outline-danger" onclick="confirmarExclusao(<?= $cardapioAtivo['id'] ?>)">
                                         <i class="fa-solid fa-trash me-1"></i> Excluir
                                     </button>
-                                    <button class="btn btn-sm btn-outline-primary" onclick="imprimirCardapio()">
-                                        <i class="fa-solid fa-utensils me-1"></i> Imprimir Cardápio
+                                    <button class="btn btn-sm btn-outline-primary" onclick="imprimirCardapioPDF()">
+                                        <i class="fa-solid fa-file-pdf me-1"></i> Imprimir Cardápio
                                     </button>
-                                    <button class="btn btn-sm btn-outline-success" onclick="imprimirLista()">
+                                    <button class="btn btn-sm btn-outline-success" onclick="imprimirListaPDF()">
                                         <i class="fa-solid fa-basket-shopping me-1"></i> Imprimir Lista
                                     </button>
+                                    <button class="btn btn-sm btn-outline-info" onclick="abrirModalEdicaoMarkdown()">
+                                        <i class="fa-solid fa-code me-1"></i> Editar Markdown
+                                    </button>
                                 </div>
+                            </div>
+
+                            <!-- Campo de Observações para Impressão -->
+                            <div class="mt-3 no-print">
+                                <label class="form-label text-muted small fw-semibold"><i class="fa-solid fa-comment-dots me-1"></i> Observações para impressão (opcional)</label>
+                                <div class="input-group">
+                                    <textarea id="observacao-impressao" class="form-control form-control-premium" rows="2" 
+                                              placeholder="Ex: Semana temática, ingredientes destacados, eventos especiais..."
+                                              style="font-size: 0.88rem;"><?= htmlspecialchars($cardapioAtivo['observacao_impressao'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
+                                    <button class="btn btn-outline-primary" type="button" onclick="salvarObservacaoImpressao()" title="Salvar observação">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </div>
+                                <div class="form-text small text-muted">Esta observação será impressa no PDF do cardápio.</div>
                             </div>
 
                             <?php if (!empty($cardapioAtivo['observacoes_geracao'])): ?>
@@ -485,100 +626,85 @@ $apiKeyConfigurada = !empty($stmtCheckKey->fetchColumn());
                             <?php endif; ?>
                         </div>
 
-                        <!-- Tabs do Cardápio vs Lista no-print -->
-                        <ul class="nav premium-nav-tabs mb-3 border-bottom no-print" role="tablist">
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="tab-cardapio-btn" data-bs-toggle="tab" data-bs-target="#tab-cardapio" type="button" role="tab"><i class="fa-solid fa-utensils me-1"></i> O Cardápio</button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="tab-lista-btn" data-bs-toggle="tab" data-bs-target="#tab-lista" type="button" role="tab"><i class="fa-solid fa-basket-shopping me-1"></i> Lista de Ingredientes</button>
-                            </li>
-                        </ul>
-
                         <!-- Tab Content -->
-                        <div class="tab-content">
-                            
-                            <!-- ABA 1: CARDÁPIO (A4 PAISAGEM NA IMPRESSÃO) -->
-                            <div class="tab-pane fade show active print-landscape-container" id="tab-cardapio" role="tabpanel">
-                                <div class="print-grid-5 row g-3">
-                                    <?php 
-                                    $diasDisplay = [
-                                        'segunda' => 'Segunda-feira',
-                                        'terca' => 'Terça-feira',
-                                        'quarta' => 'Quarta-feira',
-                                        'quinta' => 'Quinta-feira',
-                                        'sexta' => 'Sexta-feira'
-                                    ];
-                                    ?>
-                                    <?php foreach ($cardapioAtivo['dias'] as $d): ?>
-                                        <div class="col-lg col-md-6">
-                                            <div class="card-menu-day h-100">
-                                                <div class="day-header p-3 d-flex justify-content-between align-items-center">
-                                                    <span><?= $diasDisplay[$d['dia_semana']] ?></span>
-                                                    <button class="btn btn-sm btn-outline-primary px-2 py-0 border-0 no-print" 
-                                                            title="Editar Dia"
-                                                            onclick="abrirModalEdicaoDia('<?= $d['dia_semana'] ?>', <?= htmlspecialchars(json_encode($d['refeicao_principal']), ENT_QUOTES, 'UTF-8') ?>, <?= htmlspecialchars(json_encode($d['lanche']), ENT_QUOTES, 'UTF-8') ?>)">
-                                                        <i class="fa-solid fa-pencil"></i>
-                                                    </button>
-                                                </div>
-                                                <div class="card-body p-3">
-                                                    <div class="mb-3">
-                                                        <h6 class="text-primary fw-bold small text-uppercase mb-1"><i class="fa-solid fa-bowl-food me-1"></i> Almoço</h6>
-                                                        <p class="text-dark small mb-0 lh-base" id="lbl-principal-<?= $d['dia_semana'] ?>">
-                                                            <?= htmlspecialchars($d['refeicao_principal'], ENT_QUOTES, 'UTF-8') ?>
-                                                        </p>
-                                                    </div>
-                                                    <hr class="text-muted border-dashed border-opacity-20 my-2">
-                                                    <div>
-                                                        <h6 class="text-warning fw-bold small text-uppercase mb-1"><i class="fa-solid fa-cookie-bite me-1"></i> Lanche</h6>
-                                                        <p class="text-dark small mb-0 lh-base" id="lbl-lanche-<?= $d['dia_semana'] ?>">
-                                                            <?= htmlspecialchars($d['lanche'], ENT_QUOTES, 'UTF-8') ?>
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    <?php endforeach; ?>
+                        <div class="print-cardapio-container">
+                            <!-- TABELA DO CARDÁPIO -->
+                            <div class="card card-glass p-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3 no-print">
+                                    <h5 class="fw-bold mb-0 text-primary"><i class="fa-solid fa-utensils me-2"></i> Cardápio da Semana</h5>
+                                </div>
+
+                                <div class="table-responsive">
+                                    <table class="table table-cardapio mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 15%;">Dia</th>
+                                                <th style="width: 42%;">Almoço (Refeição Principal)</th>
+                                                <th style="width: 42%;">Lanche</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php 
+                                            $diasDisplay = [
+                                                'segunda' => 'Segunda-feira',
+                                                'terca' => 'Terça-feira',
+                                                'quarta' => 'Quarta-feira',
+                                                'quinta' => 'Quinta-feira',
+                                                'sexta' => 'Sexta-feira'
+                                            ];
+                                            ?>
+                                            <?php 
+                                            // Converte markdown para lista HTML
+                                            function convertMarkdownToList($text) {
+                                                if (empty($text)) return '<span class="text-muted">Não informado</span>';
+                                                $lines = explode("\n", $text);
+                                                $html = '<ul class="meal-list">';
+                                                foreach ($lines as $line) {
+                                                    $line = trim($line);
+                                                    if (empty($line)) continue;
+                                                    // Remove marcadores markdown
+                                                    $line = preg_replace('/^[-*]\s+/', '', $line);
+                                                    $line = htmlspecialchars($line, ENT_QUOTES, 'UTF-8');
+                                                    // Converte negrito
+                                                    $line = preg_replace('/\*\*(.*?)\*\*/', '<strong>$1</strong>', $line);
+                                                    $html .= "<li>{$line}</li>";
+                                                }
+                                                $html .= '</ul>';
+                                                return $html;
+                                            }
+                                            ?>
+                                            <?php foreach ($cardapioAtivo['dias'] as $d): ?>
+                                                <?php 
+                                                $hasAlmoco = ($d['refeicao_principal'] !== 'Não planejado' && !empty($d['refeicao_principal']));
+                                                $hasLanche = ($d['lanche'] !== 'Não planejado' && !empty($d['lanche']));
+                                                ?>
+                                                <tr>
+                                                    <td>
+                                                        <strong class="text-indigo-950"><?= $diasDisplay[$d['dia_semana']] ?></strong>
+                                                        <button class="btn btn-sm btn-outline-primary mt-2 d-block no-print" 
+                                                                title="Editar Dia"
+                                                                onclick="abrirModalEdicaoDia('<?= $d['dia_semana'] ?>')">
+                                                            <i class="fa-solid fa-pencil"></i> Editar
+                                                        </button>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-none" id="raw-principal-<?= $d['dia_semana'] ?>"><?= htmlspecialchars($d['refeicao_principal'], ENT_QUOTES, 'UTF-8') ?></div>
+                                                        <div id="lbl-principal-<?= $d['dia_semana'] ?>">
+                                                            <?= convertMarkdownToList($d['refeicao_principal']) ?>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-none" id="raw-lanche-<?= $d['dia_semana'] ?>"><?= htmlspecialchars($d['lanche'], ENT_QUOTES, 'UTF-8') ?></div>
+                                                        <div id="lbl-lanche-<?= $d['dia_semana'] ?>">
+                                                            <?= convertMarkdownToList($d['lanche']) ?>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
-
-                            <!-- ABA 2: LISTA DE COMPRAS (A4 RETRATO NA IMPRESSÃO) -->
-                            <div class="tab-pane fade force-portrait-page print-portrait-container" id="tab-lista" role="tabpanel">
-                                <div class="d-none print-header">
-                                    <div>
-                                        <h3 style="margin: 0; font-weight: 700;">Cantina Colégio Sant'Anna</h3>
-                                    </div>
-                                    <div style="text-align: right;">
-                                        <h4 style="margin: 0; font-weight: 600;">LISTA DE INGREDIENTES PARA COMPRA</h4>
-                                        <p style="margin: 3px 0 0 0; font-size: 9pt;">Semana: <strong><?= date('d/m/Y', strtotime($cardapioAtivo['data_inicio'])) ?></strong> a <strong><?= date('d/m/Y', strtotime($cardapioAtivo['data_fim'])) ?></strong></p>
-                                    </div>
-                                </div>
-
-                                <div class="card card-glass p-4">
-                                    <div class="d-flex justify-content-between align-items-center mb-3 no-print">
-                                        <h5 class="fw-bold mb-0 text-primary"><i class="fa-solid fa-basket-shopping me-2"></i> Insumos Estimados</h5>
-                                        <button class="btn btn-sm btn-outline-primary" onclick="abrirModalEdicaoLista(<?= htmlspecialchars(json_encode($cardapioAtivo['lista_compras']), ENT_QUOTES, 'UTF-8') ?>)">
-                                            <i class="fa-solid fa-pencil me-1"></i> Ajustar Lista
-                                        </button>
-                                    </div>
-
-                                    <div class="print-markdown-list" id="lista-compras-exibicao">
-                                        <!-- Converter Markdown simples de forma limpa no PHP -->
-                                        <?php 
-                                        $textoMarkdown = $cardapioAtivo['lista_compras'];
-                                        // Converte títulos # em <h4>
-                                        $textoMarkdown = preg_replace('/### (.*?)\n/', '<h5 class="text-indigo-950 fw-bold mt-3 mb-2 border-bottom pb-1">$1</h5>', $textoMarkdown);
-                                        $textoMarkdown = preg_replace('/## (.*?)\n/', '<h4 class="text-indigo-950 fw-bold mt-4 mb-2 border-bottom pb-2">$1</h4>', $textoMarkdown);
-                                        // Converte listas - em <ul><li>
-                                        $textoMarkdown = preg_replace('/- (.*?)\n/', '<li class="small mb-1">$1</li>', $textoMarkdown);
-                                        // Ajusta quebras de linha normais
-                                        $textoMarkdown = nl2br($textoMarkdown);
-                                        echo $textoMarkdown;
-                                        ?>
-                                    </div>
-                                </div>
-                            </div>
-
                         </div>
                     <?php endif; ?>
                 </div>
@@ -613,6 +739,16 @@ $apiKeyConfigurada = !empty($stmtCheckKey->fetchColumn());
                             <label class="form-label text-muted small fw-semibold">Sexta-feira (Fim) *</label>
                             <input type="date" name="data_fim" id="modal_data_fim" class="form-control form-control-premium" required readonly>
                         </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-semibold">Tipo de Refeição a Gerar *</label>
+                        <select name="tipo_refeicao" class="form-select form-select-premium" required>
+                            <option value="ambos">Almoço e Lanche (Completo)</option>
+                            <option value="almoco">Somente Almoço</option>
+                            <option value="lanche">Somente Lanche</option>
+                        </select>
+                        <div class="form-text small text-muted">Escolha as refeições que a inteligência artificial deve planejar.</div>
                     </div>
 
                     <div class="mb-2">
@@ -688,8 +824,45 @@ $apiKeyConfigurada = !empty($stmtCheckKey->fetchColumn());
     </div>
 </div>
 
+<!-- Modal: Edição de Markdown do Cardápio (no-print) -->
+<div class="modal fade no-print" id="modalEditarMarkdown" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl border-0">
+        <div class="modal-content border-0" style="background: transparent;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-indigo-950"><i class="fa-solid fa-code text-primary me-2"></i> Editar Cardápio em Markdown</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="formEditarMarkdown" onsubmit="salvarMarkdownManual(event)">
+                <div class="modal-body py-4">
+                    <div class="markdown-editor-container">
+                        <div class="markdown-editor-pane">
+                            <div class="pane-header">
+                                <i class="fa-solid fa-code me-1"></i> Markdown
+                            </div>
+                            <textarea name="cardapio_markdown" id="modal_edit_markdown_texto" required></textarea>
+                        </div>
+                        <div class="markdown-preview-pane">
+                            <div class="pane-header">
+                                <i class="fa-solid fa-eye me-1"></i> Preview
+                            </div>
+                            <div class="preview-content" id="markdown-preview"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-outline-secondary rounded-3 px-3" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-premium shadow"><i class="fa-solid fa-check me-1"></i> Salvar Markdown</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Bootstrap JS Bundle -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- html2pdf.js para impressão A4 paisagem -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <!-- Scripts JS dinâmicos (AJAX) -->
 <script>
@@ -751,8 +924,87 @@ $apiKeyConfigurada = !empty($stmtCheckKey->fetchColumn());
         });
     }
 
-    // EDICÃO MANUAL DO DIA - ABRE MODAL
-    function abrirModalEdicaoDia(dia, principal, lanche) {
+    // Helper JavaScript para converter Markdown simples em HTML
+    function parseMarkdownToHtmlJS(text) {
+        if (!text) return '';
+        let escaped = text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+        
+        // Converte negritos **texto** em <strong>texto</strong>
+        escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        // Converte itálicos *texto* em <em>texto</em>
+        escaped = escaped.replace(/\*(.*?)\*/g, '<em>$1</em>');
+        // Converte marcadores em lista
+        escaped = escaped.replace(/^\* (.*?)$/gm, '<li>$1</li>');
+        escaped = escaped.replace(/^- (.*?)$/gm, '<li>$1</li>');
+        
+        return escaped.replace(/\n/g, '<br>');
+    }
+
+    // Converte markdown para lista HTML formatada
+    function convertMarkdownToListJS(text) {
+        if (!text) return '<span class="text-muted">Não informado</span>';
+        
+        const lines = text.split('\n');
+        let html = '<ul class="meal-list">';
+        
+        lines.forEach(line => {
+            line = line.trim();
+            if (!line) return;
+            // Remove marcadores markdown
+            line = line.replace(/^[-*]\s+/, '');
+            // Escapa HTML
+            line = line.replace(/&/g, "&amp;")
+                      .replace(/</g, "&lt;")
+                      .replace(/>/g, "&gt;")
+                      .replace(/"/g, "&quot;")
+                      .replace(/'/g, "&#039;");
+            // Converte negrito
+            line = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            html += `<li>${line}</li>`;
+        });
+        
+        html += '</ul>';
+        return html;
+    }
+
+    // Converte markdown completo para HTML (para preview)
+    function parseMarkdownFullJS(text) {
+        if (!text) return '';
+        
+        let html = text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+        
+        // Headers
+        html = html.replace(/^### (.*?)$/gm, '<h5 class="text-indigo-950 fw-bold mt-3 mb-2 border-bottom pb-1">$1</h5>');
+        html = html.replace(/^## (.*?)$/gm, '<h4 class="text-indigo-950 fw-bold mt-4 mb-2 border-bottom pb-2">$1</h4>');
+        html = html.replace(/^# (.*?)$/gm, '<h3 class="text-indigo-950 fw-bold mt-4 mb-2">$1</h3>');
+        
+        // Negrito e itálico
+        html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+        
+        // Listas
+        html = html.replace(/^\* (.*?)$/gm, '<li class="small mb-1">$1</li>');
+        html = html.replace(/^- (.*?)$/gm, '<li class="small mb-1">$1</li>');
+        
+        // Quebras de linha
+        html = html.replace(/\n/g, '<br>');
+        
+        return html;
+    }
+
+    // EDIÇÃO MANUAL DO DIA - ABRE MODAL
+    function abrirModalEdicaoDia(dia) {
+        const principal = document.getElementById(`raw-principal-${dia}`).innerText.trim();
+        const lanche = document.getElementById(`raw-lanche-${dia}`).innerText.trim();
+        
         document.getElementById('modal_edit_dia').value = dia;
         document.getElementById('modal_edit_principal').value = principal;
         document.getElementById('modal_edit_lanche').value = lanche;
@@ -787,9 +1039,14 @@ $apiKeyConfigurada = !empty($stmtCheckKey->fetchColumn());
         .then(data => {
             modal.hide();
             if (data.sucesso) {
-                // Atualiza visualmente na tela de forma instantânea sem recarregar a página!
-                document.getElementById(`lbl-principal-${dia}`).innerText = principalVal;
-                document.getElementById(`lbl-lanche-${dia}`).innerText = lancheVal;
+                // Atualiza o valor bruto oculto
+                document.getElementById(`raw-principal-${dia}`).innerText = principalVal;
+                document.getElementById(`raw-lanche-${dia}`).innerText = lancheVal;
+                
+                // Converte markdown para exibição formatada como lista
+                document.getElementById(`lbl-principal-${dia}`).innerHTML = convertMarkdownToListJS(principalVal);
+                document.getElementById(`lbl-lanche-${dia}`).innerHTML = convertMarkdownToListJS(lancheVal);
+                
                 exibirAlerta('success', 'Dia do cardápio atualizado com sucesso.');
             } else {
                 exibirAlerta('danger', data.erro || 'Erro ao atualizar.');
@@ -832,19 +1089,6 @@ $apiKeyConfigurada = !empty($stmtCheckKey->fetchColumn());
         .then(data => {
             modal.hide();
             if (data.sucesso) {
-                // Atualiza visualmente a lista convertida de forma simples
-                let converted = listaComprasVal
-                    .replace(/### (.*?)\n/g, '<h5 class="text-indigo-950 fw-bold mt-3 mb-2 border-bottom pb-1">$1</h5>')
-                    .replace(/## (.*?)\n/g, '<h4 class="text-indigo-950 fw-bold mt-4 mb-2 border-bottom pb-2">$1</h4>')
-                    .replace(/- (.*?)\n/g, '<li class="small mb-1">$1</li>')
-                    .replace(/\n/g, '<br>');
-                
-                document.getElementById('lista-compras-exibicao').innerHTML = converted;
-                
-                // Recarrega o botão com o novo valor
-                const btnAjustar = document.querySelector('[onclick^="abrirModalEdicaoLista"]');
-                btnAjustar.setAttribute('onclick', `abrirModalEdicaoLista(${JSON.stringify(listaComprasVal)})`);
-
                 exibirAlerta('success', 'Lista de compras atualizada com sucesso.');
             } else {
                 exibirAlerta('danger', data.erro || 'Erro ao atualizar a lista.');
@@ -857,40 +1101,319 @@ $apiKeyConfigurada = !empty($stmtCheckKey->fetchColumn());
         });
     }
 
-    // IMPRIMIR APENAS O CARDÁPIO (A4 PAISAGEM)
-    function imprimirCardapio() {
-        let style = document.createElement('style');
-        style.id = 'print-page-orientation';
-        style.innerHTML = '@page { size: A4 landscape; margin: 0.8cm; }';
-        document.head.appendChild(style);
-
-        document.body.classList.add('print-only-cardapio');
-        document.body.classList.remove('print-only-lista');
+    // EDIÇÃO DO MARKDOWN DO CARDÁPIO - ABRE MODAL
+    function abrirModalEdicaoMarkdown() {
+        // Obtém o markdown atual do cardápio (armazenado em um elemento oculto ou via AJAX)
+        // Por enquanto, vamos usar os dados das linhas da tabela para construir o markdown
+        const dias = ['segunda', 'terca', 'quarta', 'quinta', 'sexta'];
+        const diasNomes = {
+            'segunda': 'Segunda-feira',
+            'terca': 'Terça-feira',
+            'quarta': 'Quarta-feira',
+            'quinta': 'Quinta-feira',
+            'sexta': 'Sexta-feira'
+        };
         
-        window.print();
+        let markdown = "# Cardápio Semanal\n\n";
+        markdown += "**Período:** <?= date('d/m/Y', strtotime($cardapioAtivo['data_inicio'])) ?> a <?= date('d/m/Y', strtotime($cardapioAtivo['data_fim'])) ?>\n\n";
         
-        setTimeout(() => {
-            style.remove();
-            document.body.classList.remove('print-only-cardapio');
-        }, 1000);
+        dias.forEach(dia => {
+            const principalEl = document.getElementById(`raw-principal-${dia}`);
+            const lancheEl = document.getElementById(`raw-lanche-${dia}`);
+            
+            if (principalEl && lancheEl) {
+                const principal = principalEl.innerText.trim();
+                const lanche = lancheEl.innerText.trim();
+                
+                markdown += `## ${diasNomes[dia]}\n\n`;
+                markdown += `### Almoço\n\n${principal}\n\n`;
+                markdown += `### Lanche\n\n${lanche}\n\n`;
+            }
+        });
+        
+        const textarea = document.getElementById('modal_edit_markdown_texto');
+        const preview = document.getElementById('markdown-preview');
+        
+        if (textarea) {
+            textarea.value = markdown;
+        }
+        
+        if (preview) {
+            preview.innerHTML = parseMarkdownFullJS(markdown);
+        }
+        
+        const modalEl = document.getElementById('modalEditarMarkdown');
+        if (modalEl) {
+            const modal = new bootstrap.Modal(modalEl);
+            modal.show();
+        }
     }
 
-    // IMPRIMIR APENAS A LISTA DE COMPRAS (A4 RETRATO)
-    function imprimirLista() {
-        let style = document.createElement('style');
-        style.id = 'print-page-orientation';
-        style.innerHTML = '@page { size: A4 portrait; margin: 1.2cm; }';
-        document.head.appendChild(style);
+    // ATUALIZA O PREVIEW DO MARKDOWN
+    function atualizarPreviewMarkdown() {
+        const markdown = document.getElementById('modal_edit_markdown_texto').value;
+        document.getElementById('markdown-preview').innerHTML = parseMarkdownFullJS(markdown);
+    }
 
-        document.body.classList.add('print-only-lista');
-        document.body.classList.remove('print-only-cardapio');
+    // SALVA EDIÇÃO DO MARKDOWN VIA AJAX
+    function salvarMarkdownManual(event) {
+        event.preventDefault();
         
-        window.print();
+        const modalEl = document.getElementById('modalEditarMarkdown');
+        const modal = bootstrap.Modal.getInstance(modalEl);
         
-        setTimeout(() => {
-            style.remove();
-            document.body.classList.remove('print-only-lista');
-        }, 1000);
+        const markdownVal = document.getElementById('modal_edit_markdown_texto').value;
+        
+        const formData = new FormData();
+        formData.append('acao', 'editar_cardapio_markdown');
+        formData.append('id', '<?= $idSelecionado ?>');
+        formData.append('cardapio_markdown', markdownVal);
+
+        fetch('cardapio_action.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            modal.hide();
+            if (data.sucesso) {
+                exibirAlerta('success', 'Cardápio em Markdown atualizado com sucesso.');
+            } else {
+                exibirAlerta('danger', data.erro || 'Erro ao atualizar o markdown.');
+            }
+        })
+        .catch(error => {
+            modal.hide();
+            exibirAlerta('danger', 'Erro de conexão com o servidor.');
+            console.error(error);
+        });
+    }
+
+    // IMPRIMIR CARDÁPIO EM PDF A4 PAISAGEM (DIAS NAS COLUNAS)
+    function imprimirCardapioPDF() {
+        const element = document.createElement('div');
+        element.id = 'cardapio-pdf-content';
+        
+        // Datas de cada dia da semana
+        const datasDias = {
+            'segunda': '<?= date('d/m', strtotime($cardapioAtivo['data_inicio'])) ?>',
+            'terca': '<?= date('d/m', strtotime($cardapioAtivo['data_inicio'] . ' +1 day')) ?>',
+            'quarta': '<?= date('d/m', strtotime($cardapioAtivo['data_inicio'] . ' +2 day')) ?>',
+            'quinta': '<?= date('d/m', strtotime($cardapioAtivo['data_inicio'] . ' +3 day')) ?>',
+            'sexta': '<?= date('d/m', strtotime($cardapioAtivo['data_inicio'] . ' +4 day')) ?>'
+        };
+        
+        const dias = ['segunda', 'terca', 'quarta', 'quinta', 'sexta'];
+        const diasNomes = {
+            'segunda': 'Segunda',
+            'terca': 'Terça',
+            'quarta': 'Quarta',
+            'quinta': 'Quinta',
+            'sexta': 'Sexta'
+        };
+        
+        // Cabeçalho
+        let html = `
+            <div style="padding: 15px 20px; font-family: Arial, sans-serif;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px;">
+                    <div>
+                        <h3 style="margin: 0; font-weight: 700; font-size: 16pt;">Cantina Colégio Sant'Anna</h3>
+                        <p style="margin: 2px 0 0 0; font-size: 9pt; color: #666;">Planejamento Nutricional Semanal</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <h4 style="margin: 0; font-weight: 600; font-size: 12pt;">CARDÁPIO SEMANAL</h4>
+                        <p style="margin: 2px 0 0 0; font-size: 9pt; color: #666;">Semana de <strong><?= date('d/m/Y', strtotime($cardapioAtivo['data_inicio'])) ?></strong> a <strong><?= date('d/m/Y', strtotime($cardapioAtivo['data_fim'])) ?></strong></p>
+                    </div>
+                </div>
+        `;
+        
+        // Tabela com dias nas colunas
+        html += `
+            <table style="width: 100%; border-collapse: collapse; font-size: 8.5pt;">
+                <thead>
+                    <tr>
+        `;
+        
+        // Cabeçalho: Almoço/Lanche à esquerda + 5 colunas de dias
+        html += `<th style="width: 10%; background: #f0f0f0; border: 1px solid #000; padding: 6px 4px; text-align: center; font-weight: 700; font-size: 8pt;"></th>`;
+        
+        dias.forEach(dia => {
+            html += `<th style="width: 18%; background: #1e1b4b; color: white; border: 1px solid #000; padding: 6px 4px; text-align: center; font-weight: 700; font-size: 9pt;">
+                ${diasNomes[dia]}<br><span style="font-size: 7.5pt; font-weight: 400;">${datasDias[dia]}</span>
+            </th>`;
+        });
+        
+        html += `</tr></thead><tbody>`;
+        
+        // Linha de Almoço
+        html += `<tr>
+            <td style="background: #f0f0f0; border: 1px solid #000; padding: 6px 4px; font-weight: 700; text-align: center; vertical-align: top; font-size: 8pt;">
+                ALMOÇO
+            </td>`;
+        
+        dias.forEach(dia => {
+            const principal = document.getElementById(`raw-principal-${dia}`).innerText.trim();
+            const principalList = principal.split('\n')
+                .filter(line => line.trim())
+                .map(line => line.replace(/^[-*]\s+/, '').replace(/\*\*/g, '').trim())
+                .map(line => `<li style="margin-bottom: 2px; line-height: 1.3;">${line}</li>`)
+                .join('');
+            
+            html += `<td style="border: 1px solid #000; padding: 6px 4px; vertical-align: top;">
+                <ul style="margin: 0; padding-left: 12px;">${principalList}</ul>
+            </td>`;
+        });
+        
+        html += `</tr>`;
+        
+        // Linha de Lanche
+        html += `<tr>
+            <td style="background: #f0f0f0; border: 1px solid #000; padding: 6px 4px; font-weight: 700; text-align: center; vertical-align: top; font-size: 8pt;">
+                LANCHE
+            </td>`;
+        
+        dias.forEach(dia => {
+            const lanche = document.getElementById(`raw-lanche-${dia}`).innerText.trim();
+            const lancheList = lanche.split('\n')
+                .filter(line => line.trim())
+                .map(line => line.replace(/^[-*]\s+/, '').replace(/\*\*/g, '').trim())
+                .map(line => `<li style="margin-bottom: 2px; line-height: 1.3;">${line}</li>`)
+                .join('');
+            
+            html += `<td style="border: 1px solid #000; padding: 6px 4px; vertical-align: top;">
+                <ul style="margin: 0; padding-left: 12px;">${lancheList}</ul>
+            </td>`;
+        });
+        
+        html += `</tr></tbody></table>`;
+        
+        // Observação de impressão (se houver)
+        const observacaoEl = document.getElementById('observacao-impressao');
+        const observacao = observacaoEl ? observacaoEl.value.trim() : '';
+        
+        if (observacao) {
+            html += `
+                <div style="margin-top: 10px; padding: 8px 10px; background: #fef3c7; border: 1px solid #f59e0b; border-radius: 4px; font-size: 8.5pt;">
+                    <strong style="color: #92400e;">Observação:</strong> <span style="color: #78350f;">${observacao}</span>
+                </div>
+            `;
+        }
+        
+        // Rodapé
+        html += `
+            <div style="margin-top: 10px; padding-top: 6px; border-top: 1px solid #ccc; font-size: 7.5pt; color: #666; text-align: center;">
+                Documento gerado automaticamente pelo Sistema de Cantina em <?= date('d/m/Y \à\s H:i') ?>
+            </div>
+        </div>`;
+        
+        element.innerHTML = html;
+        document.body.appendChild(element);
+        
+        // Configuração do html2pdf.js para A4 paisagem
+        const opt = {
+            margin: [8, 8, 8, 8],
+            filename: 'cardapio_semanal_<?= date('Y-m-d', strtotime($cardapioAtivo['data_inicio'])) ?>.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+        };
+        
+        // Gera o PDF
+        html2pdf().set(opt).from(element).save().then(() => {
+            element.remove();
+            exibirAlerta('success', 'PDF gerado com sucesso!');
+        }).catch(error => {
+            element.remove();
+            exibirAlerta('danger', 'Erro ao gerar PDF.');
+            console.error(error);
+        });
+    }
+
+    // IMPRIMIR LISTA DE COMPRAS EM PDF A4 PAISAGEM
+    function imprimirListaPDF() {
+        const element = document.createElement('div');
+        element.id = 'lista-pdf-content';
+        
+        // Obtém a lista de compras do cardápio
+        const listaCompras = <?= json_encode($cardapioAtivo['lista_compras'] ?? '') ?>;
+        
+        // Converte markdown para HTML
+        let listaHtml = listaCompras
+            .replace(/### (.*?)\n/g, '<h5 style="color: #1e1b4b; font-weight: 700; margin: 12px 0 6px 0; border-bottom: 1px solid #ccc; padding-bottom: 4px;">$1</h5>')
+            .replace(/## (.*?)\n/g, '<h4 style="color: #1e1b4b; font-weight: 700; margin: 16px 0 8px 0; border-bottom: 2px solid #000; padding-bottom: 6px;">$1</h4>')
+            .replace(/# (.*?)\n/g, '<h3 style="color: #1e1b4b; font-weight: 700; margin: 20px 0 10px 0;">$1</h3>')
+            .replace(/- (.*?)\n/g, '<li style="margin-bottom: 4px;">$1</li>')
+            .replace(/\n/g, '<br>');
+        
+        let html = `
+            <div style="padding: 20px; font-family: Arial, sans-serif;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px;">
+                    <div>
+                        <h3 style="margin: 0; font-weight: 700; font-size: 18pt;">Cantina Colégio Sant'Anna</h3>
+                        <p style="margin: 3px 0 0 0; font-size: 10pt; color: #666;">Lista de Ingredientes para Compra</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <h4 style="margin: 0; font-weight: 600;">LISTA DE COMPRAS</h4>
+                        <p style="margin: 3px 0 0 0; font-size: 10pt; color: #666;">Semana: <strong><?= date('d/m/Y', strtotime($cardapioAtivo['data_inicio'])) ?></strong> a <strong><?= date('d/m/Y', strtotime($cardapioAtivo['data_fim'])) ?></strong></p>
+                    </div>
+                </div>
+                <div style="font-size: 10pt; line-height: 1.6;">
+                    ${listaHtml}
+                </div>
+                <div style="margin-top: 20px; padding-top: 8px; border-top: 1px solid #ccc; font-size: 8pt; color: #666; text-align: center;">
+                    Documento gerado automaticamente pelo Sistema de Cantina em <?= date('d/m/Y \à\s H:i') ?>
+                </div>
+            </div>
+        `;
+        
+        element.innerHTML = html;
+        document.body.appendChild(element);
+        
+        // Configuração do html2pdf.js para A4 paisagem
+        const opt = {
+            margin: 10,
+            filename: 'lista_compras_<?= date('Y-m-d', strtotime($cardapioAtivo['data_inicio'])) ?>.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+        };
+        
+        // Gera o PDF
+        html2pdf().set(opt).from(element).save().then(() => {
+            element.remove();
+            exibirAlerta('success', 'Lista de compras gerada com sucesso!');
+        }).catch(error => {
+            element.remove();
+            exibirAlerta('danger', 'Erro ao gerar PDF da lista.');
+            console.error(error);
+        });
+    }
+
+    // SALVAR OBSERVAÇÃO DE IMPRESSÃO
+    function salvarObservacaoImpressao() {
+        const observacao = document.getElementById('observacao-impressao').value;
+        
+        const formData = new FormData();
+        formData.append('acao', 'salvar_observacao_impressao');
+        formData.append('id', '<?= $idSelecionado ?>');
+        formData.append('observacao', observacao);
+
+        fetch('cardapio_action.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.sucesso) {
+                exibirAlerta('success', 'Observação salva com sucesso.');
+            } else {
+                exibirAlerta('danger', data.erro || 'Erro ao salvar observação.');
+            }
+        })
+        .catch(error => {
+            exibirAlerta('danger', 'Erro de conexão com o servidor.');
+            console.error(error);
+        });
     }
 
     // CONFIRMAR EXCLUSÃO
@@ -937,6 +1460,19 @@ $apiKeyConfigurada = !empty($stmtCheckKey->fetchColumn());
         // Auto scroll para o topo do alerta se necessário
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+
+    // Event listener para atualizar preview do markdown
+    document.addEventListener('DOMContentLoaded', function() {
+        const markdownTextarea = document.getElementById('modal_edit_markdown_texto');
+        if (markdownTextarea) {
+            markdownTextarea.addEventListener('input', function() {
+                const preview = document.getElementById('markdown-preview');
+                if (preview) {
+                    preview.innerHTML = parseMarkdownFullJS(this.value);
+                }
+            });
+        }
+    });
 </script>
 </body>
 </html>

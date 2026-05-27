@@ -130,6 +130,18 @@ class Database {
             // Ignora se o campo já existir
         }
 
+        try {
+            @$db->exec("ALTER TABLE cardapios_semanais ADD COLUMN cardapio_markdown TEXT;");
+        } catch (\PDOException $e) {
+            // Ignora se o campo já existir
+        }
+
+        try {
+            @$db->exec("ALTER TABLE cardapios_semanais ADD COLUMN observacao_impressao TEXT;");
+        } catch (\PDOException $e) {
+            // Ignora se o campo já existir
+        }
+
         // Insere categorias padrão se a tabela estiver vazia
         $stmtCats = $db->query("SELECT COUNT(*) FROM categorias");
         if ($stmtCats->fetchColumn() == 0) {
