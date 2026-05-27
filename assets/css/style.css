@@ -164,6 +164,22 @@ body {
     margin-top: 1px;
 }
 
+.sidebar-profile-senha {
+    font-size: 0.65rem;
+    color: rgba(255, 255, 255, 0.4);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+    transition: color 0.15s ease;
+}
+
+.sidebar-profile-senha:hover {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: underline;
+}
+
 /* Dividers */
 .sidebar-divider {
     height: 1px;

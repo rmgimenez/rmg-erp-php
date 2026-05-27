@@ -34,8 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $nivel = $_POST['nivel'] ?? '';
 
         if (!empty($nome) && !empty($usuario) && !empty($senha) && !empty($nivel)) {
-            // Gerente só pode criar usuários com nível 'gerente' ou 'operador'
-            if (!in_array($nivel, ['gerente', 'operador'])) {
+            if (!in_array($nivel, ['gerente', 'operador', 'nutricionista'])) {
                 $erroMsg = "Nível de acesso inválido.";
             } else {
                 try {
@@ -71,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $nivel = $_POST['nivel'] ?? '';
 
         if ($id > 0 && !empty($nome) && !empty($usuario) && !empty($nivel)) {
-            if (!in_array($nivel, ['gerente', 'operador'])) {
+            if (!in_array($nivel, ['gerente', 'operador', 'nutricionista'])) {
                 $erroMsg = "Nível de acesso inválido.";
             } else {
                 try {
@@ -157,7 +156,7 @@ $erroMsg = $erroMsg ?? '';
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h1 class="h3 fw-bold mb-0">Controle de Usuários</h1>
-                    <p class="text-muted small mb-0">Cadastre e configure gerentes e operadores para operar o financeiro.</p>
+                    <p class="text-muted small mb-0">Cadastre e configure gerentes, operadores e nutricionistas.</p>
                 </div>
                 <button class="btn btn-premium" data-bs-toggle="modal" data-bs-target="#modalCadastrarUsuario">
                     <i class="fa-solid fa-user-plus me-1"></i> Criar Usuário
@@ -187,6 +186,8 @@ $erroMsg = $erroMsg ?? '';
                                     <td>
                                         <?php if ($u['nivel'] === 'gerente'): ?>
                                             <span class="custom-badge badge-pago"><i class="fa-solid fa-user-tie"></i> Gerente</span>
+                                        <?php elseif ($u['nivel'] === 'nutricionista'): ?>
+                                            <span class="custom-badge" style="background:#fef3c7;color:#92400e;"><i class="fa-solid fa-apple-alt"></i> Nutricionista</span>
                                         <?php else: ?>
                                             <span class="custom-badge badge-cancelado"><i class="fa-solid fa-cash-register"></i> Operador</span>
                                         <?php endif; ?>
@@ -255,6 +256,7 @@ $erroMsg = $erroMsg ?? '';
                             <select name="nivel" class="form-select form-select-premium" required>
                                 <option value="operador">Operador (Caixa)</option>
                                 <option value="gerente">Gerente (Financeiro)</option>
+                                <option value="nutricionista">Nutricionista (Cardápio)</option>
                             </select>
                         </div>
                     </div>
@@ -308,6 +310,7 @@ $erroMsg = $erroMsg ?? '';
                             <select name="nivel" id="edit-user-nivel" class="form-select form-select-premium" required>
                                 <option value="operador">Operador (Caixa)</option>
                                 <option value="gerente">Gerente (Financeiro)</option>
+                                <option value="nutricionista">Nutricionista (Cardápio)</option>
                             </select>
                         </div>
                     </div>

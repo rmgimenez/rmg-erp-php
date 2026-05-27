@@ -34,6 +34,7 @@ $activePage = $activePage ?? '';
                 <li><a class="dropdown-item <?= $activePage === 'cardapios' ? 'active' : '' ?>" href="cardapios.php"><i class="fa-solid fa-utensils"></i> Cardápio IA</a></li>
             <?php endif; ?>
             <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="alterar_senha.php"><i class="fa-solid fa-key"></i> Alterar Senha</a></li>
             <li><a class="dropdown-item text-danger" href="logout.php"><i class="fa-solid fa-right-from-bracket"></i> Sair</a></li>
         </ul>
     </div>

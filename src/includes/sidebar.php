@@ -22,6 +22,9 @@ if (count($nomePartes) > 1) {
         <div class="sidebar-profile-info">
             <div class="sidebar-profile-name"><?= htmlspecialchars($userNome, ENT_QUOTES, 'UTF-8') ?></div>
             <div class="sidebar-profile-role"><?= ucfirst($userNivel) ?></div>
+            <a href="alterar_senha.php" class="sidebar-profile-senha">
+                <i class="fa-solid fa-key"></i> Alterar senha
+            </a>
         </div>
     </div>
 
