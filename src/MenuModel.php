@@ -352,4 +352,132 @@ ATENÇÃO: Você DEVE retornar estritamente um objeto JSON válido. Não inclua 
         }
         return $success;
     }
+
+    public static function generateShoppingList(int $cardapioId, int $usuarioId): array {
+        @set_time_limit(120);
+        $db = Database::getConnection();
+
+        $cardapio = self::getById($cardapioId);
+        if (!$cardapio) {
+            throw new Exception("Cardápio #{$cardapioId} não encontrado.");
+        }
+
+        $diasNomes = ['segunda' => 'Segunda', 'terca' => 'Terça', 'quarta' => 'Quarta', 'quinta' => 'Quinta', 'sexta' => 'Sexta'];
+
+        $diasPorChave = [];
+        foreach (($cardapio['dias'] ?? []) as $dia) {
+            $diasPorChave[$dia['dia_semana']] = $dia;
+        }
+
+        $cardapioTexto = '';
+        foreach ($diasNomes as $chave => $nome) {
+            $dia = $diasPorChave[$chave] ?? null;
+            if ($dia) {
+                $cardapioTexto .= "{$nome}-feira:\n";
+                $cardapioTexto .= "  Almoço: {$dia['refeicao_principal']}\n";
+                $cardapioTexto .= "  Lanche: {$dia['lanche']}\n\n";
+            }
+        }
+
+        $configs = [];
+        $stmtConfigs = $db->query("SELECT chave, valor FROM configuracoes WHERE chave IN ('openrouter_api_key', 'openrouter_model', 'cardapio_pessoas_estimadas', 'cardapio_contexto_global')");
+        while ($row = $stmtConfigs->fetch()) {
+            $configs[$row['chave']] = $row['valor'];
+        }
+
+        $apiKey = $configs['openrouter_api_key'] ?? '';
+        $model = !empty($configs['openrouter_model']) ? $configs['openrouter_model'] : 'google/gemini-2.5-flash';
+        $pessoas = $configs['cardapio_pessoas_estimadas'] ?? '130 alunos, 30 funcionários';
+        $contexto = $configs['cardapio_contexto_global'] ?? 'Cantina escolar.';
+
+        if (empty($apiKey)) {
+            throw new Exception("Configuração ausente: Por favor, configure a chave API do OpenRouter no Painel Admin.");
+        }
+
+        $prompt = "Você é um nutricionista profissional. Com base no cardápio semanal abaixo, elabore uma lista de compras detalhada em formato Markdown, categorizada (ex: Hortifrúti, Secos, Carnes/Proteínas, Laticínios, Padaria, Bebidas, Descartáveis) contendo as quantidades estimadas para abastecer o público de '{$pessoas}' durante a semana.
+
+Contexto Geral da Cantina: {$contexto}
+
+CARDÁPIO DA SEMANA:
+{$cardapioTexto}
+
+REGRAS:
+- Seja extremamente objetivo e direto.
+- Quantidades devem ser realistas para o público informado.
+- Retorne APENAS a lista de compras, sem introduções ou comentários.
+- Utilize formato Markdown com categorias em negrito (**Categoria**).";
+
+        $ch = curl_init("https://openrouter.ai/api/v1/chat/completions");
+
+        $postData = [
+            "model" => $model,
+            "messages" => [
+                ["role" => "user", "content" => $prompt]
+            ]
+        ];
+
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt_array($ch, [
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => json_encode($postData),
+            CURLOPT_HTTPHEADER => [
+                "Authorization: Bearer " . $apiKey,
+                "Content-Type: application/json",
+                "HTTP-Referer: https://github.com/rmgimenez/rmg-erp-php",
+                "X-Title: Cantina ERP"
+            ],
+            CURLOPT_TIMEOUT => 80,
+            CURLOPT_CONNECTTIMEOUT => 15,
+            CURLOPT_SSL_VERIFYPEER => false
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+        curl_close($ch);
+
+        if ($response === false) {
+            throw new Exception("Falha na comunicação com a IA: " . $curlError);
+        }
+
+        if ($httpCode !== 200) {
+            $errData = json_decode($response, true);
+            $msg = $errData['error']['message'] ?? "Código HTTP {$httpCode}";
+            throw new Exception("Erro do OpenRouter: " . $msg);
+        }
+
+        $resData = json_decode($response, true);
+        $listaCompras = $resData['choices'][0]['message']['content'] ?? '';
+
+        if (empty($listaCompras)) {
+            throw new Exception("Retorno vazio da inteligência artificial.");
+        }
+
+        $listaCompras = trim($listaCompras);
+        if (strpos($listaCompras, '```') === 0) {
+            $listaCompras = substr($listaCompras, strpos($listaCompras, "\n") + 1);
+            if (substr($listaCompras, -3) === '```') {
+                $listaCompras = substr($listaCompras, 0, -3);
+            }
+            $listaCompras = trim($listaCompras);
+        }
+
+        $generationId = $resData['id'] ?? '';
+        $respModel = $resData['model'] ?? $model;
+        $promptTokens = $resData['usage']['prompt_tokens'] ?? 0;
+        $completionTokens = $resData['usage']['completion_tokens'] ?? 0;
+        $totalTokens = $resData['usage']['total_tokens'] ?? 0;
+
+        $stmtLog = $db->prepare("INSERT INTO ai_usage_log
+            (generation_id, source, model, prompt_tokens, completion_tokens, total_tokens, usuario_id, status)
+            VALUES (?, 'cardapio', ?, ?, ?, ?, ?, 'sucesso')");
+        $stmtLog->execute([$generationId, $respModel, $promptTokens, $completionTokens, $totalTokens, $usuarioId]);
+
+        $stmt = $db->prepare("UPDATE cardapios_semanais SET lista_compras = ? WHERE id = ?");
+        $stmt->execute([$listaCompras, $cardapioId]);
+
+        Auth::logAction($usuarioId, 'CARDAPIO_REGERAR_LISTA', "Lista de compras do cardápio #{$cardapioId} regenerada via IA.");
+
+        return ['lista_compras' => $listaCompras, 'id' => $cardapioId];
+    }
 }

@@ -45,12 +45,44 @@ function gerarCardapioIA(event) {
         if (data.sucesso) {
             window.location.href = `cardapios.php?id=${data.id}`;
         } else {
-            exibirAlerta('danger', data.erro || 'Falha desconhecida na geração.');
+            exibirToast(data.erro || 'Falha desconhecida na geração.', 'error');
         }
     })
     .catch(error => {
         loader.classList.remove('active');
-        exibirAlerta('danger', 'Erro de rede ou timeout do servidor ao tentar chamar a IA.');
+        exibirToast('Erro de rede ou timeout do servidor ao tentar chamar a IA.', 'error');
+        console.error(error);
+    });
+}
+
+function gerarListaComprasIA(cardapioId) {
+    if (!confirm('Regenerar a lista de compras via IA?\n\nA lista atual será substituída por uma nova versão baseada no cardápio atual.')) return;
+
+    const loader = document.getElementById('ia-loader-overlay');
+    loader.classList.add('active');
+
+    var formData = new FormData();
+    formData.append('acao', 'regenerar_lista');
+    formData.append('id', cardapioId);
+
+    fetch('cardapio_action.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        loader.classList.remove('active');
+        if (data.sucesso) {
+            exibirToast('Lista de compras regenerada com sucesso!', 'success');
+            document.getElementById('raw-lista-compras').innerText = data.lista_compras;
+            document.getElementById('lista-compras-exibicao').innerHTML = parseMarkdownFullJS(data.lista_compras);
+        } else {
+            exibirToast(data.erro || 'Falha ao regenerar lista de compras.', 'error');
+        }
+    })
+    .catch(error => {
+        loader.classList.remove('active');
+        exibirToast('Erro de rede ou timeout ao regenerar lista.', 'error');
         console.error(error);
     });
 }
@@ -121,14 +153,14 @@ function salvarDiaManual(event) {
             document.getElementById(`lbl-principal-${dia}`).innerHTML = convertMarkdownToList(principalVal);
             document.getElementById(`lbl-lanche-${dia}`).innerHTML = convertMarkdownToList(lancheVal);
 
-            exibirAlerta('success', 'Dia do cardápio atualizado com sucesso.');
+            exibirToast('Dia do cardápio atualizado com sucesso.', 'success');
         } else {
-            exibirAlerta('danger', data.erro || 'Erro ao atualizar.');
+            exibirToast(data.erro || 'Erro ao atualizar.', 'error');
         }
     })
     .catch(error => {
         modal.hide();
-        exibirAlerta('danger', 'Erro de conexão com o servidor.');
+        exibirToast('Erro de conexão com o servidor.', 'error');
         console.error(error);
     });
 }
@@ -173,14 +205,14 @@ function salvarListaManual(event) {
 
             document.getElementById('lista-compras-exibicao').innerHTML = converted;
 
-            exibirAlerta('success', 'Lista de compras atualizada com sucesso.');
+            exibirToast('Lista de compras atualizada com sucesso.', 'success');
         } else {
-            exibirAlerta('danger', data.erro || 'Erro ao atualizar a lista.');
+            exibirToast(data.erro || 'Erro ao atualizar a lista.', 'error');
         }
     })
     .catch(error => {
         modal.hide();
-        exibirAlerta('danger', 'Erro de conexão com o servidor.');
+        exibirToast('Erro de conexão com o servidor.', 'error');
         console.error(error);
     });
 }
@@ -259,14 +291,14 @@ function salvarMarkdownManual(event) {
     .then(data => {
         modal.hide();
         if (data.sucesso) {
-            exibirAlerta('success', 'Cardápio em Markdown atualizado com sucesso.');
+            exibirToast('Cardápio em Markdown atualizado com sucesso.', 'success');
         } else {
-            exibirAlerta('danger', data.erro || 'Erro ao atualizar o markdown.');
+            exibirToast(data.erro || 'Erro ao atualizar o markdown.', 'error');
         }
     })
     .catch(error => {
         modal.hide();
-        exibirAlerta('danger', 'Erro de conexão com o servidor.');
+        exibirToast('Erro de conexão com o servidor.', 'error');
         console.error(error);
     });
 }
@@ -392,10 +424,10 @@ function imprimirCardapioPDF() {
 
     html2pdf().set(opt).from(element).save().then(() => {
         element.remove();
-        exibirAlerta('success', 'PDF gerado com sucesso!');
+        exibirToast('PDF gerado com sucesso!', 'success');
     }).catch(error => {
         element.remove();
-        exibirAlerta('danger', 'Erro ao gerar PDF.');
+        exibirToast('Erro ao gerar PDF.', 'error');
         console.error(error);
     });
 }
@@ -454,10 +486,10 @@ function imprimirListaPDF() {
 
     html2pdf().set(opt).from(element).save().then(() => {
         element.remove();
-        exibirAlerta('success', 'Lista de compras gerada com sucesso!');
+        exibirToast('Lista de compras gerada com sucesso!', 'success');
     }).catch(error => {
         element.remove();
-        exibirAlerta('danger', 'Erro ao gerar PDF da lista.');
+        exibirToast('Erro ao gerar PDF da lista.', 'error');
         console.error(error);
     });
 }
@@ -506,11 +538,11 @@ function confirmarExclusao(id) {
         if (data.sucesso) {
             window.location.href = 'cardapios.php';
         } else {
-            exibirAlerta('danger', data.erro || 'Erro ao excluir.');
+            exibirToast(data.erro || 'Erro ao excluir.', 'error');
         }
     })
     .catch(error => {
-        exibirAlerta('danger', 'Erro de conexão com o servidor.');
+        exibirToast('Erro de conexão com o servidor.', 'error');
         console.error(error);
     });
 }

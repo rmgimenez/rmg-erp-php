@@ -118,6 +118,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    // 5. REGENERAR LISTA DE COMPRAS VIA IA
+    elseif ($acao === 'regenerar_lista') {
+        $id = (int)($_POST['id'] ?? 0);
+
+        if ($id <= 0) {
+            echo json_encode(['sucesso' => false, 'erro' => 'ID do cardápio inválido.']);
+            exit;
+        }
+
+        try {
+            $resultado = MenuModel::generateShoppingList($id, $usuarioId);
+            echo json_encode(['sucesso' => true, 'lista_compras' => $resultado['lista_compras']]);
+        } catch (Exception $e) {
+            echo json_encode(['sucesso' => false, 'erro' => $e->getMessage()]);
+        }
+        exit;
+    }
+
     // 6. SALVAR OBSERVAÇÃO DE IMPRESSÃO
     elseif ($acao === 'salvar_observacao_impressao') {
         $id = (int)($_POST['id'] ?? 0);

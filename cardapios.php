@@ -26,6 +26,12 @@ if ($idSelecionado > 0) {
 $stmtCheckKey = $db->query("SELECT valor FROM configuracoes WHERE chave = 'openrouter_api_key' LIMIT 1");
 $apiKeyConfigurada = !empty($stmtCheckKey->fetchColumn());
 
+$stmtConfigs = $db->query("SELECT chave, valor FROM configuracoes WHERE chave IN ('cardapio_pessoas_estimadas', 'cardapio_contexto_global')");
+$cardapioConfigs = [];
+foreach ($stmtConfigs->fetchAll() as $row) {
+    $cardapioConfigs[$row['chave']] = $row['valor'];
+}
+
 $diasDisplay = [
     'segunda' => 'Segunda-feira',
     'terca' => 'Terça-feira',
@@ -165,6 +171,9 @@ require_once __DIR__ . '/src/includes/layout_start.php';
                                 </span>
                                 <i class="fa-solid fa-chevron-right fs-6 opacity-50 <?= ($c['id'] == $idSelecionado) ? 'text-white' : '' ?>"></i>
                             </div>
+                            <span class="small <?= ($c['id'] == $idSelecionado) ? 'text-white text-opacity-75' : 'text-secondary' ?>">
+                                <i class="fa-regular fa-clock me-1"></i><?= date('d/m/Y H:i', strtotime($c['criado_em'])) ?>
+                            </span>
                         </a>
                     <?php endforeach; ?>
                 </div>
@@ -207,6 +216,9 @@ require_once __DIR__ . '/src/includes/layout_start.php';
                         <h4 class="fw-bold mb-0 text-indigo-950">
                             Período de <?= $dataInicioStr ?> a <?= $dataFimStr ?>
                         </h4>
+                        <span class="small text-muted mt-1 d-inline-block">
+                            <i class="fa-regular fa-clock me-1"></i>Gerado em <?= date('d/m/Y H:i', strtotime($cardapioAtivo['criado_em'])) ?>
+                        </span>
                     </div>
                     <div class="d-flex flex-wrap gap-2">
                         <button class="btn btn-sm btn-outline-danger" onclick="confirmarExclusao(<?= $idSelecionado ?>)">
@@ -217,6 +229,9 @@ require_once __DIR__ . '/src/includes/layout_start.php';
                         </button>
                         <button class="btn btn-sm btn-outline-success" onclick="imprimirListaPDF()">
                             <i class="fa-solid fa-basket-shopping me-1"></i> Imprimir Lista
+                        </button>
+                        <button class="btn btn-sm btn-outline-warning" onclick="gerarListaComprasIA(<?= $idSelecionado ?>)">
+                            <i class="fa-solid fa-rotate me-1"></i> Regenerar Lista
                         </button>
                         <button class="btn btn-sm btn-outline-info" onclick="abrirModalEdicaoMarkdown()">
                             <i class="fa-solid fa-code me-1"></i> Editar Markdown
@@ -321,6 +336,7 @@ require_once __DIR__ . '/src/includes/layout_start.php';
                             $textoMarkdown = preg_replace('/## (.*?)\n/', '<h4 class="text-indigo-950 fw-bold mt-4 mb-2 border-bottom pb-2">$1</h4>', $textoMarkdown);
                             $textoMarkdown = preg_replace('/# (.*?)\n/', '<h3 class="text-indigo-950 fw-bold mt-4 mb-2">$1</h3>', $textoMarkdown);
                             $textoMarkdown = preg_replace('/- (.*?)\n/', '<li class="small mb-1">$1</li>', $textoMarkdown);
+                            $textoMarkdown = preg_replace('/\*\*(.*?)\*\*/', '<strong>$1</strong>', $textoMarkdown);
                             $textoMarkdown = nl2br($textoMarkdown);
                             echo $textoMarkdown;
                             ?>
@@ -373,10 +389,28 @@ require_once __DIR__ . '/src/includes/layout_start.php';
                         <textarea name="observacoes" class="form-control form-control-premium" rows="4" placeholder="Ex: Semana de frio, prefira sopas e caldos no lanche. Evite carne de porco. Destaque frutas da época."></textarea>
                         <div class="form-text small text-muted">Solicite restrições, ingredientes específicos, temas ou cardápios festivos.</div>
                     </div>
+
+                    <div class="d-flex justify-content-end mt-3 mb-2">
+                        <button type="submit" class="btn btn-premium shadow"><i class="fa-solid fa-wand-magic-sparkles me-1"></i> Gerar via IA</button>
+                    </div>
+
+                    <div class="p-3 rounded-3" style="background: rgba(79,70,229,0.06); border: 1px solid rgba(79,70,229,0.12);">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <i class="fa-solid fa-circle-info text-primary"></i>
+                            <span class="fw-semibold small text-muted">INSTRUÇÕES DA IA (configuradas no Admin)</span>
+                        </div>
+                        <div class="mb-2">
+                            <span class="text-muted small fw-semibold">Público Estimado:</span>
+                            <span class="small"><?= htmlspecialchars($cardapioConfigs['cardapio_pessoas_estimadas'] ?? 'Não configurado', ENT_QUOTES, 'UTF-8') ?></span>
+                        </div>
+                        <div>
+                            <span class="text-muted small fw-semibold">Contexto Global:</span>
+                            <p class="small mb-0 mt-1" style="color: #334155; white-space: pre-wrap;"><?= htmlspecialchars($cardapioConfigs['cardapio_contexto_global'] ?? 'Não configurado', ENT_QUOTES, 'UTF-8') ?></p>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
                     <button type="button" class="btn btn-outline-secondary rounded-3 px-3" data-bs-dismiss="modal">Fechar</button>
-                    <button type="submit" class="btn btn-premium shadow"><i class="fa-solid fa-wand-magic-sparkles me-1"></i> Gerar via IA</button>
                 </div>
             </form>
         </div>
