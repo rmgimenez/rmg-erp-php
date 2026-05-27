@@ -16,7 +16,7 @@ header('Content-Type: application/json; charset=utf-8');
 // Garante que o usuário está logado
 try {
     Auth::checkAuth();
-    Auth::restrictTo(['gerente', 'operador', 'admin']);
+    Auth::restrictTo(['gerente', 'operador', 'admin', 'nutricionista']);
 } catch (Exception $e) {
     echo json_encode(['sucesso' => false, 'erro' => 'Sessão expirada ou acesso negado.']);
     exit;

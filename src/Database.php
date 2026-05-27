@@ -53,7 +53,7 @@ class Database {
             usuario TEXT NOT NULL UNIQUE,
             email TEXT,
             senha TEXT NOT NULL,
-            nivel TEXT CHECK(nivel IN ('admin', 'gerente', 'operador')) NOT NULL,
+            nivel TEXT CHECK(nivel IN ('admin', 'gerente', 'operador', 'nutricionista')) NOT NULL,
             criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
         );");
 
@@ -215,6 +215,14 @@ class Database {
             $senhaGerente = password_hash("gerente123", PASSWORD_DEFAULT);
             $stmtInsertG = $db->prepare("INSERT INTO usuarios (nome, usuario, email, senha, nivel) VALUES (?, ?, ?, ?, 'gerente')");
             $stmtInsertG->execute(["Gerente Financeiro Cantina Sant'Anna", 'gerente', 'financeiro@santanna.com.br', $senhaGerente]);
+        }
+
+        // Insere um usuário Nutricionista padrão
+        $stmtNutri = $db->query("SELECT COUNT(*) FROM usuarios WHERE nivel = 'nutricionista'");
+        if ($stmtNutri->fetchColumn() == 0) {
+            $senhaNutri = password_hash("nutricionista123", PASSWORD_DEFAULT);
+            $stmtInsertN = $db->prepare("INSERT INTO usuarios (nome, usuario, email, senha, nivel) VALUES (?, ?, ?, ?, 'nutricionista')");
+            $stmtInsertN->execute(["Nutricionista", 'nutricionista', 'nutricao@santanna.com.br', $senhaNutri]);
         }
 
         // Insere as configurações padrão se não existirem

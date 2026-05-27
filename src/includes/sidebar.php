@@ -27,6 +27,14 @@ if (count($nomePartes) > 1) {
 
     <div class="sidebar-divider"></div>
 
+<?php if ($userNivel === 'nutricionista'): ?>
+    <nav class="sidebar-nav">
+        <a href="cardapios.php" class="nav-link <?= $activePage === 'cardapios' ? 'active' : '' ?>">
+            <i class="fa-solid fa-utensils"></i>
+            <span>Cardápio IA</span>
+        </a>
+    </nav>
+<?php else: ?>
     <nav class="sidebar-nav">
         <a href="index.php" class="nav-link <?= $activePage === 'dashboard' ? 'active' : '' ?>">
             <i class="fa-solid fa-chart-line"></i>
@@ -81,6 +89,7 @@ if (count($nomePartes) > 1) {
             <span>Cardápio IA</span>
         </a>
     </nav>
+<?php endif; ?>
 
     <div class="sidebar-footer">
         <div class="sidebar-divider"></div>

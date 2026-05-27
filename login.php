@@ -19,6 +19,8 @@ Auth::initSession();
 if (isset($_SESSION['user_id'])) {
     if ($_SESSION['user_nivel'] === 'admin') {
         header("Location: admin.php");
+    } elseif ($_SESSION['user_nivel'] === 'nutricionista') {
+        header("Location: cardapios.php");
     } else {
         header("Location: index.php");
     }
@@ -35,6 +37,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (Auth::login($usuario, $senha)) {
             if ($_SESSION['user_nivel'] === 'admin') {
                 header("Location: admin.php");
+            } elseif ($_SESSION['user_nivel'] === 'nutricionista') {
+                header("Location: cardapios.php");
             } else {
                 header("Location: index.php");
             }

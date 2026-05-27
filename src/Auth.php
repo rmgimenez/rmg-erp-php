@@ -94,9 +94,10 @@ class Auth {
     public static function restrictTo(array $niveisPermitidos): void {
         self::checkAuth();
         if (!in_array($_SESSION['user_nivel'], $niveisPermitidos)) {
-            // Em caso de acesso não autorizado, redireciona para a respectiva tela padrão
             if ($_SESSION['user_nivel'] === 'admin') {
                 header("Location: admin.php?erro=acesso_negado");
+            } elseif ($_SESSION['user_nivel'] === 'nutricionista') {
+                header("Location: cardapios.php?erro=acesso_negado");
             } else {
                 header("Location: index.php?erro=acesso_negado");
             }

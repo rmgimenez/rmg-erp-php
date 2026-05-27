@@ -7,7 +7,7 @@ use CantinaFinanceiro\Auth;
 use CantinaFinanceiro\MenuModel;
 
 Auth::checkAuth();
-Auth::restrictTo(['gerente', 'operador', 'admin']);
+Auth::restrictTo(['gerente', 'operador', 'admin', 'nutricionista']);
 
 $db = CantinaFinanceiro\Database::getConnection();
 

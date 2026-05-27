@@ -23,8 +23,8 @@ Sistema de gerenciamento financeiro e operacional para cantinas escolares. PHP p
 | **Framework** | Nenhum — PHP vanilla com namespace `CantinaFinanceiro` |
 | **Banco de Dados** | SQLite 3 via PDO (`db/cantina.sqlite`) |
 | **Servidor Web** | Apache (Laragon no Windows; qualquer LAMP) |
-| **CSS** | Bootstrap 5.3.0, Font Awesome 6.4.0, Google Fonts "Outfit", CSS customizado (glassmorphism) |
-| **JavaScript** | Bootstrap 5.3.0 Bundle, Chart.js, html2pdf.js 0.10.1, vanilla JS |
+| **CSS** | Bootstrap 5.3.0, Font Awesome 6.4.0, Google Fonts "Outfit", CSS customizado (glassmorphism, tema Warm Luxury) |
+| **JavaScript** | Bootstrap 5.3.0 Bundle, Chart.js, html2pdf.js 0.10.1, vanilla JS com módulos por página |
 | **IA** | OpenRouter API (modelo padrão: `google/gemini-2.5-flash`) |
 | **Email** | MailGrid API (API brasileira) |
 
@@ -68,6 +68,7 @@ O sistema **cria automaticamente** o banco de dados `db/cantina.sqlite` com toda
 |--------|---------|-------|--------|
 | Admin | `admin` | `admin123` | `admin.php` |
 | Gerente | `gerente` | `gerente123` | `index.php` |
+| Nutricionista | `nutricionista` | `nutricionista123` | `cardapios.php` |
 
 > **Altere as senhas imediatamente** após o primeiro login via `usuarios.php`.
 
@@ -84,9 +85,13 @@ Acesse `admin.php` (somente admin) para configurar:
 rmg-erp-php/
 ├── assets/
 │   ├── css/
-│   │   └── style.css              # CSS customizado (glassmorphism, sidebar, KPIs, tabelas)
+│   │   ├── cardapios.css           # CSS específico do módulo de cardápios IA
+│   │   └── style.css              # CSS customizado (Warm Luxury, glassmorphism, sidebar, KPIs)
 │   └── js/
-│       └── dashboard.js           # Gráficos Chart.js (fluxo de caixa + categorias)
+│       ├── dashboard.js           # Gráficos Chart.js (fluxo de caixa + categorias)
+│       ├── cardapios.js           # Lógica JS do módulo de cardápios IA (14 funções)
+│       ├── toast.js               # Utilitário compartilhado de notificações toast
+│       └── utils.js               # Utilitários JS compartilhados
 ├── backups/                        # Backups do banco (protegidos por .htaccess)
 │   └── .htaccess                   # Negar acesso HTTP
 ├── db/
@@ -97,6 +102,12 @@ rmg-erp-php/
 │   ├── documentacao_sistema_financeiro.md  # Documentação técnica completa
 │   └── planejamento_cardapio_ia.md # Design do módulo de cardápio IA
 ├── src/
+│   ├── includes/
+│   │   ├── layout_start.php        # Layout wrapper (abertura HTML, CSS/JS, sidebar, mobile header)
+│   │   ├── sidebar.php             # Menu lateral Warm Luxury (dark com acentos dourados)
+│   │   ├── mobile_header.php       # Cabeçalho mobile escuro
+│   │   ├── alerts.php              # Alertas/flash messages compartilhados
+│   │   └── scripts_footer.php      # Scripts JS compartilhados no final do body
 │   ├── Database.php                # Conexão PDO Singleton, schema, seeds, migrações
 │   ├── Auth.php                    # Sessões, login/logout, RBAC, auditoria
 │   ├── AccountModel.php            # CRUD de contas, KPIs, generator para relatórios
@@ -125,18 +136,21 @@ rmg-erp-php/
 - **Namespace:** `CantinaFinanceiro` para todas as classes fonte
 - **Singleton:** `Database::getConnection()` garante uma única instância PDO
 - **Métodos Estáticos:** Todos os modelos usam métodos estáticos (sem injeção de dependência)
+- **Shared Includes:** Toda página inclui `layout_start.php` que carrega sidebar, mobile header, alerts e scripts — eliminando duplicação de HTML
 - **Page Controllers:** Cada arquivo PHP é um controller autônomo (lógica + HTML)
 - **AJAX:** Módulo de cardápios usa `fetch()` com respostas JSON via `cardapio_action.php`
+- **JS Modular:** Código JS específico de página em arquivos separados (`assets/js/pagina.js`), com dados PHP passados via atributos `data-*`
 
 ### Ciclo de Requisição
 
 ```
 1. Usuário acessa uma página (ex: contas.php)
-2. Arquivo PHP verifica autenticação (Auth::checkAuth)
-3. Verifica nível de acesso (Auth::restrictTo)
-4. Executa queries via Database::getConnection()
-5. Renderiza HTML com dados do banco
-6. Retorna resposta ao navegador
+2. Page controller faz `require_once` das classes necessárias
+3. Verifica autenticação e nível de acesso (Auth::checkAuth / Auth::restrictTo)
+4. Inclui `layout_start.php` que renderiza <head>, CSS/JS, sidebar e mobile header
+5. Executa queries via Database::getConnection()
+6. Renderiza HTML com dados do banco entre sidebar e scripts
+7. Inclui `scripts_footer.php` para JS compartilhados no final do body
 ```
 
 ### Fluxo de Dados
@@ -185,22 +199,22 @@ O sistema executa `ALTER TABLE` silenciosamente no primeiro acesso para adiciona
 
 ## Controle de Acesso (RBAC)
 
-| Página/Ação | admin | gerente | operador |
-|-------------|-------|---------|----------|
-| Login | Sim | Sim | Sim |
-| Dashboard | Não | Sim | Sim |
-| Contas - Visualizar | Não | Sim | Sim |
-| Contas - Criar | Não | Sim | Sim |
-| Contas - Editar/Excluir | Não | Sim | Não |
-| Calendário | Não | Sim | Sim |
-| Relatórios | Não | Sim | Sim |
-| Cadastros - Visualizar | Não | Sim | Sim |
-| Cadastros - Editar/Excluir/Mesclar | Não | Sim | Não |
-| Patrimônio - Visualizar/Criar/Editar | Não | Sim | Sim |
-| Patrimônio - Excluir | Não | Sim | Não |
-| Usuários | Não | Sim | Não |
-| Cardápio IA | Sim | Sim | Sim |
-| Painel Admin | Sim | Não | Não |
+| Página/Ação | admin | gerente | operador | nutricionista |
+|-------------|-------|---------|----------|---------------|
+| Login | Sim | Sim | Sim | Sim |
+| Dashboard | Não | Sim | Sim | Não |
+| Contas - Visualizar | Não | Sim | Sim | Não |
+| Contas - Criar | Não | Sim | Sim | Não |
+| Contas - Editar/Excluir | Não | Sim | Não | Não |
+| Calendário | Não | Sim | Sim | Não |
+| Relatórios | Não | Sim | Sim | Não |
+| Cadastros - Visualizar | Não | Sim | Sim | Não |
+| Cadastros - Editar/Excluir/Mesclar | Não | Sim | Não | Não |
+| Patrimônio - Visualizar/Criar/Editar | Não | Sim | Sim | Não |
+| Patrimônio - Excluir | Não | Sim | Não | Não |
+| Usuários | Não | Sim | Não | Não |
+| Cardápio IA | Sim | Sim | Sim | Sim |
+| Painel Admin | Sim | Não | Não | Não |
 
 ## Cardápio IA
 
