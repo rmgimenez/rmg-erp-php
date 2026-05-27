@@ -57,19 +57,19 @@ class AnaliseModel {
         return $dados;
     }
 
-    public static function gerarResumo(array $dados): string {
-        return self::callOpenRouter('resumo_executivo', $dados);
+    public static function gerarResumo(array $dados, int $usuarioId = 0): string {
+        return self::callOpenRouter('resumo_executivo', $dados, $usuarioId);
     }
 
-    public static function gerarTendencia(array $dados): string {
-        return self::callOpenRouter('tendencia', $dados);
+    public static function gerarTendencia(array $dados, int $usuarioId = 0): string {
+        return self::callOpenRouter('tendencia', $dados, $usuarioId);
     }
 
-    public static function perguntar(array $dados, string $pergunta, array $historico): string {
-        return self::callOpenRouter('pergunta', $dados, $pergunta, $historico);
+    public static function perguntar(array $dados, string $pergunta, array $historico, int $usuarioId = 0): string {
+        return self::callOpenRouter('pergunta', $dados, $usuarioId, $pergunta, $historico);
     }
 
-    private static function callOpenRouter(string $acao, array $dados, string $pergunta = '', array $historico = []): string {
+    private static function callOpenRouter(string $acao, array $dados, int $usuarioId = 0, string $pergunta = '', array $historico = []): string {
         $db = Database::getConnection();
 
         $stmt = $db->query("SELECT chave, valor FROM configuracoes WHERE chave IN ('openrouter_api_key', 'openrouter_model')");
@@ -201,6 +201,18 @@ TOP 5 FORNECEDORES:
         if (empty($content)) {
             throw new Exception("Retorno vazio da inteligência artificial.");
         }
+
+        // Log da chamada para rastreio de custos
+        $generationId = $resData['id'] ?? '';
+        $respModel = $resData['model'] ?? $model;
+        $promptTokens = $resData['usage']['prompt_tokens'] ?? 0;
+        $completionTokens = $resData['usage']['completion_tokens'] ?? 0;
+        $totalTokens = $resData['usage']['total_tokens'] ?? 0;
+
+        $stmtLog = $db->prepare("INSERT INTO ai_usage_log
+            (generation_id, source, model, prompt_tokens, completion_tokens, total_tokens, usuario_id, status)
+            VALUES (?, 'analise', ?, ?, ?, ?, ?, 'sucesso')");
+        $stmtLog->execute([$generationId, $respModel, $promptTokens, $completionTokens, $totalTokens, $usuarioId]);
 
         return $content;
     }

@@ -266,6 +266,40 @@ $ultimoBackup = $stmtLastBackup->fetchColumn();
 $stmtLastCron = $db->query("SELECT MAX(criado_em) FROM logs WHERE acao = 'CRON_DIARIO' OR acao = 'CRON_DIARIO_FALHA'");
 $ultimoCron = $stmtLastCron->fetchColumn();
 
+// Dados de uso de IA
+$aiLogs = [];
+$stmtAiLogs = $db->query("SELECT al.*, u.usuario as usuario_nome
+    FROM ai_usage_log al
+    LEFT JOIN usuarios u ON al.usuario_id = u.id
+    ORDER BY al.criado_em DESC LIMIT 100");
+$aiLogs = $stmtAiLogs->fetchAll();
+
+$stmtAiStats = $db->query("SELECT
+    COUNT(*) as total_chamadas,
+    COALESCE(SUM(cost_usd), 0) as custo_total,
+    COALESCE(SUM(CASE WHEN criado_em >= datetime('now', '-30 days') THEN cost_usd ELSE 0 END), 0) as custo_30dias,
+    COALESCE(SUM(CASE WHEN criado_em >= datetime('now', '-7 days') THEN cost_usd ELSE 0 END), 0) as custo_7dias,
+    SUM(CASE WHEN cost_usd IS NULL AND generation_id != '' AND status = 'sucesso' THEN 1 ELSE 0 END) as pendentes
+    FROM ai_usage_log");
+$aiStats = $stmtAiStats->fetch();
+
+$stmtAiMensal = $db->query("SELECT
+    strftime('%Y-%m-%d', criado_em) as dia,
+    COUNT(*) as chamadas,
+    COALESCE(SUM(cost_usd), 0) as custo
+    FROM ai_usage_log
+    WHERE criado_em >= datetime('now', '-30 days')
+    GROUP BY dia ORDER BY dia ASC");
+$aiMensal = $stmtAiMensal->fetchAll();
+
+$stmtAiModelos = $db->query("SELECT
+    model,
+    COUNT(*) as chamadas,
+    COALESCE(SUM(cost_usd), 0) as custo
+    FROM ai_usage_log
+    GROUP BY model ORDER BY custo DESC");
+$aiModelos = $stmtAiModelos->fetchAll();
+
 $activeTab = $_GET['tab'] ?? 'configuracoes';
 ?>
 <!DOCTYPE html>
@@ -277,6 +311,7 @@ $activeTab = $_GET['tab'] ?? 'configuracoes';
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="assets/css/style.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         :root {
             --admin-bg: #0b0d17;
@@ -754,6 +789,12 @@ $activeTab = $_GET['tab'] ?? 'configuracoes';
             </a>
         </li>
         <li class="nav-item" role="presentation">
+            <a class="nav-link <?= $activeTab === 'ia_usage' ? 'active' : '' ?>"
+               data-tab="ia_usage" href="#pane-ia_usage" role="tab">
+                <i class="fa-solid fa-robot"></i> Uso de IA
+            </a>
+        </li>
+        <li class="nav-item" role="presentation">
             <a class="nav-link <?= $activeTab === 'backups' ? 'active' : '' ?>"
                data-tab="backups" href="#pane-backups" role="tab">
                 <i class="fa-solid fa-hard-drive"></i> Backups
@@ -869,6 +910,140 @@ $activeTab = $_GET['tab'] ?? 'configuracoes';
                             </button>
                         </form>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- TAB: USO DE IA -->
+        <!-- ============================================================ -->
+        <div class="tab-pane fade <?= $activeTab === 'ia_usage' ? 'show active' : '' ?>" id="pane-ia_usage" role="tabpanel">
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="admin-kpi d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="kpi-label">Total Chamadas</div>
+                            <div class="kpi-value"><?= $aiStats['total_chamadas'] ?? 0 ?></div>
+                        </div>
+                        <i class="fa-solid fa-comments kpi-icon"></i>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="admin-kpi d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="kpi-label">Custo Total (USD)</div>
+                            <div class="kpi-value" style="font-size:1.15rem;">$<?= number_format((float)($aiStats['custo_total'] ?? 0), 4, '.', '') ?></div>
+                        </div>
+                        <i class="fa-solid fa-dollar-sign kpi-icon"></i>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="admin-kpi d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="kpi-label">Custo (30 dias)</div>
+                            <div class="kpi-value" style="font-size:1.15rem;">$<?= number_format((float)($aiStats['custo_30dias'] ?? 0), 4, '.', '') ?></div>
+                        </div>
+                        <i class="fa-solid fa-calendar-week kpi-icon"></i>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="admin-kpi d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="kpi-label">Pendentes</div>
+                            <div class="kpi-value" style="font-size:1.15rem;color:<?= ($aiStats['pendentes'] ?? 0) > 0 ? '#fbbf24' : '#34d399' ?>">
+                                <?= $aiStats['pendentes'] ?? 0 ?>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-hourglass-half kpi-icon"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-8">
+                    <div class="admin-card">
+                        <h5><i class="fa-solid fa-chart-line"></i> Custo Diário (30 dias)</h5>
+                        <div style="height:200px;">
+                            <canvas id="chartCustoDiario"
+                                data-labels='<?= htmlspecialchars(json_encode(array_column($aiMensal, 'dia')), ENT_QUOTES, 'UTF-8') ?>'
+                                data-values='<?= htmlspecialchars(json_encode(array_map(function($v) { return (float)$v['custo']; }, $aiMensal)), ENT_QUOTES, 'UTF-8') ?>'></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="admin-card">
+                        <h5><i class="fa-solid fa-chart-pie"></i> Por Modelo</h5>
+                        <div style="height:200px;">
+                            <canvas id="chartPorModelo"
+                                data-labels='<?= htmlspecialchars(json_encode(array_column($aiModelos, 'model')), ENT_QUOTES, 'UTF-8') ?>'
+                                data-values='<?= htmlspecialchars(json_encode(array_map(function($v) { return (float)$v['custo']; }, $aiModelos)), ENT_QUOTES, 'UTF-8') ?>'></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="admin-card">
+                <h5><i class="fa-solid fa-table-list"></i> Chamadas Recentes</h5>
+                <div class="admin-scroll" style="max-height:400px;">
+                    <table class="admin-table w-100">
+                        <thead>
+                            <tr>
+                                <th>Origem</th>
+                                <th>Modelo</th>
+                                <th>Tokens</th>
+                                <th>Custo (USD)</th>
+                                <th>Data</th>
+                                <th>Usuário</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($aiLogs)): ?>
+                                <tr>
+                                    <td colspan="7" class="text-center py-4" style="color:var(--admin-text-muted);">
+                                        <i class="fa-solid fa-robot me-1"></i> Nenhuma chamada de IA registrada
+                                    </td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach ($aiLogs as $l): ?>
+                                    <tr>
+                                        <td>
+                                            <span class="admin-badge <?= $l['source'] === 'cardapio' ? 'admin-badge-operador' : 'admin-badge-gerente' ?>">
+                                                <?= $l['source'] === 'cardapio' ? 'Cardápio' : 'Análise' ?>
+                                            </span>
+                                        </td>
+                                        <td style="font-size:0.78rem;color:var(--admin-text-muted);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                                            <?= htmlspecialchars($l['model'] ?? '—', ENT_QUOTES, 'UTF-8') ?>
+                                        </td>
+                                        <td style="color:var(--admin-text-muted);font-size:0.8rem;">
+                                            <?= number_format((int)$l['total_tokens']) ?>
+                                            <span style="font-size:0.7rem;">(P:<?= number_format((int)$l['prompt_tokens']) ?> C:<?= number_format((int)$l['completion_tokens']) ?>)</span>
+                                        </td>
+                                        <td class="ai-cost" data-cost="<?= htmlspecialchars($l['cost_usd'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                                            <?php if ($l['cost_usd'] !== null): ?>
+                                                $<?= number_format((float)$l['cost_usd'], 4, '.', '') ?>
+                                            <?php else: ?>
+                                                <span style="color:var(--admin-text-muted);font-style:italic;">—</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td style="color:var(--admin-text-muted);font-size:0.78rem;"><?= date('d/m/Y H:i', strtotime($l['criado_em'])) ?></td>
+                                        <td style="color:var(--admin-text-muted);font-size:0.8rem;">
+                                            <code style="color:var(--admin-accent);background:rgba(0,212,170,0.08);padding:0.1rem 0.4rem;border-radius:4px;font-size:0.78rem;">
+                                                <?= htmlspecialchars($l['usuario_nome'] ?? 'Sistema', ENT_QUOTES, 'UTF-8') ?>
+                                            </code>
+                                        </td>
+                                        <td>
+                                            <?php if ($l['status'] === 'sucesso'): ?>
+                                                <span style="color:#34d399;"><i class="fa-solid fa-check-circle"></i></span>
+                                            <?php else: ?>
+                                                <span style="color:#f87171;"><i class="fa-solid fa-circle-exclamation"></i></span>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -1171,6 +1346,7 @@ $activeTab = $_GET['tab'] ?? 'configuracoes';
 </div>
 
 <script src="assets/js/toast.js"></script>
+<script src="assets/js/admin.js"></script>
 <script>
     // Carrega dados no modal de edição
     const modalEditarUsuario = document.getElementById('modalEditarUsuario');

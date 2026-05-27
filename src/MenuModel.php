@@ -230,6 +230,18 @@ ATENÇÃO: Você DEVE retornar estritamente um objeto JSON válido. Não inclua 
             throw new Exception("Retorno vazio da inteligência artificial.");
         }
 
+        // Log da chamada para rastreio de custos
+        $generationId = $resData['id'] ?? '';
+        $respModel = $resData['model'] ?? $model;
+        $promptTokens = $resData['usage']['prompt_tokens'] ?? 0;
+        $completionTokens = $resData['usage']['completion_tokens'] ?? 0;
+        $totalTokens = $resData['usage']['total_tokens'] ?? 0;
+
+        $stmtLog = $db->prepare("INSERT INTO ai_usage_log
+            (generation_id, source, model, prompt_tokens, completion_tokens, total_tokens, usuario_id, status)
+            VALUES (?, 'cardapio', ?, ?, ?, ?, ?, 'sucesso')");
+        $stmtLog->execute([$generationId, $respModel, $promptTokens, $completionTokens, $totalTokens, $usuarioId]);
+
         // Caso a IA coloque delimitadores de Markdown ```json
         $contentCleaned = trim($content);
         if (strpos($contentCleaned, '```json') === 0) {

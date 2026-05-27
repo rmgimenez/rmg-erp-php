@@ -30,14 +30,14 @@ try {
     switch ($acao) {
         case 'resumo_executivo':
             $dados = AnaliseModel::getDadosConsolidados();
-            $resumo = AnaliseModel::gerarResumo($dados);
+            $resumo = AnaliseModel::gerarResumo($dados, $usuarioId);
             Auth::logAction($usuarioId, 'IA_RESUMO', 'Resumo executivo financeiro gerado via IA.');
             echo json_encode(['sucesso' => true, 'conteudo' => $resumo]);
             break;
 
         case 'tendencia':
             $dados = AnaliseModel::getDadosConsolidados();
-            $tendencia = AnaliseModel::gerarTendencia($dados);
+            $tendencia = AnaliseModel::gerarTendencia($dados, $usuarioId);
             Auth::logAction($usuarioId, 'IA_TENDENCIA', 'Análise de tendências financeiras gerada via IA.');
             echo json_encode(['sucesso' => true, 'conteudo' => $tendencia]);
             break;
@@ -50,7 +50,7 @@ try {
             }
             $historico = $_SESSION['ia_chat_history'] ?? [];
             $dados = AnaliseModel::getDadosConsolidados();
-            $resposta = AnaliseModel::perguntar($dados, $pergunta, $historico);
+            $resposta = AnaliseModel::perguntar($dados, $pergunta, $historico, $usuarioId);
             $historico[] = ['pergunta' => $pergunta, 'resposta' => $resposta];
             if (count($historico) > 10) {
                 array_shift($historico);

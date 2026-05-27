@@ -205,6 +205,22 @@ class Database {
             FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE SET NULL
         );");
 
+        // Tabela de Uso de IA (rastreio de chamadas OpenRouter)
+        $db->exec("CREATE TABLE IF NOT EXISTS ai_usage_log (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            generation_id TEXT NOT NULL,
+            source TEXT NOT NULL CHECK(source IN ('cardapio', 'analise')),
+            model TEXT NOT NULL,
+            prompt_tokens INTEGER NOT NULL DEFAULT 0,
+            completion_tokens INTEGER NOT NULL DEFAULT 0,
+            total_tokens INTEGER NOT NULL DEFAULT 0,
+            cost_usd REAL DEFAULT NULL,
+            usuario_id INTEGER,
+            status TEXT NOT NULL DEFAULT 'sucesso' CHECK(status IN ('sucesso', 'falha')),
+            criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE SET NULL
+        );");
+
         // Tabela de Cardápios Semanais (IA)
         $db->exec("CREATE TABLE IF NOT EXISTS cardapios_semanais (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
