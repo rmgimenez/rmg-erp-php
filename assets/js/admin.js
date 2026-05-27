@@ -111,17 +111,17 @@ function fetchIaCosts() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    var iaTab = document.querySelector('.admin-tabs .nav-link[data-tab="ia_usage"]');
-    if (iaTab) {
-        iaTab.addEventListener('click', function onFirstClick() {
-            iaTab.removeEventListener('click', onFirstClick);
+    var iaMenuItem = document.querySelector('.admin-sidebar .menu-item[data-section="ia_usage"]');
+    if (iaMenuItem) {
+        iaMenuItem.addEventListener('click', function onFirstClick() {
+            iaMenuItem.removeEventListener('click', onFirstClick);
             setTimeout(function() {
                 initIaCharts();
                 fetchIaCosts();
             }, 100);
         });
 
-        if (iaTab.classList.contains('active')) {
+        if (iaMenuItem.classList.contains('active')) {
             setTimeout(function() {
                 initIaCharts();
                 fetchIaCosts();

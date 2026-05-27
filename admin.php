@@ -312,6 +312,7 @@ $activeTab = $_GET['tab'] ?? 'configuracoes';
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="assets/css/style.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <style>
         :root {
             --admin-bg: #0b0d17;
@@ -392,43 +393,96 @@ $activeTab = $_GET['tab'] ?? 'configuracoes';
             opacity: 0.6;
         }
 
-        /* Nav Tabs Dark */
-        .admin-tabs {
-            border-bottom: 1px solid var(--admin-border);
-            margin-bottom: 1.75rem;
-            gap: 0.25rem;
-            flex-wrap: nowrap;
+        /* Sidebar Menu */
+        .admin-layout {
+            display: flex;
+            gap: 1.75rem;
+            align-items: flex-start;
         }
 
-        .admin-tabs .nav-link {
-            border: none !important;
-            color: var(--admin-text-muted) !important;
-            font-weight: 600;
-            font-size: 0.85rem;
-            padding: 0.75rem 1.25rem;
-            border-radius: 8px 8px 0 0;
-            transition: all 0.2s;
+        .admin-sidebar {
+            width: 220px;
+            flex-shrink: 0;
+            background: linear-gradient(180deg, #101326 0%, #131627 100%);
+            border: 1px solid var(--admin-border);
+            border-radius: 12px;
+            padding: 0.75rem 0;
+            position: sticky;
+            top: 1.5rem;
+        }
+
+        .admin-sidebar .menu-item {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.65rem;
+            padding: 0.7rem 1.25rem;
+            color: var(--admin-text-muted);
+            font-weight: 500;
+            font-size: 0.85rem;
             text-decoration: none;
-            background: transparent !important;
-            margin-bottom: 0;
+            cursor: pointer;
+            transition: all 0.15s;
+            border-left: 3px solid transparent;
         }
 
-        .admin-tabs .nav-link i {
+        .admin-sidebar .menu-item i {
+            width: 18px;
+            text-align: center;
             font-size: 0.9rem;
         }
 
-        .admin-tabs .nav-link:hover {
-            color: var(--admin-text) !important;
-            background: rgba(255, 255, 255, 0.03) !important;
+        .admin-sidebar .menu-item:hover {
+            color: var(--admin-text);
+            background: rgba(255,255,255,0.03);
         }
 
-        .admin-tabs .nav-link.active {
-            color: var(--admin-accent) !important;
-            background: rgba(0, 212, 170, 0.08) !important;
-            border-bottom: 2px solid var(--admin-accent) !important;
+        .admin-sidebar .menu-item.active {
+            color: var(--admin-accent);
+            background: var(--admin-accent-dim);
+            border-left-color: var(--admin-accent);
+        }
+
+        .admin-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .admin-section {
+            display: none;
+        }
+
+        .admin-section.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .admin-layout {
+                flex-direction: column;
+            }
+            .admin-sidebar {
+                width: 100%;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0;
+                padding: 0.5rem;
+                position: static;
+            }
+            .admin-sidebar .menu-item {
+                flex: 1;
+                min-width: 100px;
+                justify-content: center;
+                border-left: none;
+                border-bottom: 3px solid transparent;
+                padding: 0.6rem 0.75rem;
+                font-size: 0.78rem;
+            }
+            .admin-sidebar .menu-item.active {
+                border-left-color: transparent;
+                border-bottom-color: var(--admin-accent);
+            }
+            .admin-sidebar .menu-item i {
+                display: none;
+            }
         }
 
         /* Cards Dark */
@@ -780,47 +834,30 @@ $activeTab = $_GET['tab'] ?? 'configuracoes';
 
     <!-- Toast notifications are rendered via JS on page load -->
 
-    <!-- Nav Tabs -->
-    <ul class="nav admin-tabs" id="adminTab" role="tablist">
-        <li class="nav-item" role="presentation">
-            <a class="nav-link <?= $activeTab === 'configuracoes' ? 'active' : '' ?>"
-               data-tab="configuracoes" href="#pane-configuracoes" role="tab">
-                <i class="fa-solid fa-sliders"></i> Configurações
-            </a>
-        </li>
-        <li class="nav-item" role="presentation">
-            <a class="nav-link <?= $activeTab === 'ia_usage' ? 'active' : '' ?>"
-               data-tab="ia_usage" href="#pane-ia_usage" role="tab">
-                <i class="fa-solid fa-robot"></i> Uso de IA
-            </a>
-        </li>
-        <li class="nav-item" role="presentation">
-            <a class="nav-link <?= $activeTab === 'backups' ? 'active' : '' ?>"
-               data-tab="backups" href="#pane-backups" role="tab">
-                <i class="fa-solid fa-hard-drive"></i> Backups
-            </a>
-        </li>
-        <li class="nav-item" role="presentation">
-            <a class="nav-link <?= $activeTab === 'usuarios' ? 'active' : '' ?>"
-               data-tab="usuarios" href="#pane-usuarios" role="tab">
-                <i class="fa-solid fa-users-gear"></i> Usuários
-            </a>
-        </li>
-        <li class="nav-item" role="presentation">
-            <a class="nav-link <?= $activeTab === 'auditoria' ? 'active' : '' ?>"
-               data-tab="auditoria" href="#pane-auditoria" role="tab">
-                <i class="fa-solid fa-list-check"></i> Auditoria
-            </a>
-        </li>
-    </ul>
-
-    <!-- Tab Content -->
-    <div class="tab-content">
+    <div class="admin-layout">
+    <aside class="admin-sidebar">
+        <a class="menu-item <?= $activeTab === 'configuracoes' ? 'active' : '' ?>" data-section="configuracoes">
+            <i class="fa-solid fa-sliders"></i> Configurações
+        </a>
+        <a class="menu-item <?= $activeTab === 'ia_usage' ? 'active' : '' ?>" data-section="ia_usage">
+            <i class="fa-solid fa-robot"></i> Uso de IA
+        </a>
+        <a class="menu-item <?= $activeTab === 'backups' ? 'active' : '' ?>" data-section="backups">
+            <i class="fa-solid fa-hard-drive"></i> Backups
+        </a>
+        <a class="menu-item <?= $activeTab === 'usuarios' ? 'active' : '' ?>" data-section="usuarios">
+            <i class="fa-solid fa-users-gear"></i> Usuários
+        </a>
+        <a class="menu-item <?= $activeTab === 'auditoria' ? 'active' : '' ?>" data-section="auditoria">
+            <i class="fa-solid fa-list-check"></i> Auditoria
+        </a>
+    </aside>
+    <main class="admin-content">
 
         <!-- ============================================================ -->
         <!-- TAB: CONFIGURAÇÕES -->
         <!-- ============================================================ -->
-        <div class="tab-pane fade <?= $activeTab === 'configuracoes' ? 'show active' : '' ?>" id="pane-configuracoes" role="tabpanel">
+        <div class="admin-section <?= $activeTab === 'configuracoes' ? 'active' : '' ?>" id="section-configuracoes">
             <div class="row g-4">
                 <div class="col-lg-6">
                     <div class="admin-card">
@@ -917,7 +954,7 @@ $activeTab = $_GET['tab'] ?? 'configuracoes';
         <!-- ============================================================ -->
         <!-- TAB: USO DE IA -->
         <!-- ============================================================ -->
-        <div class="tab-pane fade <?= $activeTab === 'ia_usage' ? 'show active' : '' ?>" id="pane-ia_usage" role="tabpanel">
+        <div class="admin-section <?= $activeTab === 'ia_usage' ? 'active' : '' ?>" id="section-ia_usage">
             <div class="row g-3 mb-4">
                 <div class="col-md-3">
                     <div class="admin-kpi d-flex align-items-center justify-content-between">
@@ -1051,7 +1088,7 @@ $activeTab = $_GET['tab'] ?? 'configuracoes';
         <!-- ============================================================ -->
         <!-- TAB: BACKUPS -->
         <!-- ============================================================ -->
-        <div class="tab-pane fade <?= $activeTab === 'backups' ? 'show active' : '' ?>" id="pane-backups" role="tabpanel">
+        <div class="admin-section <?= $activeTab === 'backups' ? 'active' : '' ?>" id="section-backups">
             <div class="admin-card">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="mb-0"><i class="fa-solid fa-hard-drive"></i> Snapshots do Banco</h5>
@@ -1128,7 +1165,7 @@ $activeTab = $_GET['tab'] ?? 'configuracoes';
         <!-- ============================================================ -->
         <!-- TAB: USUÁRIOS -->
         <!-- ============================================================ -->
-        <div class="tab-pane fade <?= $activeTab === 'usuarios' ? 'show active' : '' ?>" id="pane-usuarios" role="tabpanel">
+        <div class="admin-section <?= $activeTab === 'usuarios' ? 'active' : '' ?>" id="section-usuarios">
             <div class="admin-card">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="mb-0"><i class="fa-solid fa-users-gear"></i> Todos os Usuários</h5>
@@ -1199,7 +1236,7 @@ $activeTab = $_GET['tab'] ?? 'configuracoes';
         <!-- ============================================================ -->
         <!-- TAB: AUDITORIA -->
         <!-- ============================================================ -->
-        <div class="tab-pane fade <?= $activeTab === 'auditoria' ? 'show active' : '' ?>" id="pane-auditoria" role="tabpanel">
+        <div class="admin-section <?= $activeTab === 'auditoria' ? 'active' : '' ?>" id="section-auditoria">
             <div class="admin-card">
                 <h5><i class="fa-solid fa-list-check"></i> Logs de Auditoria (últimos 50)</h5>
                 <div class="admin-scroll" style="max-height:500px;">
@@ -1226,7 +1263,8 @@ $activeTab = $_GET['tab'] ?? 'configuracoes';
             </div>
         </div>
 
-    </div><!-- /.tab-content -->
+    </main>
+    </div><!-- /.admin-layout -->
 </div><!-- /.container-fluid -->
 
 <!-- ============================================================ -->
@@ -1362,37 +1400,28 @@ $activeTab = $_GET['tab'] ?? 'configuracoes';
         });
     }
 
-    // Controle de abas (JS puro, sem dependência do Bootstrap)
-    document.querySelectorAll('.admin-tabs .nav-link').forEach(function(tab) {
-        tab.addEventListener('click', function(e) {
-            e.preventDefault();
-            var targetId = this.getAttribute('href');
-            if (!targetId) return;
+    // Controle de seções (menu lateral)
+    document.querySelectorAll('.admin-sidebar .menu-item').forEach(function(item) {
+        item.addEventListener('click', function(e) {
+            var sectionName = this.getAttribute('data-section');
+            if (!sectionName) return;
 
-            // Remove active de todas as abas e painéis
-            document.querySelectorAll('.admin-tabs .nav-link').forEach(function(t) {
-                t.classList.remove('active');
+            document.querySelectorAll('.admin-sidebar .menu-item').forEach(function(m) {
+                m.classList.remove('active');
             });
-            document.querySelectorAll('.tab-pane').forEach(function(p) {
-                p.classList.remove('show', 'active');
+            document.querySelectorAll('.admin-section').forEach(function(s) {
+                s.classList.remove('active');
             });
 
-            // Ativa aba clicada
             this.classList.add('active');
-
-            // Ativa painel correspondente
-            var pane = document.querySelector(targetId);
-            if (pane) {
-                pane.classList.add('show', 'active');
+            var section = document.getElementById('section-' + sectionName);
+            if (section) {
+                section.classList.add('active');
             }
 
-            // Atualiza URL sem recarregar
-            var tabName = this.getAttribute('data-tab');
-            if (tabName) {
-                var url = new URL(window.location);
-                url.searchParams.set('tab', tabName);
-                window.history.replaceState({}, '', url);
-            }
+            var url = new URL(window.location);
+            url.searchParams.set('tab', sectionName);
+            window.history.replaceState({}, '', url);
         });
     });
 
