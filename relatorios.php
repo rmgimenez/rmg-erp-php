@@ -161,6 +161,10 @@ $fornecedores = $stmtForn->fetchAll();
                         <i class="fa-solid fa-users me-2"></i> Usuários
                     </a>
                 <?php endif; ?>
+                <!-- Novo link adicionado -->
+                <a href="cardapios.php" class="nav-link">
+                    <i class="fa-solid fa-utensils me-2"></i> Cardápio IA
+                </a>
                 <div class="border-top border-secondary border-opacity-25 my-4 mx-3"></div>
                 <a href="logout.php" class="nav-link text-danger">
                     <i class="fa-solid fa-right-from-bracket me-2"></i> Sair
@@ -189,6 +193,7 @@ $fornecedores = $stmtForn->fetchAll();
                         <?php if ($_SESSION['user_nivel'] === 'gerente'): ?>
                             <li><a class="dropdown-menu-item nav-link p-2" href="usuarios.php"><i class="fa-solid fa-users me-2"></i> Usuários</a></li>
                         <?php endif; ?>
+                        <li><a class="dropdown-menu-item nav-link p-2" href="cardapios.php"><i class="fa-solid fa-utensils me-2"></i> Cardápio IA</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-menu-item nav-link p-2 text-danger" href="logout.php"><i class="fa-solid fa-right-from-bracket me-2"></i> Sair</a></li>
                     </ul>

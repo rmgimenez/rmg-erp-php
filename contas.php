@@ -212,6 +212,10 @@ $fornecedoresDisponiveis = $stmtFornecedores->fetchAll();
                         <i class="fa-solid fa-users me-2"></i> Usuários
                     </a>
                 <?php endif; ?>
+                <!-- Novo link adicionado -->
+                <a href="cardapios.php" class="nav-link">
+                    <i class="fa-solid fa-utensils me-2"></i> Cardápio IA
+                </a>
                 <div class="border-top border-secondary border-opacity-25 my-4 mx-3"></div>
                 <a href="logout.php" class="nav-link text-danger">
                     <i class="fa-solid fa-right-from-bracket me-2"></i> Sair

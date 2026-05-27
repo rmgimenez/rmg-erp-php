@@ -168,6 +168,27 @@ class Database {
             FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE SET NULL
         );");
 
+        // Tabela de Cardápios Semanais (IA)
+        $db->exec("CREATE TABLE IF NOT EXISTS cardapios_semanais (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            data_inicio DATE NOT NULL,
+            data_fim DATE NOT NULL,
+            observacoes_geracao TEXT,
+            lista_compras TEXT NOT NULL,
+            criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
+        );");
+
+        // Tabela de Itens Diários do Cardápio
+        $db->exec("CREATE TABLE IF NOT EXISTS cardapios_dias (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            cardapio_semanal_id INTEGER NOT NULL,
+            dia_semana TEXT CHECK(dia_semana IN ('segunda', 'terca', 'quarta', 'quinta', 'sexta')) NOT NULL,
+            refeicao_principal TEXT NOT NULL,
+            lanche TEXT NOT NULL,
+            criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (cardapio_semanal_id) REFERENCES cardapios_semanais(id) ON DELETE CASCADE
+        );");
+
         // Insere o usuário Admin padrão se a tabela de usuários estiver vazia
         $stmt = $db->query("SELECT COUNT(*) FROM usuarios WHERE nivel = 'admin'");
         if ($stmt->fetchColumn() == 0) {
@@ -191,7 +212,11 @@ class Database {
             'email_remetente' => 'financeiro@santanna.com.br',
             'nome_remetente' => "Financeiro Cantina Sant'Anna",
             'emails_destinatarios' => 'direcao@santanna.com.br',
-            'dias_alerta_vencimento' => '3'
+            'dias_alerta_vencimento' => '3',
+            'openrouter_api_key' => '',
+            'openrouter_model' => 'google/gemini-2.5-flash',
+            'cardapio_pessoas_estimadas' => '130 alunos do ensino médio, 30 funcionários',
+            'cardapio_contexto_global' => 'Cantina escolar. Refeições saudáveis, saborosas e balanceadas.'
         ];
 
         foreach ($defaultConfigs as $chave => $valor) {

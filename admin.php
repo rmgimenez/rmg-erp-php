@@ -50,6 +50,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    // 1.2 Salvar Configurações de IA (OpenRouter)
+    elseif ($acao === 'salvar_ia_config') {
+        $configs = [
+            'openrouter_api_key' => trim($_POST['openrouter_api_key'] ?? ''),
+            'openrouter_model' => trim($_POST['openrouter_model'] ?? 'google/gemini-2.5-flash'),
+            'cardapio_pessoas_estimadas' => trim($_POST['cardapio_pessoas_estimadas'] ?? ''),
+            'cardapio_contexto_global' => trim($_POST['cardapio_contexto_global'] ?? '')
+        ];
+
+        try {
+            $stmt = $db->prepare("INSERT OR REPLACE INTO configuracoes (chave, valor) VALUES (?, ?)");
+            foreach ($configs as $chave => $valor) {
+                $stmt->execute([$chave, (string)$valor]);
+            }
+            $sucessoMsg = "Configurações da Inteligência Artificial (OpenRouter) salvas com sucesso.";
+            Auth::logAction($usuarioId, 'CONFIG_IA_ATUALIZAR', 'Configurações do OpenRouter e IA do Cardápio atualizadas.');
+        } catch (\Exception $e) {
+            $erroMsg = "Erro ao salvar as configurações da IA: " . $e->getMessage();
+        }
+    }
+
     // 2. Criar Backup Manual
     elseif ($acao === 'gerar_backup') {
         if (BackupService::criarBackup($usuarioId, 'manual')) {
@@ -315,6 +336,47 @@ $ultimoCron = $stmtLastCron->fetchColumn();
                         </tbody>
                     </table>
                 </div>
+            </div>
+    </div>
+
+    <!-- IA / OpenRouter Weekly Menu Configurations -->
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="card card-glass p-4">
+                <h5 class="fw-bold mb-3"><i class="fa-solid fa-robot text-primary me-2"></i> Configurações de Inteligência Artificial (Cardápio Semanal via OpenRouter)</h5>
+                <form method="POST" action="admin.php">
+                    <input type="hidden" name="acao" value="salvar_ia_config">
+                    
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-semibold">Token de API do OpenRouter *</label>
+                            <input type="password" name="openrouter_api_key" class="form-control form-control-premium" placeholder="sk-or-v1-..." value="<?= htmlspecialchars($configs['openrouter_api_key'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required>
+                            <div class="form-text small text-muted">Obtenha sua chave em <a href="https://openrouter.ai/" target="_blank" class="text-decoration-none">openrouter.ai</a>. Seu token fica seguro no banco de dados.</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-semibold">Modelo de IA (ID do Modelo OpenRouter) *</label>
+                            <input type="text" name="openrouter_model" class="form-control form-control-premium" placeholder="Ex: google/gemini-2.5-flash" value="<?= htmlspecialchars($configs['openrouter_model'] ?? 'google/gemini-2.5-flash', ENT_QUOTES, 'UTF-8') ?>" required>
+                            <div class="form-text small text-muted">Modelos recomendados: <code>google/gemini-2.5-flash</code> ou <code>meta-llama/llama-3-8b-instruct</code>.</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label text-muted small fw-semibold">Público Estimado (para dimensionamento dos ingredientes) *</label>
+                            <input type="text" name="cardapio_pessoas_estimadas" class="form-control form-control-premium" placeholder="Ex: 130 alunos do ensino médio, 30 funcionários" value="<?= htmlspecialchars($configs['cardapio_pessoas_estimadas'] ?? '130 alunos do ensino médio, 30 funcionários', ENT_QUOTES, 'UTF-8') ?>" required>
+                            <div class="form-text small text-muted">A IA usará esta descrição detalhada para calcular de forma inteligente as quantidades necessárias na lista de compras.</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label text-muted small fw-semibold">Instruções e Contexto Global do Prompt *</label>
+                            <textarea name="cardapio_contexto_global" class="form-control form-control-premium" rows="3" required><?= htmlspecialchars($configs['cardapio_contexto_global'] ?? 'Cantina escolar. Refeições saudáveis, saborosas e balanceadas.', ENT_QUOTES, 'UTF-8') ?></textarea>
+                            <div class="form-text small text-muted">Defina aqui as diretrizes fixas do cardápio (ex: tipo de público, restrições alimentares comuns do local, preferência por alimentos integrais, etc.).</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-premium px-4"><i class="fa-solid fa-floppy-disk me-1"></i> Salvar Configurações de IA</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
