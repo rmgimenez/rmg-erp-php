@@ -1,0 +1,23 @@
+/* Estilos da página de Relatórios */
+
+#report-area {
+    background-color: #ffffff;
+    padding: 10px;
+}
+
+.pdf-header {
+    display: none;
+    border-bottom: 2px solid #334155;
+    padding-bottom: 15px;
+    margin-bottom: 25px;
+}
+
+.pdf-header h2 {
+    margin: 0;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.html2pdf__page-break {
+    page-break-before: always;
+}

@@ -87,118 +87,14 @@ $categorias = $stmtCat->fetchAll();
 
 $stmtForn = $db->query("SELECT id, nome FROM fornecedores ORDER BY nome ASC");
 $fornecedores = $stmtForn->fetchAll();
+
+$pageTitle = 'Relatórios';
+$activePage = 'relatorios';
 ?>
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Relatórios Financeiros - Cantina Sant'Anna</title>
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome Icons -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="assets/css/style.css" rel="stylesheet">
-    <style>
-        /* Estilos adicionais para layout de impressão do PDF */
-        #report-area {
-            background-color: #ffffff;
-            padding: 10px;
-        }
-        .pdf-header {
-            display: none;
-            border-bottom: 2px solid #334155;
-            padding-bottom: 15px;
-            margin-bottom: 25px;
-        }
-        .pdf-header h2 {
-            margin: 0;
-            font-weight: 700;
-            color: #0f172a;
-        }
-        /* Configurações forçadas de exibição ao gerar o PDF */
-        .html2pdf__page-break {
-            page-break-before: always;
-        }
-    </style>
-</head>
-<body>
+<?php require_once __DIR__ . '/src/includes/layout_start.php'; ?>
 
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar Navigation -->
-        <div class="col-md-3 col-lg-2 px-0 sidebar-panel d-none d-md-block">
-            <div class="py-4 text-center border-bottom border-secondary border-opacity-25">
-                <div style="font-size: 1.6rem; font-weight: 700; color: #ffffff; letter-spacing: -0.5px;">
-                    Sant'Anna<span style="color: #6366f1;">.</span>
-                </div>
-                <span class="badge bg-light text-dark text-opacity-75 small px-3 py-1 rounded-pill mt-1">
-                    <?= ucfirst($_SESSION['user_nivel']) ?>
-                </span>
-            </div>
-            
-            <div class="mt-4">
-                <a href="index.php" class="nav-link">
-                    <i class="fa-solid fa-chart-line me-2"></i> Dashboard
-                </a>
-                <a href="contas.php" class="nav-link">
-                    <i class="fa-solid fa-file-invoice-dollar me-2"></i> Contas
-                </a>
-                <a href="calendario.php" class="nav-link">
-                    <i class="fa-solid fa-calendar-days me-2"></i> Calendário
-                </a>
-                <a href="relatorios.php" class="nav-link active">
-                    <i class="fa-solid fa-file-pdf me-2"></i> Relatórios
-                </a>
-                <a href="cadastros.php" class="nav-link">
-                    <i class="fa-solid fa-tags me-2"></i> Cadastros
-                </a>
-                <a href="patrimonio.php" class="nav-link">
-                    <i class="fa-solid fa-screwdriver-wrench me-2"></i> Patrimônio
-                </a>
-                <?php if ($_SESSION['user_nivel'] === 'gerente'): ?>
-                    <a href="usuarios.php" class="nav-link">
-                        <i class="fa-solid fa-users me-2"></i> Usuários
-                    </a>
-                <?php endif; ?>
-                <!-- Novo link adicionado -->
-                <a href="cardapios.php" class="nav-link">
-                    <i class="fa-solid fa-utensils me-2"></i> Cardápio IA
-                </a>
-                <div class="border-top border-secondary border-opacity-25 my-4 mx-3"></div>
-                <a href="logout.php" class="nav-link text-danger">
-                    <i class="fa-solid fa-right-from-bracket me-2"></i> Sair
-                </a>
-            </div>
-        </div>
-
-        <!-- Main Content Area -->
-        <div class="col-md-9 col-lg-10 py-4 px-md-4">
-            <!-- Mobile Header -->
-            <div class="d-md-none d-flex justify-content-between align-items-center mb-4 p-3 bg-white rounded-3 shadow-sm">
-                <div style="font-size: 1.3rem; font-weight: 700; color: #1e1b4b;">
-                    Sant'Anna<span style="color: var(--primary);">.</span>
-                </div>
-                <div class="dropdown">
-                    <button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" data-bs-toggle="dropdown">
-                        Menu
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow">
-                        <li><a class="dropdown-menu-item nav-link p-2" href="index.php"><i class="fa-solid fa-chart-line me-2"></i> Dashboard</a></li>
-                        <li><a class="dropdown-menu-item nav-link p-2" href="contas.php"><i class="fa-solid fa-file-invoice-dollar me-2"></i> Contas</a></li>
-                        <li><a class="dropdown-menu-item nav-link p-2" href="calendario.php"><i class="fa-solid fa-calendar-days me-2"></i> Calendário</a></li>
-                        <li><a class="dropdown-menu-item nav-link p-2" href="relatorios.php"><i class="fa-solid fa-file-pdf me-2"></i> Relatórios</a></li>
-                        <li><a class="dropdown-menu-item nav-link p-2" href="cadastros.php"><i class="fa-solid fa-tags me-2"></i> Cadastros</a></li>
-                        <li><a class="dropdown-menu-item nav-link p-2" href="patrimonio.php"><i class="fa-solid fa-screwdriver-wrench me-2"></i> Patrimônio</a></li>
-                        <?php if ($_SESSION['user_nivel'] === 'gerente'): ?>
-                            <li><a class="dropdown-menu-item nav-link p-2" href="usuarios.php"><i class="fa-solid fa-users me-2"></i> Usuários</a></li>
-                        <?php endif; ?>
-                        <li><a class="dropdown-menu-item nav-link p-2" href="cardapios.php"><i class="fa-solid fa-utensils me-2"></i> Cardápio IA</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-menu-item nav-link p-2 text-danger" href="logout.php"><i class="fa-solid fa-right-from-bracket me-2"></i> Sair</a></li>
-                    </ul>
-                </div>
-            </div>
+<!-- Alertas -->
+<?php require_once __DIR__ . '/src/includes/alerts.php'; ?>
 
             <!-- Page Header -->
             <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
@@ -432,14 +328,8 @@ $fornecedores = $stmtForn->fetchAll();
                     © <?= date('Y') ?> Cantina Sant'Anna. Todos os direitos reservados.
                 </div>
             </div>
-        </div>
-    </div>
-</div>
 
-<!-- Bootstrap JS Bundle -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- html2pdf.js Bundle CDN -->
+<!-- Scripts específicos desta página -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <script>
@@ -462,12 +352,11 @@ $fornecedores = $stmtForn->fetchAll();
             filename:     'relatorio_financeiro_' + new Date().toISOString().slice(0, 10) + '.pdf',
             image:        { type: 'jpeg', quality: 0.98 },
             html2canvas:  { scale: 2, useCORS: true },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' } // formato paisagem para acomodar melhor colunas
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
         };
 
         // Roda o html2pdf
         html2pdf().set(opt).from(element).save().then(() => {
-            // Oculta os cabeçalhos do PDF novamente após a exportação
             pdfHeader.style.display = 'none';
             pdfFooter.classList.add('d-none');
         }).catch(err => {
@@ -477,5 +366,5 @@ $fornecedores = $stmtForn->fetchAll();
         });
     }
 </script>
-</body>
-</html>
+
+<?php require_once __DIR__ . '/src/includes/layout_end.php'; ?>

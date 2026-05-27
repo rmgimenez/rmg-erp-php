@@ -7,9 +7,11 @@
 require_once __DIR__ . '/src/Database.php';
 require_once __DIR__ . '/src/Auth.php';
 require_once __DIR__ . '/src/AccountModel.php';
+require_once __DIR__ . '/src/FormatHelper.php';
 
 use CantinaFinanceiro\Auth;
 use CantinaFinanceiro\AccountModel;
+use CantinaFinanceiro\FormatHelper;
 
 Auth::checkAuth();
 Auth::restrictTo(['gerente', 'operador']);
@@ -17,6 +19,8 @@ Auth::restrictTo(['gerente', 'operador']);
 $usuarioId = $_SESSION['user_id'];
 $nivelUsuario = $_SESSION['user_nivel'];
 
+$pageTitle = 'Contas';
+$activePage = 'contas';
 $sucessoMsg = '';
 $erroMsg = '';
 
@@ -25,13 +29,6 @@ $erroMsg = '';
 // ----------------------------------------------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $acao = $_POST['acao'] ?? '';
-
-    // Converte valor no formato BRL (Ex: "1.250,50") para Centavos (inteiro)
-    function parseBrlToCents(string $val): int {
-        $cleanVal = str_replace('.', '', $val);
-        $cleanVal = str_replace(',', '.', $cleanVal);
-        return (int)round((float)$cleanVal * 100);
-    }
 
     // 1. Cadastrar Conta
     if ($acao === 'cadastrar') {
@@ -83,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $dataLiquidacao = $_POST['data_liquidacao'] ?? null;
 
             if ($id > 0 && !empty($descricao) && !empty($valorRaw) && !empty($dataVenc)) {
-                $valorCents = parseBrlToCents($valorRaw);
+            $valorCents = FormatHelper::parseBrlToCents($valorRaw);
                 $dados = [
                     'descricao' => $descricao,
                     'valor' => $valorCents,
@@ -161,83 +158,10 @@ $categoriasDisponiveis = $stmtCategorias->fetchAll();
 $stmtFornecedores = $db->query("SELECT * FROM fornecedores ORDER BY nome ASC");
 $fornecedoresDisponiveis = $stmtFornecedores->fetchAll();
 ?>
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciamento de Contas - Cantina Sant'Anna</title>
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome Icons -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="assets/css/style.css" rel="stylesheet">
-</head>
-<body>
+<?php require_once __DIR__ . '/src/includes/layout_start.php'; ?>
 
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar Navigation -->
-        <div class="col-md-3 col-lg-2 px-0 sidebar-panel d-none d-md-block">
-            <div class="py-4 text-center border-bottom border-secondary border-opacity-25">
-                <div style="font-size: 1.6rem; font-weight: 700; color: #ffffff; letter-spacing: -0.5px;">
-                    Sant'Anna<span style="color: #6366f1;">.</span>
-                </div>
-                <span class="badge bg-light text-dark text-opacity-75 small px-3 py-1 rounded-pill mt-1">
-                    <?= ucfirst($_SESSION['user_nivel']) ?>
-                </span>
-            </div>
-            
-            <div class="mt-4">
-                <a href="index.php" class="nav-link">
-                    <i class="fa-solid fa-chart-line me-2"></i> Dashboard
-                </a>
-                <a href="contas.php" class="nav-link active">
-                    <i class="fa-solid fa-file-invoice-dollar me-2"></i> Contas
-                </a>
-                <a href="calendario.php" class="nav-link">
-                    <i class="fa-solid fa-calendar-days me-2"></i> Calendário
-                </a>
-                <a href="relatorios.php" class="nav-link">
-                    <i class="fa-solid fa-file-pdf me-2"></i> Relatórios
-                </a>
-                <a href="cadastros.php" class="nav-link">
-                    <i class="fa-solid fa-tags me-2"></i> Cadastros
-                </a>
-                <a href="patrimonio.php" class="nav-link">
-                    <i class="fa-solid fa-screwdriver-wrench me-2"></i> Patrimônio
-                </a>
-                <?php if ($_SESSION['user_nivel'] === 'gerente'): ?>
-                    <a href="usuarios.php" class="nav-link">
-                        <i class="fa-solid fa-users me-2"></i> Usuários
-                    </a>
-                <?php endif; ?>
-                <!-- Novo link adicionado -->
-                <a href="cardapios.php" class="nav-link">
-                    <i class="fa-solid fa-utensils me-2"></i> Cardápio IA
-                </a>
-                <div class="border-top border-secondary border-opacity-25 my-4 mx-3"></div>
-                <a href="logout.php" class="nav-link text-danger">
-                    <i class="fa-solid fa-right-from-bracket me-2"></i> Sair
-                </a>
-            </div>
-        </div>
-
-        <!-- Main Content Area -->
-        <div class="col-md-9 col-lg-10 py-4 px-md-4">
-            <!-- Alert banners -->
-            <?php if ($sucessoMsg): ?>
-                <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm" role="alert">
-                    <i class="fa-solid fa-circle-check me-2"></i> <?= htmlspecialchars($sucessoMsg, ENT_QUOTES, 'UTF-8') ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            <?php endif; ?>
-            <?php if ($erroMsg): ?>
-                <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm" role="alert">
-                    <i class="fa-solid fa-circle-exclamation me-2"></i> <?= htmlspecialchars($erroMsg, ENT_QUOTES, 'UTF-8') ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            <?php endif; ?>
+<!-- Alertas -->
+<?php require_once __DIR__ . '/src/includes/alerts.php'; ?>
 
             <!-- Page Header -->
             <div class="d-flex justify-content-between align-items-center mb-4">
@@ -572,25 +496,10 @@ $fornecedoresDisponiveis = $stmtFornecedores->fetchAll();
 </div>
 <?php endif; ?>
 
-<!-- Bootstrap JS Bundle -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Scripts compartilhados -->
+<script src="assets/js/money-mask.js"></script>
 <script>
-    // ----------------------------------------------------
-    // Máscara Simples para Moeda (BRL)
-    // ----------------------------------------------------
-    document.querySelectorAll('.money-mask').forEach(input => {
-        input.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, "");
-            value = (value / 100).toFixed(2) + "";
-            value = value.replace(".", ",");
-            value = value.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
-            e.target.value = value;
-        });
-    });
-
-    // ----------------------------------------------------
     // Carregamento de dados no modal de edição
-    // ----------------------------------------------------
     const modalEditar = document.getElementById('modalEditar');
     if (modalEditar) {
         modalEditar.addEventListener('show.bs.modal', function(event) {
@@ -621,5 +530,4 @@ $fornecedoresDisponiveis = $stmtFornecedores->fetchAll();
     <?php endforeach; ?>
 </datalist>
 
-</body>
-</html>
+<?php require_once __DIR__ . '/src/includes/layout_end.php'; ?>
