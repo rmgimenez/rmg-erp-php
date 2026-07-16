@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $obs = trim($_POST['observacoes'] ?? '');
 
         if (!empty($descricao) && !empty($valorRaw) && !empty($tipo) && !empty($dataVenc)) {
-            $valorCents = parseBrlToCents($valorRaw);
+            $valorCents = FormatHelper::parseBrlToCents($valorRaw);
             $dados = [
                 'descricao' => $descricao,
                 'valor' => $valorCents,
